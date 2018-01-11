@@ -4,6 +4,7 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$/bc18-scaffold">
       <sourceFolder url="file://$MODULE_DIR$/bc18-scaffold/examplefuncsplayer-java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/bc18-scaffold/LegoPlayer" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
