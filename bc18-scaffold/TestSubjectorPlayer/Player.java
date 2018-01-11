@@ -1,7 +1,20 @@
 import bc.*;
+import java.util.*;
 
 public class Player
 {
+    static GameController gc;
+
+    public static void moveUnitTowards(Unit unit, Location targetLocation)
+    {
+        Direction movementDirection = unit.location().mapLocation().directionTo(targetLocation.mapLocation());
+        if (gc.isMoveReady(unit.id()) && gc.canMove(unit.id(), movementDirection)
+                )
+        {
+            gc.moveRobot(unit.id(), movementDirection);
+        }
+    }
+
     public static void main(String[] args)
     {
         // MapLocation is a data structure you'll use a lot.
@@ -20,11 +33,19 @@ public class Player
             for (int i = 0; i < units.size(); i++)
             {
                 Unit unit = units.get(i);
-
-                // Most methods on gc take unit IDs, instead of the unit objects themselves.
-                if (gc.isMoveReady(unit.id()) && gc.canMove(unit.id(), Direction.East))
+                // For Worker
+                if (unit.unitType() == UnitType.Worker)
                 {
-                    gc.moveRobot(unit.id(), Direction.East);
+                    // Check Replication
+                    if (gc.canReplicate(unit.id(), Direction.Southwest))
+                    {
+                        gc.replicate(unit.id(), Direction.Southwest);
+                    }
+
+                    // Most methods on gc take unit IDs, instead of the unit objects themselves.
+                    if (gc.isMoveReady(unit.id()) && gc.canMove(unit.id(), Direction.East)) {
+                        gc.moveRobot(unit.id(), Direction.East);
+                    }
                 }
             }
             // Submit the actions we've done, and wait for our next turn.
