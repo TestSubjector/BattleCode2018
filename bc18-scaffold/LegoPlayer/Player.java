@@ -34,7 +34,7 @@ public class Player
         while (true) 
         {
             System.out.println("Current round: " + gc.round());
-            System.out.println("Karbonite: " + gc.karbonite());
+            // System.out.println("Karbonite: " + gc.karbonite());
             VecUnit units = gc.myUnits();
             for (int i = 0; i < units.size(); i++)
             {
@@ -43,6 +43,12 @@ public class Player
                 {
                     if (unit.unitType() == UnitType.Worker)
                     {
+
+                        while (!unfinishedBlueprints.isEmpty() &&
+                                gc.senseUnitAtLocation(unfinishedBlueprints.getFirst().location().mapLocation()).structureIsBuilt() == 1)
+                        {
+                            unfinishedBlueprints.removeFirst();
+                        }
                         if (unfinishedBlueprints.isEmpty())
                         {
                             Direction blueprintDirection = directions[0];
@@ -61,20 +67,17 @@ public class Player
                         else
                         {
                             Unit blueprint = unfinishedBlueprints.getFirst();
-                            if (unit.location().isAdjacentTo(blueprint.location()))
+                            Unit structure = gc.senseUnitAtLocation(blueprint.location().mapLocation());
+                            if (unit.location().isAdjacentTo(structure.location()))
                             {
-                                if (gc.canBuild(unit.id(), blueprint.id()))
+                                if (gc.canBuild(unit.id(), structure.id()))
                                 {
-                                    gc.build(unit.id(), blueprint.id());
-                                    if (blueprint.structureIsBuilt() != 0)
-                                    {
-                                        unfinishedBlueprints.removeFirst();
-                                    }
+                                    gc.build(unit.id(), structure.id());
                                 }
                             }
                             else
                             {
-                                moveUnitTowards(unit, blueprint.location());
+                                moveUnitTowards(unit, structure.location());
                             }
                         }
                     }
