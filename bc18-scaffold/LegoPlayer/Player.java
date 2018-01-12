@@ -5,6 +5,9 @@ import java.util.*;
 public class Player 
 {
     static GameController gc;
+    static long initialWorkers;
+    static long mapWidth;
+    static long mapHeight;
 
     public static void moveUnitTowards(Unit unit, Location targetLocation)
     {
@@ -30,6 +33,26 @@ public class Player
         // Starting PlanetMaps
         PlanetMap earthMap = gc.startingMap(Planet.Earth);
         PlanetMap marsMap = gc.startingMap(Planet.Mars);
+
+        initialWorkers = earthMap.getInitial_units().size();
+        mapWidth = earthMap.getWidth();
+        mapHeight = earthMap.getHeight();
+
+        // Initial karbonite locations
+        LinkedList<MapLocation> earthKarboniteLocations = new LinkedList<MapLocation>();
+
+        for (int x = 0; x < mapWidth; x++)
+        {
+            for (int y = 0; y < mapHeight; y++)
+            {
+                MapLocation tempMapLocation = new MapLocation(Planet.Earth, x, y);
+                long karboniteAtTempMapLocation = earthMap.initialKarboniteAt(tempMapLocation);
+                if (karboniteAtTempMapLocation > 0)
+                {
+                    earthKarboniteLocations.add(tempMapLocation);
+                }
+            }
+        }
 
         // List of blueprints
         LinkedList<Unit> unfinishedBlueprints = new LinkedList<Unit>();
@@ -67,9 +90,10 @@ public class Player
                 {
                     if (gc.planet() == Planet.Earth)
                     {
-                        if (unit.unitType() == UnitType.Worker)
+                        if (unitTypes[i] == UnitType.Worker)
                         {
-                            if (units.size() < 6 || units.size() < Math.sqrt(gc.round()))
+                            // Worker replication
+                            if (unitList.size() < 10 || unitList.size() < 3 * Math.sqrt(gc.round()))
                             {
                                 Direction replicateDirection = directions[0];
                                 int j = 1;
@@ -80,15 +104,18 @@ public class Player
                                 if (gc.canReplicate(unit.id(), replicateDirection))
                                 {
                                     gc.replicate(unit.id(), replicateDirection);
+                                    // System.out.println("Replicated at round: " + gc.round());
                                     continue;
                                 }
                             }
+
+                            // Structure building
                             while (!unfinishedBlueprints.isEmpty() &&
                                     gc.senseUnitAtLocation(unfinishedBlueprints.getFirst().location().mapLocation()).structureIsBuilt() == 1)
                             {
                                 unfinishedBlueprints.removeFirst();
                             }
-                            if (unfinishedBlueprints.isEmpty())
+                            if (typeSortedUnitLists.get(UnitType.Factory).size() < 5)
                             {
                                 Direction blueprintDirection = directions[0];
                                 int j = 1;
@@ -103,7 +130,7 @@ public class Player
                                     unfinishedBlueprints.add(gc.senseUnitAtLocation(blueprintLocation));
                                 }
                             }
-                            else
+                            if (!unfinishedBlueprints.isEmpty())
                             {
                                 Unit blueprint = unfinishedBlueprints.getFirst();
                                 Unit structure = gc.senseUnitAtLocation(blueprint.location().mapLocation());
