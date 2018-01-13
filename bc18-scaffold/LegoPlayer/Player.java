@@ -8,18 +8,45 @@ public class Player
     static long initialWorkers;
     static long mapWidth;
     static long mapHeight;
+    static Direction[] directions;
+    static HashMap<Integer, Integer> timesMovementFailed;
 
-    public static void moveUnitTowards(Unit unit, Location targetLocation)
+    public static void moveUnitInDirection(Unit unit, Direction candidateDirection)
     {
-        Direction movementDirection = unit.location().mapLocation().directionTo(targetLocation.mapLocation());
-        if (gc.isMoveReady(unit.id()) && gc.canMove(unit.id(), movementDirection)
-            )
+        int directionIndex = candidateDirection.swigValue();
+        if (gc.isMoveReady(unit.id()))
         {
-            gc.moveRobot(unit.id(), movementDirection);
+            int delta = 1;
+            while (!gc.canMove(unit.id(), candidateDirection) && Math.abs(delta) <= 2)
+            {
+                candidateDirection = directions[(((directionIndex + delta) % 8) + 8) % 8];
+                delta = -delta;
+                if (delta > 0)
+                {
+                    delta++;
+                }
+            }
+            if (gc.canMove(unit.id(), candidateDirection))
+            {
+                gc.moveRobot(unit.id(), candidateDirection);
+            }
         }
     }
 
-    public static void main(String[] args) 
+    public static void moveUnitTowards(Unit unit, Location targetLocation)
+    {
+        Direction targetDirection = unit.location().mapLocation().directionTo(targetLocation.mapLocation());
+        moveUnitInDirection(unit, targetDirection);
+    }
+
+    public static void moveUnitAwayFrom(Unit unit, Location targetLocation)
+    {
+        Direction targetDirection = unit.location().mapLocation().directionTo(targetLocation.mapLocation());
+        targetDirection = bc.bcDirectionOpposite(targetDirection);
+        moveUnitInDirection(unit, targetDirection);
+    }
+
+    public static void main(String[] args)
     {
         // Connect to the manager, starting the game
         gc = new GameController();
@@ -28,7 +55,7 @@ public class Player
         Random random = new Random();
 
         // Cardinal directions
-        Direction[] directions = Direction.values();
+        directions = Direction.values();
 
         // Unit types
         UnitType[] unitTypes = UnitType.values();
@@ -72,10 +99,10 @@ public class Player
             typeSortedUnitLists.put(unitTypes[i], new LinkedList<Unit>());
         }
 
-        while (true) 
+        while (true)
         {
-            // System.out.println("Current round: " + gc.round());
-            // System.out.println("Karbonite: " + gc.karbonite());
+            System.out.println("Current round: " + gc.round());
+            System.out.println("Karbonite: " + gc.karbonite());
 
             // Clear unit lists
             for (int i = 0; i < unitTypes.length; i++)
@@ -148,7 +175,7 @@ public class Player
                             {
                                 unfinishedBlueprints.removeFirst();
                             }
-                            if (typeSortedUnitLists.get(UnitType.Factory).size() < 5)
+                            if (typeSortedUnitLists.get(UnitType.Factory).size() < 10)
                             {
                                 Direction blueprintDirection = directions[0];
                                 int j = 1;
