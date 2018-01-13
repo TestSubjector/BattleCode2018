@@ -101,8 +101,8 @@ public class Player
 
         while (true)
         {
-            System.out.println("Current round: " + gc.round());
-            System.out.println("Karbonite: " + gc.karbonite());
+//            System.out.println("Current round: " + gc.round());
+//            System.out.println("Karbonite: " + gc.karbonite());
 
             // Clear unit lists
             for (int i = 0; i < unitTypes.length; i++)
@@ -143,29 +143,38 @@ public class Player
             for (int i = 0; i < unitTypes.length; i++)
             {
                 LinkedList<Unit> unitList = typeSortedUnitLists.get(unitTypes[i]);
-                for (int u = 0; u < unitList.size(); u++)
+                unitLoop: for (int u = 0; u < unitList.size(); u++)
                 {
                     Unit unit = unitList.get(u);
                     if (gc.planet() == Planet.Earth)
                     {
+
                         if (unitTypes[i] == UnitType.Worker)
                         {
+                            System.out.println("Round#" + gc.round()+ ": Remaining known karbonite reserves: " + earthKarboniteLocations.keySet().size());
                             // Karbonite mining
                             for (int j = 0; j < directions.length; j++)
                             {
                                 if (gc.canHarvest(unit.id(),directions[j]))
                                 {
-                                    System.out.println("Karbonite harvested!");
-                                    gc.harvest(unit.id(),directions[j]);
                                     MapLocation minedLoc = unit.location().mapLocation().add(directions[j]);
+                                    System.out.println("Initial karbs at loc: " + gc.karboniteAt(minedLoc));
+                                    System.out.println("Harvesting karbonite! Limit = " + unit.workerHarvestAmount());
+                                    gc.harvest(unit.id(),directions[j]);
+                                    System.out.println("Post-mining karbs at loc: " + gc.karboniteAt(minedLoc));
                                     // remove from initial locations if depleted
                                     if (gc.karboniteAt(minedLoc) == 0)
                                     {
+                                        System.out.println("***** LOC REMOVED " + minedLoc.toString() + " *****");
                                         earthKarboniteLocations.remove(minedLoc);
+                                        System.out.println(" contains = " + earthKarboniteLocations.containsKey(minedLoc));
                                     }
-//                                    continue unitLoop;
+                                    continue unitLoop;
                                 }
                             }
+
+                            /*
+
 
                             // Worker replication
                             if (unitList.size() < 10 || unitList.size() < gc.round() / 10)
@@ -223,6 +232,8 @@ public class Player
                                     moveUnitTowards(unit, structure.location());
                                 }
                             }
+
+                            */
 
                             // Move toward mines
                             Set<Map.Entry<MapLocation, Long>> entrySet = earthKarboniteLocations.entrySet();
