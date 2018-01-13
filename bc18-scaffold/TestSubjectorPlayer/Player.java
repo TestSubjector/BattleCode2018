@@ -66,9 +66,9 @@ public class Player
         // Hashmap of units
         HashMap<UnitType, LinkedList<Unit>> typeSortedUnitLists = new HashMap<UnitType, LinkedList<Unit>>();
 
-        for (int i = 0; i < unitTypes.length; i++)
+        for (UnitType unitType2 : unitTypes)
         {
-            typeSortedUnitLists.put(unitTypes[i], new LinkedList<Unit>());
+            typeSortedUnitLists.put(unitType2, new LinkedList<Unit>());
         }
 
         while (true)
@@ -77,9 +77,9 @@ public class Player
             // System.out.println("Karbonite: " + gc.karbonite());
 
             // Clear unit lists
-            for (int i = 0; i < unitTypes.length; i++)
+            for (UnitType unitType1 : unitTypes)
             {
-                typeSortedUnitLists.get(unitTypes[i]).clear();
+                typeSortedUnitLists.get(unitType1).clear();
             }
 
             VecUnit units = gc.myUnits();
@@ -98,27 +98,27 @@ public class Player
                 if (!(ri.getLevel(unitTypes[0]) == 1))
                 {
                     gc.queueResearch(unitTypes[0]); // Return 1 if done, else 0
-                    System.out.println(">> Researching worker stuff");
+                    //System.out.println(">> Researching worker stuff");
                 }
                 else
                 {
-                    System.out.println(">> Researching something random");
+                    //System.out.println(">> Researching something random");
                     gc.queueResearch(unitTypes[ran.nextInt(7)]);
                 }
             }
             else
             {
-                System.out.println(">> Research left" + ri.roundsLeft());
+                //System.out.println(">> Research left" + ri.roundsLeft());
             }
 
-            for (int i = 0; i < unitTypes.length; i++)
+            for (UnitType unitType : unitTypes)
             {
-                LinkedList<Unit> unitList = typeSortedUnitLists.get(unitTypes[i]);
+                LinkedList<Unit> unitList = typeSortedUnitLists.get(unitType);
                 for (Unit unit : unitList)
                 {
                     if (gc.planet() == Planet.Earth)
                     {
-                        if (unitTypes[i] == UnitType.Worker)
+                        if (unitType == UnitType.Worker)
                         {
                             // Worker replication
                             if (unitList.size() < 10 || unitList.size() < 3 * Math.sqrt(gc.round()))
@@ -168,8 +168,7 @@ public class Player
                                     {
                                         gc.build(unit.id(), structure.id());
                                     }
-                                }
-                                else
+                                } else
                                 {
                                     moveUnitTowards(unit, structure.location());
                                 }
@@ -177,10 +176,22 @@ public class Player
                         }
                         if (unit.unitType() == UnitType.Factory)
                         {
-
+                            if (unit.isFactoryProducing() == 0)
+                            {
+                                if (gc.canProduceRobot(unit.id(), UnitType.Ranger))
+                                {   // Spawning as Garrison
+                                    gc.produceRobot(unit.id(), UnitType.Ranger);
+                                }
+                            }
                         }
-                    }
-                    else
+                        if (unit.unitType() == UnitType.Ranger)
+                        {
+                            if(unit.location().isInGarrison())
+                            {
+                                System.out.println(gc.round() + ">> Ranger is in Garrison! " + unit.id());
+                            }
+                        }
+                    } else
                     {
                         // Mars code here
                     }
