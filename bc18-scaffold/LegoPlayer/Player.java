@@ -24,11 +24,18 @@ public class Player
         // Connect to the manager, starting the game
         gc = new GameController();
 
+        // Random number generator
+        Random random = new Random();
+
         // Cardinal directions
         Direction[] directions = Direction.values();
 
         // Unit types
         UnitType[] unitTypes = UnitType.values();
+
+        // Research Info
+        ResearchInfo researchInfo;
+        int[] researchLevelQueued = new int[5];
 
         // Starting PlanetMaps
         PlanetMap earthMap = gc.startingMap(Planet.Earth);
@@ -76,6 +83,7 @@ public class Player
                 typeSortedUnitLists.get(unitTypes[i]).clear();
             }
 
+            // Fetch current units
             VecUnit units = gc.myUnits();
             for (int i = 0; i < units.size(); i++)
             {
@@ -83,17 +91,40 @@ public class Player
                 typeSortedUnitLists.get(unit.unitType()).add(unit);
             }
 
+            // Research code
+            if (gc.planet() == Planet.Mars)
+            {
+                if (researchLevelQueued[UnitType.Worker.swigValue()] < 4)
+                {
+                    gc.queueResearch(UnitType.Worker);
+                    researchLevelQueued[UnitType.Worker.swigValue()]++;
+                }
+                // Removed else, replace with decision based research tree
+
+                // Update researchInfo to new state
+                researchInfo = gc.researchInfo();
+                if (researchInfo.hasNextInQueue())
+                {
+                    UnitType currentResearchType = researchInfo.nextInQueue();
+                    long currentResearchLevel = researchInfo.getLevel(currentResearchType) + 1;
+                    System.out.println(">> Researching " + currentResearchType + " Level " + currentResearchLevel);
+                    System.out.println("Research left " + researchInfo.roundsLeft());
+                }
+            }
+
+            // Unit processing
             for (int i = 0; i < unitTypes.length; i++)
             {
                 LinkedList<Unit> unitList = typeSortedUnitLists.get(unitTypes[i]);
-                for (Unit unit : unitList)
+                for (int u = 0; u < unitList.size(); u++)
                 {
+                    Unit unit = unitList.get(u);
                     if (gc.planet() == Planet.Earth)
                     {
                         if (unitTypes[i] == UnitType.Worker)
                         {
                             // Worker replication
-                            if (unitList.size() < 10 || unitList.size() < 3 * Math.sqrt(gc.round()))
+                            if (unitList.size() < 10 || unitList.size() < gc.round() / 10)
                             {
                                 Direction replicateDirection = directions[0];
                                 int j = 1;
@@ -104,6 +135,7 @@ public class Player
                                 if (gc.canReplicate(unit.id(), replicateDirection))
                                 {
                                     gc.replicate(unit.id(), replicateDirection);
+                                    unitList.add(gc.senseUnitAtLocation(unit.location().mapLocation().add(replicateDirection)));
                                     // System.out.println("Replicated at round: " + gc.round());
                                     continue;
                                 }
@@ -111,7 +143,8 @@ public class Player
 
                             // Structure building
                             while (!unfinishedBlueprints.isEmpty() &&
-                                    gc.senseUnitAtLocation(unfinishedBlueprints.getFirst().location().mapLocation()).structureIsBuilt() == 1)
+                                    gc.senseUnitAtLocation(unfinishedBlueprints.getFirst().location().mapLocation()).structureIsBuilt() == 1
+                                    )
                             {
                                 unfinishedBlueprints.removeFirst();
                             }
