@@ -116,14 +116,15 @@ public class Player
             for (int i = 0; i < unitTypes.length; i++)
             {
                 LinkedList<Unit> unitList = typeSortedUnitLists.get(unitTypes[i]);
-                for (Unit unit : unitList)
+                for (int u = 0; u < unitList.size(); u++)
                 {
+                    Unit unit = unitList.get(u);
                     if (gc.planet() == Planet.Earth)
                     {
                         if (unitTypes[i] == UnitType.Worker)
                         {
                             // Worker replication
-                            if (unitList.size() < 10 || unitList.size() < gc.round() / 8)
+                            if (unitList.size() < 10 || unitList.size() < gc.round() / 10)
                             {
                                 Direction replicateDirection = directions[0];
                                 int j = 1;
@@ -134,7 +135,7 @@ public class Player
                                 if (gc.canReplicate(unit.id(), replicateDirection))
                                 {
                                     gc.replicate(unit.id(), replicateDirection);
-                                    // unitList.add(gc.senseUnitAtLocation(unit.location().mapLocation().add(replicateDirection)));
+                                    unitList.add(gc.senseUnitAtLocation(unit.location().mapLocation().add(replicateDirection)));
                                     // System.out.println("Replicated at round: " + gc.round());
                                     continue;
                                 }
@@ -142,7 +143,8 @@ public class Player
 
                             // Structure building
                             while (!unfinishedBlueprints.isEmpty() &&
-                                    gc.senseUnitAtLocation(unfinishedBlueprints.getFirst().location().mapLocation()).structureIsBuilt() == 1)
+                                    gc.senseUnitAtLocation(unfinishedBlueprints.getFirst().location().mapLocation()).structureIsBuilt() == 1
+                                    )
                             {
                                 unfinishedBlueprints.removeFirst();
                             }
