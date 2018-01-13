@@ -83,7 +83,7 @@ public class Player
                 long karboniteAtTempMapLocation = earthMap.initialKarboniteAt(tempMapLocation);
                 if (karboniteAtTempMapLocation > 0)
                 {
-                    earthKarboniteLocations.add(tempMapLocation);
+                    earthKarboniteLocations.put(tempMapLocation, karboniteAtTempMapLocation);
                 }
             }
         }
@@ -119,24 +119,24 @@ public class Player
             }
 
             // Research Code - Worker(0), Rocket(7)
-            ri = gc.researchInfo();
+            if (gc.planet() == Planet.Mars)
+            {
+                if (researchLevelQueued[UnitType.Worker.swigValue()] < 4)
+                {
+                    gc.queueResearch(UnitType.Worker);
+                    researchLevelQueued[UnitType.Worker.swigValue()]++;
+                }
+                // Removed else, replace with decision based research tree
 
-            if(!ri.hasNextInQueue())
-            {
-                if (!(ri.getLevel(unitTypes[0]) == 1))
+                // Update researchInfo to new state
+                researchInfo = gc.researchInfo();
+                if (researchInfo.hasNextInQueue())
                 {
-                    gc.queueResearch(unitTypes[0]); // Return 1 if done, else 0
-                    //System.out.println(">> Researching worker stuff");
+                    UnitType currentResearchType = researchInfo.nextInQueue();
+                    long currentResearchLevel = researchInfo.getLevel(currentResearchType) + 1;
+//                    System.out.println(">> Researching " + currentResearchType + " Level " + currentResearchLevel);
+//                    System.out.println("Research left " + researchInfo.roundsLeft());
                 }
-                else
-                {
-                    //System.out.println(">> Researching something random");
-                    gc.queueResearch(unitTypes[ran.nextInt(7)]);
-                }
-            }
-            else
-            {
-                //System.out.println(">> Research left" + ri.roundsLeft());
             }
 
             // Remove obsolete karboniteMapLocations
