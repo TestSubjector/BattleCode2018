@@ -66,9 +66,9 @@ public class Player
         // Hashmap of units
         HashMap<UnitType, LinkedList<Unit>> typeSortedUnitLists = new HashMap<UnitType, LinkedList<Unit>>();
 
-        for (UnitType unitType2 : unitTypes)
+        for (int i = 0; i < unitTypes.length; i++)
         {
-            typeSortedUnitLists.put(unitType2, new LinkedList<Unit>());
+            typeSortedUnitLists.put(unitTypes[i], new LinkedList<Unit>());
         }
 
         while (true)
@@ -77,9 +77,9 @@ public class Player
             // System.out.println("Karbonite: " + gc.karbonite());
 
             // Clear unit lists
-            for (UnitType unitType1 : unitTypes)
+            for (int i = 0; i < unitTypes.length; i++)
             {
-                typeSortedUnitLists.get(unitType1).clear();
+                typeSortedUnitLists.get(unitTypes[i]).clear();
             }
 
             VecUnit units = gc.myUnits();
@@ -111,14 +111,14 @@ public class Player
                 //System.out.println(">> Research left" + ri.roundsLeft());
             }
 
-            for (UnitType unitType : unitTypes)
+            for (int i = 0; i < unitTypes.length; i++)
             {
-                LinkedList<Unit> unitList = typeSortedUnitLists.get(unitType);
+                LinkedList<Unit> unitList = typeSortedUnitLists.get(unitTypes[i]);
                 for (Unit unit : unitList)
                 {
                     if (gc.planet() == Planet.Earth)
                     {
-                        if (unitType == UnitType.Worker)
+                        if (unitTypes[i] == UnitType.Worker)
                         {
                             // Worker replication
                             if (unitList.size() < 10 || unitList.size() < 3 * Math.sqrt(gc.round()))
