@@ -9,8 +9,6 @@ public class Player
     static long mapWidth;
     static long mapHeight;
 
-    long boundKeeper;
-
     public static void moveUnitTowards(Unit unit, Location targetLocation)
     {
         Direction movementDirection = unit.location().mapLocation().directionTo(targetLocation.mapLocation());
@@ -93,9 +91,24 @@ public class Player
 
 
             // Research Code - Worker(0), Rocket(7)
+            ri = gc.researchInfo();
+
             if(!ri.hasNextInQueue())
             {
-                    System.out.println(">> Researching " + gc.queueResearch(unitTypes[ran.nextInt(7)]));
+                if (!(ri.getLevel(unitTypes[0]) == 1))
+                {
+                    gc.queueResearch(unitTypes[0]); // Return 1 if done, else 0
+                    System.out.println(">> Researching worker stuff");
+                }
+                else
+                {
+                    System.out.println(">> Researching something random");
+                    gc.queueResearch(unitTypes[ran.nextInt(7)]);
+                }
+            }
+            else
+            {
+                System.out.println(">> Research left" + ri.roundsLeft());
             }
 
             for (int i = 0; i < unitTypes.length; i++)
