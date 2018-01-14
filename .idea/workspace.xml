@@ -13,26 +13,10 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file leaf-file-name="Player.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/bc18-scaffold/LegoPlayer/Player.java">
+        <entry file="file://$PROJECT_DIR$/bc18-scaffold/TestSubjectorPlayer/Player.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="253">
-              <caret line="301" column="80" lean-forward="true" selection-start-line="301" selection-start-column="80" selection-end-line="301" selection-end-column="80" />
-              <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="e#2447#2466#0" expanded="true" />
-                <element signature="e#3064#3070#0" expanded="true" />
-                <element signature="e#3180#3208#0" expanded="true" />
-                <element signature="e#5163#5176#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Player.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/bc18-scaffold/TheGamer007Player/Player.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1259">
-              <caret line="171" column="54" lean-forward="false" selection-start-line="171" selection-start-column="54" selection-end-line="171" selection-end-column="54" />
+            <state relative-caret-position="797">
+              <caret line="300" column="80" lean-forward="true" selection-start-line="300" selection-start-column="80" selection-end-line="300" selection-end-column="80" />
               <folding />
             </state>
           </provider>
@@ -320,11 +304,11 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#2447#2466#0" expanded="true" />
-            <element signature="e#3064#3070#0" expanded="true" />
-            <element signature="e#3180#3208#0" expanded="true" />
-            <element signature="e#5163#5176#0" expanded="true" />
+            <element signature="imports" expanded="false" />
+            <element signature="e#2447#2466#0" expanded="false" />
+            <element signature="e#3064#3070#0" expanded="false" />
+            <element signature="e#3180#3208#0" expanded="false" />
+            <element signature="e#5163#5176#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -415,11 +399,11 @@
         <state relative-caret-position="1089">
           <caret line="69" column="63" lean-forward="true" selection-start-line="69" selection-start-column="63" selection-end-line="69" selection-end-column="63" />
           <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#2447#2466#0" expanded="true" />
-            <element signature="e#3064#3070#0" expanded="true" />
-            <element signature="e#3180#3208#0" expanded="true" />
-            <element signature="e#5163#5176#0" expanded="true" />
+            <element signature="imports" expanded="false" />
+            <element signature="e#2447#2466#0" expanded="false" />
+            <element signature="e#3064#3070#0" expanded="false" />
+            <element signature="e#3180#3208#0" expanded="false" />
+            <element signature="e#5163#5176#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -429,11 +413,11 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#2447#2466#0" expanded="true" />
-            <element signature="e#3064#3070#0" expanded="true" />
-            <element signature="e#3180#3208#0" expanded="true" />
-            <element signature="e#5163#5176#0" expanded="true" />
+            <element signature="imports" expanded="false" />
+            <element signature="e#2447#2466#0" expanded="false" />
+            <element signature="e#3064#3070#0" expanded="false" />
+            <element signature="e#3180#3208#0" expanded="false" />
+            <element signature="e#5163#5176#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -451,11 +435,11 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#2447#2466#0" expanded="true" />
-            <element signature="e#3064#3070#0" expanded="true" />
-            <element signature="e#3180#3208#0" expanded="true" />
-            <element signature="e#5163#5176#0" expanded="true" />
+            <element signature="imports" expanded="false" />
+            <element signature="e#2447#2466#0" expanded="false" />
+            <element signature="e#3064#3070#0" expanded="false" />
+            <element signature="e#3180#3208#0" expanded="false" />
+            <element signature="e#5163#5176#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -524,11 +508,11 @@
         <state relative-caret-position="3024">
           <caret line="145" column="52" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="165" selection-end-column="1" />
           <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#2447#2466#0" expanded="true" />
-            <element signature="e#3064#3070#0" expanded="true" />
-            <element signature="e#3180#3208#0" expanded="true" />
-            <element signature="e#5163#5176#0" expanded="true" />
+            <element signature="imports" expanded="false" />
+            <element signature="e#2447#2466#0" expanded="false" />
+            <element signature="e#3064#3070#0" expanded="false" />
+            <element signature="e#3180#3208#0" expanded="false" />
+            <element signature="e#5163#5176#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -564,11 +548,11 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#2447#2466#0" expanded="true" />
-            <element signature="e#3064#3070#0" expanded="true" />
-            <element signature="e#3180#3208#0" expanded="true" />
-            <element signature="e#5163#5176#0" expanded="true" />
+            <element signature="imports" expanded="false" />
+            <element signature="e#2447#2466#0" expanded="false" />
+            <element signature="e#3064#3070#0" expanded="false" />
+            <element signature="e#3180#3208#0" expanded="false" />
+            <element signature="e#5163#5176#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -586,11 +570,11 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#2447#2466#0" expanded="true" />
-            <element signature="e#3064#3070#0" expanded="true" />
-            <element signature="e#3180#3208#0" expanded="true" />
-            <element signature="e#5163#5176#0" expanded="true" />
+            <element signature="imports" expanded="false" />
+            <element signature="e#2447#2466#0" expanded="false" />
+            <element signature="e#3064#3070#0" expanded="false" />
+            <element signature="e#3180#3208#0" expanded="false" />
+            <element signature="e#5163#5176#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -608,11 +592,11 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#2447#2466#0" expanded="true" />
-            <element signature="e#3064#3070#0" expanded="true" />
-            <element signature="e#3180#3208#0" expanded="true" />
-            <element signature="e#5163#5176#0" expanded="true" />
+            <element signature="imports" expanded="false" />
+            <element signature="e#2447#2466#0" expanded="false" />
+            <element signature="e#3064#3070#0" expanded="false" />
+            <element signature="e#3180#3208#0" expanded="false" />
+            <element signature="e#5163#5176#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -686,11 +670,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/bc18-scaffold/TestSubjectorPlayer/Player.java">
+    <entry file="file://$PROJECT_DIR$/bc18-scaffold/LegoPlayer/Player.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="47" column="46" lean-forward="false" selection-start-line="47" selection-start-column="37" selection-end-line="47" selection-end-column="46" />
-          <folding />
+        <state relative-caret-position="17">
+          <caret line="294" column="25" lean-forward="false" selection-start-line="294" selection-start-column="25" selection-end-line="294" selection-end-column="25" />
+          <folding>
+            <element signature="imports" expanded="false" />
+            <element signature="e#2447#2466#0" expanded="false" />
+            <element signature="e#3064#3070#0" expanded="false" />
+            <element signature="e#3180#3208#0" expanded="false" />
+            <element signature="e#5163#5176#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -702,17 +692,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/bc18-scaffold/LegoPlayer/Player.java">
+    <entry file="file://$PROJECT_DIR$/bc18-scaffold/TestSubjectorPlayer/Player.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="253">
-          <caret line="301" column="80" lean-forward="true" selection-start-line="301" selection-start-column="80" selection-end-line="301" selection-end-column="80" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#2447#2466#0" expanded="true" />
-            <element signature="e#3064#3070#0" expanded="true" />
-            <element signature="e#3180#3208#0" expanded="true" />
-            <element signature="e#5163#5176#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="797">
+          <caret line="300" column="80" lean-forward="true" selection-start-line="300" selection-start-column="80" selection-end-line="300" selection-end-column="80" />
+          <folding />
         </state>
       </provider>
     </entry>
