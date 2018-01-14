@@ -68,6 +68,17 @@ public class Player
         PlanetMap earthMap = gc.startingMap(Planet.Earth);
         PlanetMap marsMap = gc.startingMap(Planet.Mars);
 
+        Team enemyTeam =  null;
+        Team ourTeam = gc.team();
+        if (ourTeam == Team.Blue)
+        {
+            enemyTeam = Team.Red;
+        }
+        else
+        {
+            enemyTeam = Team.Blue;
+        }
+
         initialWorkers = earthMap.getInitial_units().size();
         mapWidth = earthMap.getWidth();
         mapHeight = earthMap.getHeight();
@@ -118,7 +129,7 @@ public class Player
                 typeSortedUnitLists.get(unit.unitType()).add(unit);
             }
 
-            // Research Code - Worker(0), Rocket(7)
+            // Research code
             if (gc.planet() == Planet.Mars)
             {
                 if (researchLevelQueued[UnitType.Worker.swigValue()] < 4)
@@ -155,6 +166,7 @@ public class Player
                 earthKarboniteLocations.remove(obsolete);
             }
 
+            // Unit processing
             for (int i = 0; i < unitTypes.length; i++)
             {
                 LinkedList<Unit> unitList = typeSortedUnitLists.get(unitTypes[i]);
@@ -166,10 +178,10 @@ public class Player
                         if (unitTypes[i] == UnitType.Worker)
                         {
                             // Build a structure if adjacent to one
-                            VecUnit nearbyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 2, gc.team());
-                            for (int j = 0; j < units.size(); j++)
+                            VecUnit nearbyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 2, ourTeam);
+                            for (int j = 0; j < nearbyUnits.size(); j++)
                             {
-                                Unit nearbyUnit = units.get(j);
+                                Unit nearbyUnit = nearbyUnits.get(j);
                                 if (nearbyUnit.unitType() == UnitType.Factory || nearbyUnit.unitType() == UnitType.Rocket)
                                 {
                                     if (gc.canBuild(unit.id(), nearbyUnit.id()))
@@ -196,7 +208,7 @@ public class Player
                             }
 
                             // Worker replication
-                            if (unitList.size() < 10 || unitList.size() < 3 * Math.sqrt(gc.round()))
+                            if (unitList.size() < 10 || unitList.size() < gc.round() / 10)
                             {
                                 Direction replicateDirection = directions[0];
                                 int j = 1;
@@ -207,6 +219,7 @@ public class Player
                                 if (gc.canReplicate(unit.id(), replicateDirection))
                                 {
                                     gc.replicate(unit.id(), replicateDirection);
+                                    unitList.add(gc.senseUnitAtLocation(unit.location().mapLocation().add(replicateDirection)));
                                     // System.out.println("Replicated at round: " + gc.round());
                                     continue;
                                 }
@@ -291,7 +304,6 @@ public class Player
                                 moveUnitInDirection(unit, unitLoc.directionTo(closestMineMapLocation));
                             }
                         }
-
                         if (unit.unitType() == UnitType.Factory)
                         {
                             if (unit.isFactoryProducing() == 0)
@@ -316,13 +328,43 @@ public class Player
                                 }
                             }
                         }
-                    } else
+                        if (unit.unitType() == UnitType.Ranger)
+                        {
+                            if(!unit.location().isInGarrison())
+                            {
+                                VecUnit nearbyEnemyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
+                                        50, enemyTeam);
+                                // Must be refined later with movement code above this
+                                if (!gc.isAttackReady(unit.id()))
+                                {
+                                    continue;
+                                }
+                                for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+                                {
+                                    Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
+                                    // Check health of enemy unit ands see if you can win
+                                    // Make bounty rating for all sensed units and attack highest ranked unit
+                                    //if(nearbyEnemyUnit.unitType() != UnitType.Worker)
+                                    {
+                                        if(gc.canAttack(unit.id(), nearbyEnemyUnit.id()))
+                                        {
+                                            gc.attack(unit.id(), nearbyEnemyUnit.id());
+                                            break;
+                                        }
+                                    }
+                                    //if (nearbyUnit.unitType() == UnitType.Factory || nearbyUnit.unitType() == UnitType.Rocket)
+                                    //{
+                                    //}
+                                }
+                            }
+                        }
+                    }
+                    else
                     {
                         // Mars code here
                     }
                 }
             }
-
             // Submit the actions we've done, and wait for our next turn.
             gc.nextTurn();
         }
