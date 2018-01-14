@@ -48,7 +48,7 @@ public class Player
         targetDirection = bc.bcDirectionOpposite(targetDirection);
         moveUnitInDirection(unit, targetDirection);
     }
-
+    
     // Move Unit In Random Direction
     public static void moveUnitInRandomDirection(Unit unit)
     {
@@ -69,6 +69,31 @@ public class Player
             return false;
         }
     }
+
+    /**
+     * Produces a robot and updates unit lists
+     * @param factory where the robot should be spawned
+     * @param type of the robot to be spawned
+     * @param typeSortedUnitLists HashMap where the spawned robot will be added to keep track
+     */
+    public static void produceAndAddRobot(Unit factory, UnitType type, HashMap<UnitType, LinkedList<Unit>> typeSortedUnitLists) {
+        gc.produceRobot(factory.id(), type);
+        Direction unloadDirection = directions[0];
+        int j = 1;
+        while (j < directions.length - 1 &&
+                !gc.canUnload(factory.id(), unloadDirection))
+        {
+            unloadDirection = directions[j++];
+        }
+        if (gc.canUnload(factory.id(), unloadDirection))
+        {
+            gc.unload(factory.id(), unloadDirection);
+            MapLocation unloadLocation = factory.location().mapLocation().add(unloadDirection);
+            Unit newUnit = gc.senseUnitAtLocation(unloadLocation);
+            typeSortedUnitLists.get(type).add(newUnit);
+        }
+    }
+
     public static void main(String[] args)
     {
         // Connect to the manager, starting the game
@@ -332,24 +357,33 @@ public class Player
                         {
                             if (unit.isFactoryProducing() == 0)
                             {
-                                if (gc.canProduceRobot(unit.id(), UnitType.Ranger))
+                                int workerCount = typeSortedUnitLists.get(UnitType.Worker).size(); // rarely produced
+                                int knightCount = typeSortedUnitLists.get(UnitType.Knight).size(); // not being produced
+                                int rangerCount = typeSortedUnitLists.get(UnitType.Ranger).size();
+                                int mageCount = typeSortedUnitLists.get(UnitType.Mage).size();
+                                int healerCount = typeSortedUnitLists.get(UnitType.Healer).size();
+
+                                // think of better condition later; produce workers if existing ones are being massacred
+                                if (workerCount == 0)
                                 {
-                                    gc.produceRobot(unit.id(), UnitType.Ranger);
-                                    Direction unloadDirection = directions[0];
-                                    int j = 1;
-                                    while (j < directions.length - 1 &&
-                                            !gc.canUnload(unit.id(), unloadDirection))
+                                    if (gc.canProduceRobot(unit.id(), UnitType.Worker))
                                     {
-                                        unloadDirection = directions[j++];
-                                    }
-                                    if (gc.canUnload(unit.id(), unloadDirection))
-                                    {
-                                        gc.unload(unit.id(), unloadDirection);
-                                        MapLocation unloadLocation = unit.location().mapLocation().add(unloadDirection);
-                                        Unit newUnit = gc.senseUnitAtLocation(unloadLocation);
-                                        typeSortedUnitLists.get(newUnit.unitType()).add(newUnit);
+                                        produceAndAddRobot(unit, UnitType.Worker, typeSortedUnitLists);
                                     }
                                 }
+
+                                UnitType toBeProduced; // can add a default to skip one condition later on
+                                if (rangerCount >= (mageCount + healerCount))
+                                {
+                                    toBeProduced = (mageCount > healerCount)?(UnitType.Healer):(UnitType.Mage);
+                                }
+                                else
+                                {
+                                    toBeProduced = UnitType.Ranger; // not really needed now, but let it be for later
+                                }
+
+                                produceAndAddRobot(unit, toBeProduced, typeSortedUnitLists);
+
                             }
                         }
                         if (unit.unitType() == UnitType.Ranger)
