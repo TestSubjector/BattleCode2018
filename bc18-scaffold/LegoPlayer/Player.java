@@ -279,7 +279,7 @@ public class Player
 
                             // Structure building
                             while (!unfinishedBlueprints.isEmpty() &&
-                                    gc.senseUnitAtLocation(unfinishedBlueprints.getFirst().location().mapLocation()).structureIsBuilt() == 1)
+                                    (gc.senseUnitAtLocation(unfinishedBlueprints.getFirst().location().mapLocation()).structureIsBuilt() == 1))
                             {
                                 unfinishedBlueprints.removeFirst();
                             }
@@ -374,15 +374,14 @@ public class Player
 
                                 if (rangerCount >= (mageCount + healerCount))
                                 {
-                                    UnitType typeToBeProduced = (mageCount > healerCount)?(UnitType.Healer):(UnitType.Mage);
+                                    UnitType typeToBeProduced = (mageCount > healerCount) ? (UnitType.Healer) : (UnitType.Mage);
                                     if (gc.canProduceRobot(unit.id(), typeToBeProduced))
                                     {
                                         produceAndAddRobot(unit, typeToBeProduced, typeSortedUnitLists);
                                     }
-                                }
-                                else
+                                } else
                                 {
-                                    if (gc.canProduceRobot(unit.id(),UnitType.Ranger))
+                                    if (gc.canProduceRobot(unit.id(), UnitType.Ranger))
                                     {
                                         produceAndAddRobot(unit, UnitType.Ranger, typeSortedUnitLists);
                                     }
@@ -397,7 +396,7 @@ public class Player
                                         50, enemyTeam);
 
                                 // Must be refined later with movement code above this
-                                if(unitFrozenByHeat(gc, unit))
+                                if (unitFrozenByHeat(gc, unit))
                                 {
                                     continue;
                                 }
@@ -423,6 +422,56 @@ public class Player
                                 moveUnitInRandomDirection(unit);
                             }
 
+                        }
+                        if (unit.unitType() == UnitType.Mage)
+                        {
+                            if (!unit.location().isInGarrison())
+                            {
+                                VecUnit nearbyEnemyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
+                                        30, enemyTeam);
+
+                                if (unitFrozenByHeat(gc, unit))
+                                {
+                                    continue;
+                                }
+                                // Convenient because Attack Range = Vision Range for Mage
+                                for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+                                {
+                                    Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
+                                    {
+                                        if (gc.canAttack(unit.id(), nearbyEnemyUnit.id()))
+                                        {
+                                            gc.attack(unit.id(), nearbyEnemyUnit.id());
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (unit.unitType() == UnitType.Healer)
+                        {
+                            if (!unit.location().isInGarrison())
+                            {
+                                VecUnit nearbyFriendyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
+                                        50, ourTeam);
+
+                                if (unitFrozenByHeat(gc, unit))
+                                {
+                                    continue;
+                                }
+
+                                for (int j = 0; j < nearbyFriendyUnits.size(); j++)
+                                {
+                                    Unit nearbyFriendlyUnit = nearbyFriendyUnits.get(j);
+                                    {
+                                        if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()))
+                                        {
+                                            gc.heal(unit.id(), nearbyFriendlyUnit.id());
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                     else
