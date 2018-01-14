@@ -71,7 +71,7 @@ public class Player
     }
 
     /**
-     * Produces a robot and updates unit lists
+     * Produces a robot and updates unit lists. CHECK BEFORE CALL
      * @param factory where the robot should be spawned
      * @param type of the robot to be spawned
      * @param typeSortedUnitLists HashMap where the spawned robot will be added to keep track
@@ -372,18 +372,21 @@ public class Player
                                     }
                                 }
 
-                                UnitType toBeProduced; // can add a default to skip one condition later on
                                 if (rangerCount >= (mageCount + healerCount))
                                 {
-                                    toBeProduced = (mageCount > healerCount)?(UnitType.Healer):(UnitType.Mage);
+                                    UnitType typeToBeProduced = (mageCount > healerCount)?(UnitType.Healer):(UnitType.Mage);
+                                    if (gc.canProduceRobot(unit.id(), typeToBeProduced))
+                                    {
+                                        produceAndAddRobot(unit, typeToBeProduced, typeSortedUnitLists);
+                                    }
                                 }
                                 else
                                 {
-                                    toBeProduced = UnitType.Ranger; // not really needed now, but let it be for later
+                                    if (gc.canProduceRobot(unit.id(),UnitType.Ranger))
+                                    {
+                                        produceAndAddRobot(unit, UnitType.Ranger, typeSortedUnitLists);
+                                    }
                                 }
-
-                                produceAndAddRobot(unit, toBeProduced, typeSortedUnitLists);
-
                             }
                         }
                         if (unit.unitType() == UnitType.Ranger)
