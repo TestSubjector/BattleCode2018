@@ -1,5 +1,6 @@
 // import the API.
 import bc.*;
+
 import java.util.*;
 
 public class Player 
@@ -48,6 +49,26 @@ public class Player
         moveUnitInDirection(unit, targetDirection);
     }
 
+    // Move Unit In Random Direction
+    public static void moveUnitInRandomDirection(Unit unit)
+    {
+        Random random = new Random();
+        moveUnitInDirection(unit, Direction.values()[1 + random.nextInt(8)]);
+    }
+
+    // Both Movement and Attack on Cooldown
+    // ++++ Note - Add Ability Cooldown Later
+    public static boolean unitFrozenByHeat(GameController gc, Unit unit)
+    {
+        if (!gc.isAttackReady(unit.id()) && unit.movementCooldown() > 9)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     public static void main(String[] args)
     {
         // Connect to the manager, starting the game
@@ -337,11 +358,13 @@ public class Player
                             {
                                 VecUnit nearbyEnemyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
                                         50, enemyTeam);
+
                                 // Must be refined later with movement code above this
-                                if (!gc.isAttackReady(unit.id()))
+                                if(unitFrozenByHeat(gc, unit))
                                 {
                                     continue;
                                 }
+
                                 for (int j = 0; j < nearbyEnemyUnits.size(); j++)
                                 {
                                     Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
@@ -359,6 +382,8 @@ public class Player
                                     //{
                                     //}
                                 }
+
+                                moveUnitInRandomDirection(unit);
                             }
 
                         }
