@@ -5,6 +5,8 @@ import java.util.*;
 public class Player 
 {
     static GameController gc;
+    static PlanetMap homeMap;
+    static PlanetMap awayMap;
     static long initialWorkers;
     static long mapWidth;
     static long mapHeight;
@@ -64,13 +66,20 @@ public class Player
         ResearchInfo researchInfo;
         int[] researchLevelQueued = new int[5];
 
-        // Starting PlanetMaps
-        PlanetMap earthMap = gc.startingMap(Planet.Earth);
-        PlanetMap marsMap = gc.startingMap(Planet.Mars);
+        // Get initial map states
+        homeMap = gc.startingMap(gc.planet());
+        if (gc.planet() == Planet.Mars)
+        {
+            awayMap = gc.startingMap(Planet.Earth);
+        }
+        else
+        {
+            awayMap = gc.startingMap(Planet.Mars);
+        }
 
-        initialWorkers = earthMap.getInitial_units().size();
-        mapWidth = earthMap.getWidth();
-        mapHeight = earthMap.getHeight();
+        initialWorkers = homeMap.getInitial_units().size();
+        mapWidth = homeMap.getWidth();
+        mapHeight = homeMap.getHeight();
 
         // Initial karbonite locations
         HashMap<MapLocation, Long> earthKarboniteLocations = new HashMap<MapLocation, Long>();
@@ -79,8 +88,8 @@ public class Player
         {
             for (int y = 0; y < mapHeight; y++)
             {
-                MapLocation tempMapLocation = new MapLocation(Planet.Earth, x, y);
-                long karboniteAtTempMapLocation = earthMap.initialKarboniteAt(tempMapLocation);
+                MapLocation tempMapLocation = new MapLocation(gc.planet(), x, y);
+                long karboniteAtTempMapLocation = homeMap.initialKarboniteAt(tempMapLocation);
                 if (karboniteAtTempMapLocation > 0)
                 {
                     earthKarboniteLocations.put(tempMapLocation, karboniteAtTempMapLocation);
@@ -168,9 +177,9 @@ public class Player
                         {
                             // Build a structure if adjacent to one
                             VecUnit nearbyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 2, gc.team());
-                            for (int j = 0; j < units.size(); j++)
+                            for (int j = 0; j < nearbyUnits.size(); j++)
                             {
-                                Unit nearbyUnit = units.get(j);
+                                Unit nearbyUnit = nearbyUnits.get(j);
                                 if (nearbyUnit.unitType() == UnitType.Factory || nearbyUnit.unitType() == UnitType.Rocket)
                                 {
                                     if (gc.canBuild(unit.id(), nearbyUnit.id()))
@@ -197,20 +206,17 @@ public class Player
                             }
 
                             // Worker replication
-                            if (unitList.size() < 10 || unitList.size() < gc.round() / 10)
+                            if (unitList.size() < 30)
                             {
-                                Direction replicateDirection = directions[0];
-                                int j = 1;
-                                while (j < directions.length - 1 && !gc.canReplicate(unit.id(), replicateDirection))
+                                for (int j = 0; j < directions.length - 1; j++)
                                 {
-                                    replicateDirection = directions[j++];
-                                }
-                                if (gc.canReplicate(unit.id(), replicateDirection))
-                                {
-                                    gc.replicate(unit.id(), replicateDirection);
-                                    unitList.add(gc.senseUnitAtLocation(unit.location().mapLocation().add(replicateDirection)));
-                                    // System.out.println("Replicated at round: " + gc.round());
-                                    continue;
+                                    Direction replicateDirection = directions[j];
+                                    if (gc.canReplicate(unit.id(), replicateDirection))
+                                    {
+                                        gc.replicate(unit.id(), replicateDirection);
+                                        unitList.add(gc.senseUnitAtLocation(unit.location().mapLocation().add(replicateDirection)));
+                                        break;
+                                    }
                                 }
                             }
 
