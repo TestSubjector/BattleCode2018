@@ -14,6 +14,16 @@ public class Player
     static Direction[] directions;
     static HashMap<Integer, Integer> timesMovementFailed;
 
+    static final int initialRangerAttackDistance = 7;  // Rounding For Now
+    static final int initialRangerMovementCooldown = 20;
+    static final int initialRangerAttackCooldown = 20;
+    static final int initialMageAttackDistance = 5; // Rounding For Now
+    static final int initialMageMovementCooldown = 20;
+    static final int initialMageAttackCooldown = 20;
+    static final int initialKnightAttackDistance = 1;
+    static final int initialKnightMovementCooldown = 15;
+    static final int initialKnightAttackCooldown = 20;
+
     public static void moveUnitInDirection(Unit unit, Direction candidateDirection)
     {
         int directionIndex = candidateDirection.swigValue();
@@ -57,7 +67,7 @@ public class Player
     }
 
     // Both Movement and Attack on Cooldown
-    // ++++ Note - Add Ability Cooldown Later
+    // ++++ TODO - Add Ability Cooldown Later
     public static boolean unitFrozenByHeat(GameController gc, Unit unit)
     {
         if (!gc.isAttackReady(unit.id()) && unit.movementCooldown() > 9)
@@ -92,6 +102,83 @@ public class Player
             Unit newUnit = gc.senseUnitAtLocation(unloadLocation);
             typeSortedUnitLists.get(type).add(newUnit);
         }
+    }
+
+    // Decides the incentive to attack an unit by Rangers
+    // **** TODO - Make it live rather fixed static values, if computation allows
+    public static long setBountyScoreRanger(Unit unit, Unit enemyUnit)
+    {
+        long incentiveToHunt = enemyUnit.health() * -1;
+        UnitType unitType = unit.unitType();
+        UnitType enemyUnitType = enemyUnit.unitType();
+
+        // Same type of enemy unit, but higher health.
+        if(unitType == enemyUnitType && unit.health() < incentiveToHunt)
+        {
+            return -100;
+        }
+        else if(enemyUnitType == UnitType.Worker)
+        {
+            return incentiveToHunt + 300;
+        }
+        else if (enemyUnitType == UnitType.Factory || enemyUnitType == UnitType.Rocket)
+        {
+            return 500;
+        }
+        else if(unitType == UnitType.Ranger)
+        {
+            if(enemyUnitType == UnitType.Knight)
+            {
+                // Add run away instructions
+                incentiveToHunt += 468 ; //(6 * 4 * 40 / 2)
+            }
+            else if(enemyUnitType == UnitType.Mage)
+            {
+                //Match steps with Mage
+                incentiveToHunt += 540 ; // (Is infinite, but we consider non-perfect movement)
+            }
+            else
+            {
+                // Chase
+                huntingBounty += 200; //(Kill others first)
+            }
+        }
+        else if(unitType == UnitType.Knight)
+        {
+            if(enemyUnitType == UnitType.Ranger)
+            {
+
+            }
+            else if(enemyUnitType == UnitType.Mage)
+            {
+
+            }
+            else
+            {
+
+            }
+        }
+        else if(unitType == UnitType.Mage)
+        {
+            if(enemyUnitType == UnitType.Knight)
+            {
+
+            }
+            else if(enemyUnitType == UnitType.Ranger)
+            {
+
+            }
+            else
+            {
+
+            }
+        }
+        else
+        {
+            // For Healers
+            return 5;
+        }
+
     }
 
     public static void main(String[] args)
@@ -468,6 +555,31 @@ public class Player
                                         if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()))
                                         {
                                             gc.heal(unit.id(), nearbyFriendlyUnit.id());
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (unit.unitType() == UnitType.Knight)
+                        {
+                            if (!unit.location().isInGarrison())
+                            {
+                                VecUnit nearbyEnemyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
+                                        30, enemyTeam);
+
+                                if (unitFrozenByHeat(gc, unit))
+                                {
+                                    continue;
+                                }
+                                // Convenient because Attack Range = Vision Range for Mage
+                                for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+                                {
+                                    Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
+                                    {
+                                        if (gc.canAttack(unit.id(), nearbyEnemyUnit.id()))
+                                        {
+                                            gc.attack(unit.id(), nearbyEnemyUnit.id());
                                             break;
                                         }
                                     }
