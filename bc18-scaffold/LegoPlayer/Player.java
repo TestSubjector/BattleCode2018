@@ -2,6 +2,7 @@
 import bc.*;
 
 import java.util.*;
+import java.lang.Math.*;
 
 public class Player 
 {
@@ -106,79 +107,86 @@ public class Player
 
     // Decides the incentive to attack an unit by Rangers
     // **** TODO - Make it live rather fixed static values, if computation allows
-    public static long setBountyScoreRanger(Unit unit, Unit enemyUnit)
+    public static long setBountyScore(Unit unit, Unit enemyUnit)
     {
-        long incentiveToHunt = enemyUnit.health() * -1;
         UnitType unitType = unit.unitType();
+        MapLocation unitMapLocation = unit.location().mapLocation();
+        long unitHealth = unit.health();
+
+        long incentiveToHunt = enemyUnit.health() * -1;
         UnitType enemyUnitType = enemyUnit.unitType();
+        MapLocation enemyMapLocation = enemyUnit.location().mapLocation();
+        long distanceBetweenUnitsSquared = (int) Math.floor(Math.sqrt(unitMapLocation.distanceSquaredTo(enemyMapLocation)));
 
         // Same type of enemy unit, but higher health.
-        if(unitType == enemyUnitType && unit.health() < incentiveToHunt)
+        if(unitType == enemyUnitType && unitHealth < incentiveToHunt)
         {
-            return -100;
+            incentiveToHunt += unitHealth;
         }
         else if(enemyUnitType == UnitType.Worker)
         {
-            return incentiveToHunt + 300;
+            incentiveToHunt = 10 - distanceBetweenUnitsSquared;
         }
         else if (enemyUnitType == UnitType.Factory || enemyUnitType == UnitType.Rocket)
         {
-            return 500;
+            incentiveToHunt = 11 - distanceBetweenUnitsSquared;
         }
         else if(unitType == UnitType.Ranger)
         {
             if(enemyUnitType == UnitType.Knight)
             {
-                // Add run away instructions
-                incentiveToHunt += 468 ; //(6 * 4 * 40 / 2)
+                // **** TODO - Add run away instructions later
+                //(6 * 4 * 40 / 2)
+                incentiveToHunt += 6 * (distanceBetweenUnitsSquared - 3)* 20;
             }
             else if(enemyUnitType == UnitType.Mage)
             {
                 //Match steps with Mage
-                incentiveToHunt += 540 ; // (Is infinite, but we consider non-perfect movement)
+                //(Is infinite, if we don't consider non-perfect movement)
+                incentiveToHunt += 20 * Math.floor(unitHealth * 2/60) + (distanceBetweenUnitsSquared - 3) * 40;
             }
             else
             {
-                // Chase
-                huntingBounty += 200; //(Kill others first)
+                // Chase Healers ideally
+                incentiveToHunt = 10 - distanceBetweenUnitsSquared; //(Kill others first)
             }
         }
         else if(unitType == UnitType.Knight)
         {
             if(enemyUnitType == UnitType.Ranger)
             {
-
+                incentiveToHunt += unitHealth;
             }
             else if(enemyUnitType == UnitType.Mage)
             {
-
+                incentiveToHunt += unitHealth;
             }
             else
             {
-
+                incentiveToHunt = 10 - distanceBetweenUnitsSquared;
             }
         }
         else if(unitType == UnitType.Mage)
         {
             if(enemyUnitType == UnitType.Knight)
             {
-
+                incentiveToHunt += 60*(distanceBetweenUnitsSquared - 1);
             }
             else if(enemyUnitType == UnitType.Ranger)
             {
-
+                incentiveToHunt += 60*(5 - distanceBetweenUnitsSquared);
             }
             else
             {
-
+                incentiveToHunt = 10 - distanceBetweenUnitsSquared;
             }
         }
         else
         {
-            // For Healers
-            return 5;
+            // Unrequired Else case
+            return 0;
         }
-
+        return incentiveToHunt;
     }
 
     public static void main(String[] args)
@@ -489,6 +497,8 @@ public class Player
                                     continue;
                                 }
 
+                                long desireToKill = -500;
+                                long rememberUnit = -1;
                                 for (int j = 0; j < nearbyEnemyUnits.size(); j++)
                                 {
                                     Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
@@ -498,15 +508,19 @@ public class Player
                                     {
                                         if (gc.canAttack(unit.id(), nearbyEnemyUnit.id()))
                                         {
-                                            gc.attack(unit.id(), nearbyEnemyUnit.id());
-                                            break;
+                                            long possibleDesireToKill = setBountyScore(unit, nearbyEnemyUnit);
+                                            if(desireToKill < possibleDesireToKill)
+                                            {
+                                                desireToKill = possibleDesireToKill;
+                                                rememberUnit = j;
+                                            }
                                         }
                                     }
-                                    //if (nearbyUnit.unitType() == UnitType.Factory || nearbyUnit.unitType() == UnitType.Rocket)
-                                    //{
-                                    //}
                                 }
-
+                                if(rememberUnit != -1)
+                                {
+                                    gc.attack(unit.id(), nearbyEnemyUnits.get(rememberUnit).id());
+                                }
                                 moveUnitInRandomDirection(unit);
                             }
 
@@ -518,6 +532,8 @@ public class Player
                                 VecUnit nearbyEnemyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
                                         30, enemyTeam);
 
+                                long desireToKill = -500;
+                                long rememberUnit = -1;
                                 if (unitFrozenByHeat(gc, unit))
                                 {
                                     continue;
@@ -529,11 +545,20 @@ public class Player
                                     {
                                         if (gc.canAttack(unit.id(), nearbyEnemyUnit.id()))
                                         {
-                                            gc.attack(unit.id(), nearbyEnemyUnit.id());
-                                            break;
+                                            long possibleDesireToKill = setBountyScore(unit, nearbyEnemyUnit);
+                                            if(desireToKill < possibleDesireToKill)
+                                            {
+                                                desireToKill = possibleDesireToKill;
+                                                rememberUnit = j;
+                                            }
                                         }
                                     }
                                 }
+                                if(rememberUnit != -1)
+                                {
+                                    gc.attack(unit.id(), nearbyEnemyUnits.get(rememberUnit).id());
+                                }
+                                moveUnitInRandomDirection(unit);
                             }
                         }
                         if (unit.unitType() == UnitType.Healer)
@@ -568,6 +593,8 @@ public class Player
                                 VecUnit nearbyEnemyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
                                         30, enemyTeam);
 
+                                long desireToKill = -500;
+                                long rememberUnit = -1;
                                 if (unitFrozenByHeat(gc, unit))
                                 {
                                     continue;
@@ -579,11 +606,20 @@ public class Player
                                     {
                                         if (gc.canAttack(unit.id(), nearbyEnemyUnit.id()))
                                         {
-                                            gc.attack(unit.id(), nearbyEnemyUnit.id());
-                                            break;
+                                            long possibleDesireToKill = setBountyScore(unit, nearbyEnemyUnit);
+                                            if(desireToKill < possibleDesireToKill)
+                                            {
+                                                desireToKill = possibleDesireToKill;
+                                                rememberUnit = j;
+                                            }
                                         }
                                     }
                                 }
+                                if(rememberUnit != -1)
+                                {
+                                    gc.attack(unit.id(), nearbyEnemyUnits.get(rememberUnit).id());
+                                }
+                                moveUnitInRandomDirection(unit);
                             }
                         }
                     }
