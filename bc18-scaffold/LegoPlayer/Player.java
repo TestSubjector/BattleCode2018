@@ -521,7 +521,7 @@ public class Player
                                 if (!unit.location().isInGarrison())
                                 {
                                     VecUnit nearbyEnemyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
-                                            50, enemyTeam);
+                                            70, enemyTeam);
 
                                     // Must be refined later with movement code above this
                                     if (unitFrozenByHeat(gc, unit))
@@ -632,7 +632,7 @@ public class Player
                                 if (!unit.location().isInGarrison())
                                 {
                                     VecUnit nearbyEnemyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
-                                            30, enemyTeam);
+                                            50, enemyTeam);
 
                                     long desireToKill = -500;
                                     long rememberUnit = -1;
