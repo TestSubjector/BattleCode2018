@@ -4,7 +4,7 @@ import bc.*;
 import java.util.*;
 import java.lang.Math.*;
 
-public class Player 
+public class Player
 {
     static GameController gc;
     static PlanetMap homeMap;
@@ -64,7 +64,7 @@ public class Player
     {
         moveUnitAwayFrom(unit, targetLocation.mapLocation());
     }
-    
+
     // Move Unit In Random Direction
     public static void moveUnitInRandomDirection(Unit unit)
     {
@@ -259,6 +259,7 @@ public class Player
 
         while (true)
         {
+            System.out.println("Time left at start of round " + gc.round() + " : " + gc.getTimeLeftMs());
             // System.out.println("Current round: " + gc.round());
             // System.out.println("Karbonite: " + gc.karbonite());
 
