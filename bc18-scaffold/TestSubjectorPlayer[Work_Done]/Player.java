@@ -278,7 +278,8 @@ public class Player
                             }
 
                             // Structure building
-                            while (!unfinishedBlueprints.isEmpty())
+                            while (!unfinishedBlueprints.isEmpty() &&
+                                    (gc.senseUnitAtLocation(unfinishedBlueprints.getFirst().location().mapLocation()).structureIsBuilt() == 1))
                             {
                                 unfinishedBlueprints.removeFirst();
                             }

@@ -209,7 +209,8 @@ public class Player
         UnitType[] unitTypes = UnitType.values();
 
         // Research Info
-        ResearchInfo researchInfo = new ResearchInfo();
+        ResearchInfo researchInfo;
+        int[] researchLevelQueued = new int[5];
 
         // Get initial map states
         homeMap = gc.startingMap(gc.planet());
@@ -286,20 +287,13 @@ public class Player
             // Research code
             if (gc.planet() == Planet.Mars)
             {
-                //First research should be workers
-                if(researchInfo.getLevel(UnitType.Worker)< 2)
+                if (researchLevelQueued[UnitType.Worker.swigValue()] < 4)
                 {
                     gc.queueResearch(UnitType.Worker);
-                }
-                else if(researchInfo.getLevel(UnitType.Rocket)< 1)
-                {
-                    gc.queueResearch(UnitType.Rocket);
+                    researchLevelQueued[UnitType.Worker.swigValue()]++;
                 }
                 // Removed else, replace with decision based research tree
-                if(researchInfo.getLevel(UnitType.Rocket) == 1)
-                {
-                    System.out.println(">> Resercged Rockets");
-                }
+
                 // Update researchInfo to new state
                 researchInfo = gc.researchInfo();
                 if (researchInfo.hasNextInQueue())
@@ -343,7 +337,7 @@ public class Player
                             for (int j = 0; j < nearbyUnits.size(); j++)
                             {
                                 Unit nearbyUnit = nearbyUnits.get(j);
-                                if ( nearbyUnit.unitType() == UnitType.Factory || nearbyUnit.unitType() == UnitType.Rocket)
+                                if (nearbyUnit.unitType() == UnitType.Factory || nearbyUnit.unitType() == UnitType.Rocket)
                                 {
                                     if (gc.canBuild(unit.id(), nearbyUnit.id()))
                                     {
@@ -401,40 +395,12 @@ public class Player
                                 {
                                     blueprintDirection = directions[j++];
                                 }
-
-                                // Copying Factory Code, needs a decision tree
-                                if (gc.canBlueprint(unit.id(), UnitType.Rocket, blueprintDirection))
-                                {
-                                    gc.blueprint(unit.id(), UnitType.Rocket, blueprintDirection);
-                                    MapLocation blueprintLocation = unit.location().mapLocation().add(blueprintDirection);
-                                    unfinishedBlueprints.add(gc.senseUnitAtLocation(blueprintLocation));
-                                }
-                                else
-                                {
-                                    blueprintDirection = directions[0];
-                                    j = 1;
-                                    while (j < directions.length - 1 &&
-                                            !gc.canBlueprint(unit.id(), UnitType.Rocket, blueprintDirection))
-                                    {
-                                        blueprintDirection = directions[j++];
-                                    }
-                                    if (gc.canBlueprint(unit.id(), UnitType.Rocket, blueprintDirection))
-                                    {
-                                        gc.blueprint(unit.id(), UnitType.Rocket, blueprintDirection);
-                                        MapLocation blueprintLocation = unit.location().mapLocation().add(blueprintDirection);
-                                        Unit newFactory = gc.senseUnitAtLocation(blueprintLocation);
-                                        unfinishedBlueprints.add(newFactory);
-                                        typeSortedUnitLists.get(UnitType.Rocket).add(newFactory);
-                                    }
-                                }
-
                                 if (gc.canBlueprint(unit.id(), UnitType.Factory, blueprintDirection))
                                 {
                                     gc.blueprint(unit.id(), UnitType.Factory, blueprintDirection);
                                     MapLocation blueprintLocation = unit.location().mapLocation().add(blueprintDirection);
                                     unfinishedBlueprints.add(gc.senseUnitAtLocation(blueprintLocation));
-                                }
-                                else
+                                } else
                                 {
                                     blueprintDirection = directions[0];
                                     j = 1;
@@ -559,12 +525,8 @@ public class Player
                                 if(rememberUnit != -1)
                                 {
                                     gc.attack(unit.id(), nearbyEnemyUnits.get(rememberUnit).id());
-                                    //moveUnitAwayFrom(unit, nearbyEnemyUnits.get(rememberUnit).location());
                                 }
-                                else
-                                {
-                                    moveUnitInRandomDirection(unit);
-                                }
+
                             }
 
                         }
@@ -601,11 +563,7 @@ public class Player
                                 {
                                     gc.attack(unit.id(), nearbyEnemyUnits.get(rememberUnit).id());
                                 }
-                                else
-                                {
-                                    moveUnitInRandomDirection(unit);
-                                }
-
+                                moveUnitInRandomDirection(unit);
                             }
                         }
                         if (unit.unitType() == UnitType.Healer)
@@ -631,7 +589,6 @@ public class Player
                                         }
                                     }
                                 }
-                                moveUnitInRandomDirection(unit);
                             }
                         }
                         if (unit.unitType() == UnitType.Knight)
@@ -667,10 +624,7 @@ public class Player
                                 {
                                     gc.attack(unit.id(), nearbyEnemyUnits.get(rememberUnit).id());
                                 }
-                                else
-                                {
-                                    moveUnitInRandomDirection(unit);
-                                }
+                                moveUnitInRandomDirection(unit);
                             }
                         }
                     }
