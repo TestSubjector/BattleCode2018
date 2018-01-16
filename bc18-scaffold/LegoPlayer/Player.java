@@ -19,7 +19,8 @@ public class Player
     static long mapSize;
     static VecUnit initialWorkers;
     static Set<MapLocation> earthKarboniteLocations;
-    static Queue<MapLocation> potentialLandingSites;
+    static PriorityQueue<QueuePair<Long, MapLocation>> potentialLandingSites;
+    static ArrayList<MapLocation> prevLandingSites;
 
     final static int INITIAL_RANGER_ATTACK_DISTANCE = 7;  // Rounding For Now
     final static int INITIAL_RANGER_MOVEMENT_COOLDOWN = 20;
@@ -30,6 +31,12 @@ public class Player
     final static int INITIAL_KNIGHT_ATTACK_DISTANCE = 1;
     final static int INITIAL_KNIGHT_MOVEMENT_COOLDOWN = 15;
     final static int INITIAL_KNIGHT_ATTACK_COOLDOWN = 20;
+
+    final static long WEIGHT_IMPASSABLE = -2;
+//    final static long WEIGHT_KARBONITE_CENTER = -1; // central tile is Karb; undesirable
+    final static long WEIGHT_ROCKET = -1;
+//    final static long WEIGHT_KARBONITE_SIDE = +1; // Karb to the side; desirable
+    final static long WEIGHT_NONE = 0;
 
     //25+25+25+100+100+75+100+100+25+75+200+25+75
     final static UnitType[] RESEARCH_QUEUE_HARD = {UnitType.Worker, UnitType.Ranger, UnitType.Mage, UnitType.Rocket,
@@ -295,6 +302,19 @@ public class Player
         return incentiveToHunt;
     }
 
+    public static long getLocationAppeal(int x, int y)
+    {
+        if (x < 0 || x >= mapWidth) return WEIGHT_IMPASSABLE;
+
+        if (y < 0 || y >= mapHeight) return WEIGHT_IMPASSABLE;
+
+        MapLocation tempLoc = new MapLocation(Planet.Mars, x, y);
+
+        // only called from Earth, so awayMap will be Mars
+        if (awayMap.isPassableTerrainAt(tempLoc) == 0) return WEIGHT_IMPASSABLE;
+        else return WEIGHT_NONE;
+    }
+
     public static void main(String[] args)
     {
         initializeGlobals();
@@ -323,18 +343,37 @@ public class Player
 
         // Find potential landing spots and store in a priority queue
         // (Add priority logic later using Pair class and comparators)
-        // potentialLandingSites = new PriorityQueue<QueuePair<Long, MapLocation>>();
-        potentialLandingSites = new LinkedList<MapLocation>();
-        if (homePlanet == Planet.Earth)
+         potentialLandingSites = new PriorityQueue<>();
+        if (gc.planet() == Planet.Earth)
         {
+            MapLocation tempLoc;
+            int temp_x, temp_y;
             for (int i = 0; i < awayMap.getWidth(); i++)
             {
                 for (int j = 0; j < awayMap.getHeight(); j++)
                 {
-                    MapLocation temp = new MapLocation(awayPlanet, i, j);
-                    if (awayMap.isPassableTerrainAt(temp) != 0)
+                    tempLoc = new MapLocation(Planet.Mars, i, j);
+                    temp_x = tempLoc.getX();
+                    temp_y = tempLoc.getY();
+                    if (awayMap.isPassableTerrainAt(tempLoc) != 0)
                     {
-                        potentialLandingSites.add(temp);
+                        long appeal = WEIGHT_NONE;
+
+                        // top row
+                        appeal += getLocationAppeal(temp_x - 1,temp_y + 1);
+                        appeal += getLocationAppeal(temp_x,temp_y + 1);
+                        appeal += getLocationAppeal(temp_x + 1,temp_y + 1);
+
+                        // middle row
+                        appeal += getLocationAppeal(temp_x - 1,temp_y);
+                        appeal += getLocationAppeal(temp_x + 1,temp_y);
+
+                        // bottom row
+                        appeal += getLocationAppeal(temp_x - 1,temp_y - 1);
+                        appeal += getLocationAppeal(temp_x,temp_y - 1);
+                        appeal += getLocationAppeal(temp_x + 1,temp_y - 1);
+
+                        potentialLandingSites.add(new QueuePair<>(appeal, tempLoc));
                     }
                 }
             }
@@ -762,13 +801,14 @@ public class Player
                                     }
                                     if (unit.structureGarrison().size() >= unit.structureMaxCapacity() / 2)
                                     {
-                                        MapLocation dest = potentialLandingSites.remove();
+                                        MapLocation dest = potentialLandingSites.poll().getSecond();
                                         // potentialLandingSites is supposed to have only those spots
                                         // that are passable, and not already used as a destination.
                                         // Hence, this check should always pass.
                                         if (gc.canLaunchRocket(unit.id(), dest))
                                         {
                                             gc.launchRocket(unit.id(), dest);
+                                            prevLandingSites.add(dest);
                                         }
                                     }
                                 }
