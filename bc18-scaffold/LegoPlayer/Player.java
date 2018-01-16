@@ -18,6 +18,7 @@ public class Player
     static long mapHeight;
     static long mapSize;
     static VecUnit initialWorkers;
+    static long earthInititalTotalKarbonite = 0;
     static Set<MapLocation> earthKarboniteLocations;
     static PriorityQueue<QueuePair<Long, MapLocation>> potentialLandingSites;
     static ArrayList<QueuePair<Long, MapLocation>> updatedAppealSites;
@@ -31,17 +32,17 @@ public class Player
     final static int INITIAL_KNIGHT_ATTACK_DISTANCE = 1;
     final static int INITIAL_KNIGHT_MOVEMENT_COOLDOWN = 15;
     final static int INITIAL_KNIGHT_ATTACK_COOLDOWN = 20;
+    static int rangerTalentVision = 0;
 
     final static long WEIGHT_IMPASSABLE = -2;
 //    final static long WEIGHT_KARBONITE_CENTER = -1; // central tile is Karb; undesirable
     final static long WEIGHT_ROCKET = -1;
 //    final static long WEIGHT_KARBONITE_SIDE = +1; // Karb to the side; desirable
     final static long WEIGHT_NONE = 0;
-    // 25+25+25+100+100+75+100+100+25+75+200+25+75
-    final static UnitType[] RESEARCH_QUEUE_HARD = {UnitType.Worker, UnitType.Ranger, UnitType.Mage, UnitType.Rocket,
-            UnitType.Ranger, UnitType.Mage, UnitType.Mage, UnitType.Rocket,
-            UnitType.Healer, UnitType.Healer, UnitType.Mage, UnitType.Knight,
-            UnitType.Knight};
+    // 25+25+100+100+100+25+75+100+25+75+100+25+75+100+25+75
+    final static UnitType[] RESEARCH_QUEUE_HARD = {UnitType.Worker, UnitType.Ranger, UnitType.Ranger, UnitType.Rocket,
+            UnitType.Rocket, UnitType.Healer, UnitType.Healer, UnitType.Rocket,
+            UnitType.Mage, UnitType.Mage, UnitType.Mage, UnitType.Knight, UnitType.Knight};
 
     public static void initializeGlobals()
     {
@@ -103,6 +104,7 @@ public class Player
                     if (karboniteAtTempMapLocation > 0)
                     {
                         earthKarboniteLocations.add(tempMapLocation);
+                        earthInititalTotalKarbonite += karboniteAtTempMapLocation;
                     }
                 }
             }
@@ -339,6 +341,74 @@ public class Player
         }
     }
 
+    public static long maxWorkerLimitAtTurn(long currentRound)
+    {
+        long maxWorkers = 0;
+
+        if(mapSize <=500)
+        {
+            if(currentRound < 75)
+            {
+                if(earthInititalTotalKarbonite > 1000)
+                {
+                    return 20;
+                }
+                else if(earthInititalTotalKarbonite > 750)
+                {
+                    return 15;
+                }
+                else if(earthInititalTotalKarbonite < 100)
+                {
+                    return 5;
+                }
+            }
+        }
+        else if(mapSize <=900)
+        {
+            if(currentRound < 85)
+            {
+                if(earthInititalTotalKarbonite > 1000)
+                {
+                    return 20;
+                }
+                else if(earthInititalTotalKarbonite > 750)
+                {
+                    return 15;
+                }
+                else if(earthInititalTotalKarbonite < 100)
+                {
+                    return 5;
+                }
+            }
+        }
+        else
+        {
+            if(currentRound < 75)
+            {
+                if(earthInititalTotalKarbonite > 3000)
+                {
+                    return 30;
+                }
+                else if(earthInititalTotalKarbonite > 1000)
+                {
+                    return 20;
+                }
+                else if(earthInititalTotalKarbonite < 1000)
+                {
+                    return 10;
+                }
+            }
+        }
+        if(earthInititalTotalKarbonite < 100)
+        {
+            return 5;
+        }
+        else
+        {
+            return 10;
+        }
+    }
+
     public static void main(String[] args)
     {
         initializeGlobals();
@@ -405,6 +475,10 @@ public class Player
                 System.out.println("Time left at start of round " + currentRound + " : " + gc.getTimeLeftMs());
             }
 
+            if(currentRound == 150)
+            {
+                rangerTalentVision = 30;
+            }
             // Clear unit lists
             for (int i = 0; i < unitTypes.length; i++)
             {
@@ -459,8 +533,8 @@ public class Player
                             if (unitTypes[i] == UnitType.Worker)
                             {
                                 boolean workerBuiltThisTurn = false;
-                                boolean workedMinedThisTurn = false;
-                                boolean workedReplicatedThisTurn = false;
+                                boolean workerMinedThisTurn = false;
+                                boolean workerReplicatedThisTurn = false;
                                 // Build a structure if adjacent to one
                                 for (int j = 0; j < adjacentUnits.size(); j++)
                                 {
@@ -482,16 +556,13 @@ public class Player
                                     if (gc.canHarvest(unit.id(), directions[j]))
                                     {
                                         gc.harvest(unit.id(), directions[j]);
-                                        workedMinedThisTurn = true;
+                                        workerMinedThisTurn = true;
                                         break;
                                     }
                                 }
 
                                 // Replicate worker
-                                if (unitsOfType[UnitType.Worker.ordinal()] < 20 && currentRound < 650 ||
-                                        ((currentRound > 130 && currentRound < 400) &&
-                                                (unitsOfType[UnitType.Worker.ordinal()] < mapSize * 2 / (mapHeight + mapWidth) - 10) ||
-                                                unitsOfType[UnitType.Worker.ordinal()] < 10))
+                                if (unitsOfType[UnitType.Worker.ordinal()] < maxWorkerLimitAtTurn(currentRound))
                                 {
                                     for (int j = 0; j < directions.length - 1; j++)
                                     {
@@ -500,7 +571,7 @@ public class Player
                                         {
                                             gc.replicate(unit.id(), replicateDirection);
                                             unitsOfType[UnitType.Worker.ordinal()]++;
-                                            workedReplicatedThisTurn = true;
+                                            workerReplicatedThisTurn = true;
                                             break;
                                         }
                                     }
@@ -600,7 +671,7 @@ public class Player
                                 // Make space for other units
                                 // Moved this to end to check results
                                 // Seems better at the bottom
-//                                if(!workedMinedThisTurn && !workerBuiltThisTurn)
+//                                if(!workerMinedThisTurn && !workerBuiltThisTurn)
 //                                {
 //                                    moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
 //                                }
@@ -610,7 +681,7 @@ public class Player
                                 if (!unit.location().isInGarrison())
                                 {
                                     VecUnit nearbyEnemyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
-                                            70, theirTeam);
+                                            70 + rangerTalentVision, theirTeam);
 
                                     // Must be refined later with movement code above this
                                     if (unitFrozenByHeat(unit))
@@ -780,9 +851,9 @@ public class Player
                                         }
                                     }
 
-                                    if (rangerCount >= (mageCount + healerCount))
+                                    if (rangerCount >= 8 * (healerCount))
                                     {
-                                        UnitType typeToBeProduced = (mageCount > healerCount) ? (UnitType.Healer) : (UnitType.Mage);
+                                        UnitType typeToBeProduced = UnitType.Healer;
                                         if (gc.canProduceRobot(unit.id(), typeToBeProduced))
                                         {
                                             gc.produceRobot(unit.id(), typeToBeProduced);
@@ -876,6 +947,54 @@ public class Player
                                     {
                                         gc.unload(unit.id(), direction);
                                     }
+                                }
+                            }
+                            if (unitTypes[i] == UnitType.Worker)
+                            {
+                                boolean workerRepairedThisTurn = false;
+                                boolean workerMinedThisTurn = false;
+                                boolean workerReplicatedThisTurn = false;
+                                // Build a structure if adjacent to one
+                                for (int j = 0; j < adjacentUnits.size(); j++)
+                                {
+                                    Unit adjacentUnit = adjacentUnits.get(j);
+                                    if (adjacentUnit.unitType() == UnitType.Factory || adjacentUnit.unitType() == UnitType.Rocket)
+                                    {
+                                        if (gc.canRepair(unit.id(), adjacentUnit.id()))
+                                        {
+                                            gc.repair(unit.id(), adjacentUnit.id());
+                                            workerRepairedThisTurn = true;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                // Mine karbonite if adjacent to or standing on a mine
+                                for (int j = 0; j < directions.length; j++)
+                                {
+                                    if (gc.canHarvest(unit.id(), directions[j]))
+                                    {
+                                        gc.harvest(unit.id(), directions[j]);
+                                        workerMinedThisTurn = true;
+                                        break;
+                                    }
+                                }
+
+                                // Replicate worker
+                                for (int j = 0; j < directions.length - 1; j++)
+                                {
+                                    Direction replicateDirection = directions[j];
+                                    if (gc.canReplicate(unit.id(), replicateDirection))
+                                    {
+                                        gc.replicate(unit.id(), replicateDirection);
+                                        unitsOfType[UnitType.Worker.ordinal()]++;
+                                        workerReplicatedThisTurn = true;
+                                        break;
+                                    }
+                                }
+                                if(!workerMinedThisTurn && !workerRepairedThisTurn)
+                                {
+                                    moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
                                 }
                             }
                         }
