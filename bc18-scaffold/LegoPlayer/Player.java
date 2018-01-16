@@ -3,7 +3,6 @@
 import bc.*;
 
 import java.util.*;
-import java.lang.Math.*;
 
 public class Player
 {
@@ -403,7 +402,6 @@ public class Player
                                 {
                                     Direction blueprintDirection = directions[0];
                                     int j = 1;
-                                    //grouping of  ANDs and ORs
                                     while (j < directions.length - 1 &&
                                             (!gc.canBlueprint(unit.id(), UnitType.Factory, blueprintDirection) ||
                                                     gc.canSenseLocation(unit.location().mapLocation().add(blueprintDirection)) &&
