@@ -37,8 +37,7 @@ public class Player
     final static long WEIGHT_ROCKET = -1;
 //    final static long WEIGHT_KARBONITE_SIDE = +1; // Karb to the side; desirable
     final static long WEIGHT_NONE = 0;
-
-    //25+25+25+100+100+75+100+100+25+75+200+25+75
+    // 25+25+25+100+100+75+100+100+25+75+200+25+75
     final static UnitType[] RESEARCH_QUEUE_HARD = {UnitType.Worker, UnitType.Ranger, UnitType.Mage, UnitType.Rocket,
             UnitType.Ranger, UnitType.Mage, UnitType.Mage, UnitType.Rocket,
             UnitType.Healer, UnitType.Healer, UnitType.Mage, UnitType.Knight,
@@ -88,11 +87,11 @@ public class Player
         mapHeight = homeMap.getHeight();
         mapSize = mapHeight * mapHeight;
 
+        // Get initial worker units
+        initialWorkers = homeMap.getInitial_units();
+
         if (homePlanet == Planet.Earth)
         {
-            // Get initial worker units
-            initialWorkers = homeMap.getInitial_units();
-
             // Get initial karbonite locations
             earthKarboniteLocations = new HashSet<MapLocation>();
             for (int x = 0; x < mapWidth; x++)
@@ -116,7 +115,7 @@ public class Player
 
     public static boolean moveUnitInDirection(Unit unit, Direction candidateDirection)
     {
-        int directionIndex = candidateDirection.swigValue();
+        int directionIndex = candidateDirection.ordinal();
         boolean didUnitMove = false;
         if (gc.isMoveReady(unit.id()))
         {
@@ -341,8 +340,6 @@ public class Player
     {
         initializeGlobals();
 
-        gc.queueResearch(UnitType.Rocket);
-
         // Set of unfinished blueprints
         Set<Unit> unfinishedBlueprints = new HashSet<Unit>();
 
@@ -475,6 +472,7 @@ public class Player
                                         {
                                             gc.build(unit.id(), adjacentUnit.id());
                                             workerBuiltThisTurn = true;
+                                            break;
                                         }
                                     }
                                 }
@@ -491,10 +489,10 @@ public class Player
                                 }
 
                                 // Replicate worker
-                                if (unitsOfType[UnitType.Worker.swigValue()] < 20 && currentRound < 650 ||
+                                if (unitsOfType[UnitType.Worker.ordinal()] < 20 && currentRound < 650 ||
                                         ((currentRound > 130 && currentRound < 400) &&
-                                                (unitsOfType[UnitType.Worker.swigValue()] < mapSize * 2 / (mapHeight + mapWidth) - 10) ||
-                                                unitsOfType[UnitType.Worker.swigValue()] < 10))
+                                                (unitsOfType[UnitType.Worker.ordinal()] < mapSize * 2 / (mapHeight + mapWidth) - 10) ||
+                                                unitsOfType[UnitType.Worker.ordinal()] < 10))
                                 {
                                     for (int j = 0; j < directions.length - 1; j++)
                                     {
@@ -502,7 +500,7 @@ public class Player
                                         if (gc.canReplicate(unit.id(), replicateDirection))
                                         {
                                             gc.replicate(unit.id(), replicateDirection);
-                                            unitsOfType[UnitType.Worker.swigValue()]++;
+                                            unitsOfType[UnitType.Worker.ordinal()]++;
                                             workedReplicatedThisTurn = true;
                                             break;
                                         }
@@ -537,7 +535,7 @@ public class Player
                                     unfinishedBlueprints.remove(obsoleteBlueprint);
                                 }
                                 // Blueprint factories (change if condition)
-                                if (unitsOfType[UnitType.Factory.swigValue()] < 8)
+                                if (unitsOfType[UnitType.Factory.ordinal()] < 8)
                                 {
                                     for (int j = 0; j < directions.length - 1; j++)
                                     {
@@ -545,13 +543,13 @@ public class Player
                                         if (gc.canBlueprint(unit.id(), UnitType.Factory, blueprintDirection))
                                         {
                                             gc.blueprint(unit.id(), UnitType.Factory, blueprintDirection);
-                                            unitsOfType[UnitType.Factory.swigValue()]++;
+                                            unitsOfType[UnitType.Factory.ordinal()]++;
                                         }
                                     }
                                 }
 
                                 // Blueprint rockets (change if condition)
-                                if (unitsOfType[UnitType.Rocket.swigValue()] < 5)
+                                if (unitsOfType[UnitType.Rocket.ordinal()] < 5)
                                 {
                                     for (int j = 0; j < directions.length - 1; j++)
                                     {
@@ -559,7 +557,7 @@ public class Player
                                         if (gc.canBlueprint(unit.id(), UnitType.Rocket, blueprintDirection))
                                         {
                                             gc.blueprint(unit.id(), UnitType.Rocket, blueprintDirection);
-                                            unitsOfType[UnitType.Rocket.swigValue()]++;
+                                            unitsOfType[UnitType.Rocket.ordinal()]++;
                                         }
                                     }
                                 }
@@ -767,11 +765,11 @@ public class Player
                                 tryToUnloadRobot(unit);
                                 if (unit.isFactoryProducing() == 0)
                                 {
-                                    int workerCount = unitsOfType[UnitType.Worker.swigValue()]; // rarely produced
-                                    int knightCount = unitsOfType[UnitType.Knight.swigValue()]; // not being produced
-                                    int rangerCount = unitsOfType[UnitType.Ranger.swigValue()];
-                                    int mageCount = unitsOfType[UnitType.Mage.swigValue()];
-                                    int healerCount = unitsOfType[UnitType.Healer.swigValue()];
+                                    int workerCount = unitsOfType[UnitType.Worker.ordinal()]; // rarely produced
+                                    int knightCount = unitsOfType[UnitType.Knight.ordinal()]; // not being produced
+                                    int rangerCount = unitsOfType[UnitType.Ranger.ordinal()];
+                                    int mageCount = unitsOfType[UnitType.Mage.ordinal()];
+                                    int healerCount = unitsOfType[UnitType.Healer.ordinal()];
 
                                     // Think of better condition later; produce workers if existing ones are being massacred
                                     if (workerCount == 0)
@@ -779,7 +777,7 @@ public class Player
                                         if (gc.canProduceRobot(unit.id(), UnitType.Worker))
                                         {
                                             gc.produceRobot(unit.id(), UnitType.Worker);
-                                            unitsOfType[UnitType.Worker.swigValue()]++;
+                                            unitsOfType[UnitType.Worker.ordinal()]++;
                                         }
                                     }
 
@@ -789,7 +787,7 @@ public class Player
                                         if (gc.canProduceRobot(unit.id(), typeToBeProduced))
                                         {
                                             gc.produceRobot(unit.id(), typeToBeProduced);
-                                            unitsOfType[typeToBeProduced.swigValue()]++;
+                                            unitsOfType[typeToBeProduced.ordinal()]++;
                                         }
                                     }
                                     else
@@ -797,7 +795,7 @@ public class Player
                                         if (gc.canProduceRobot(unit.id(), UnitType.Ranger))
                                         {
                                             gc.produceRobot(unit.id(), UnitType.Ranger);
-                                            unitsOfType[UnitType.Ranger.swigValue()]++;
+                                            unitsOfType[UnitType.Ranger.ordinal()]++;
                                         }
                                     }
                                 }
