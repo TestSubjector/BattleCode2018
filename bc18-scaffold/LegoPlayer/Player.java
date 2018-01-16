@@ -603,10 +603,10 @@ public class Player
                                 // Make space for other units
                                 // Moved this to end to check results
                                 // Seems better at the bottom
-                                if(!workedMinedThisTurn && !workerBuiltThisTurn)
-                                {
-                                    moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
-                                }
+//                                if(!workedMinedThisTurn && !workerBuiltThisTurn)
+//                                {
+//                                    moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
+//                                }
                             }
                             if (unit.unitType() == UnitType.Ranger)
                             {
