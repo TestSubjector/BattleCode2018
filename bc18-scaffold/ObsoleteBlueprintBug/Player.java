@@ -1,116 +1,34 @@
 // import the API.
-import java.util.*;
+
 import bc.*;
+
+import java.util.*;
+import java.lang.Math.*;
 
 public class Player
 {
-    static Random random;
     static GameController gc;
-    static Direction[] directions;
-    static UnitType[] unitTypes;
-    static Planet homePlanet;
-    static Planet awayPlanet;
     static PlanetMap homeMap;
     static PlanetMap awayMap;
-    static Team ourTeam;
-    static Team theirTeam;
+    static long initialWorkers;
     static long mapWidth;
     static long mapHeight;
-    static long mapSize;
-    static VecUnit initialWorkers;
-    static Set<MapLocation> earthKarboniteLocations;
-    static Queue<MapLocation> potentialLandingSites;
+    static Direction[] directions;
+    static HashMap<Integer, Integer> timesMovementFailed;
 
-    final static int INITIAL_RANGER_ATTACK_DISTANCE = 7;  // Rounding For Now
-    final static int INITIAL_RANGER_MOVEMENT_COOLDOWN = 20;
-    final static int INITIAL_RANGER_ATTACK_COOLDOWN = 20;
-    final static int INITIAL_MAGE_ATTACK_DISTANCE = 5; // Rounding For Now
-    final static int INITIAL_MAGE_MOVEMENT_COOLDOWN = 20;
-    final static int INITIAL_MAGE_ATTACK_COOLDOWN = 20;
-    final static int INITIAL_KNIGHT_ATTACK_DISTANCE = 1;
-    final static int INITIAL_KNIGHT_MOVEMENT_COOLDOWN = 15;
-    final static int INITIAL_KNIGHT_ATTACK_COOLDOWN = 20;
+    static final int initialRangerAttackDistance = 7;  // Rounding For Now
+    static final int initialRangerMovementCooldown = 20;
+    static final int initialRangerAttackCooldown = 20;
+    static final int initialMageAttackDistance = 5; // Rounding For Now
+    static final int initialMageMovementCooldown = 20;
+    static final int initialMageAttackCooldown = 20;
+    static final int initialKnightAttackDistance = 1;
+    static final int initialKnightMovementCooldown = 15;
+    static final int initialKnightAttackCooldown = 20;
 
-    //25+25+25+100+100+75+100+100+25+75+200+25+75
-    final static UnitType[] RESEARCH_QUEUE_HARD = {UnitType.Worker, UnitType.Ranger, UnitType.Mage, UnitType.Rocket,
-            UnitType.Ranger, UnitType.Mage, UnitType.Mage, UnitType.Rocket,
-            UnitType.Healer, UnitType.Healer, UnitType.Mage, UnitType.Knight,
-            UnitType.Knight};
-
-    public static void initializeGlobals()
-    {
-        // Connect to the manager, starting the game
-        gc = new GameController();
-
-        // Random number generator
-        random = new Random();
-
-        // Cardinal directions
-        directions = Direction.values();
-
-        // Unit types
-        unitTypes = UnitType.values();
-
-        // Get planets and initial map states
-        homePlanet = gc.planet();
-        homeMap = gc.startingMap(gc.planet());
-        if (homePlanet == Planet.Mars)
-        {
-            awayPlanet = Planet.Earth;
-            awayMap = gc.startingMap(Planet.Earth);
-        }
-        else
-        {
-            awayPlanet = Planet.Mars;
-            awayMap = gc.startingMap(Planet.Mars);
-        }
-
-        // Get team designations
-        ourTeam = gc.team();
-        if (ourTeam == Team.Blue)
-        {
-            theirTeam = Team.Red;
-        }
-        else
-        {
-            theirTeam = Team.Blue;
-        }
-
-        // Get map dimensions and calculate size
-        mapWidth = homeMap.getWidth();
-        mapHeight = homeMap.getHeight();
-        mapSize = mapHeight * mapHeight;
-
-        if (homePlanet == Planet.Earth)
-        {
-            // Get initial worker units
-            initialWorkers = homeMap.getInitial_units();
-
-            // Get initial karbonite locations
-            earthKarboniteLocations = new HashSet<MapLocation>();
-            for (int x = 0; x < mapWidth; x++)
-            {
-                for (int y = 0; y < mapHeight; y++)
-                {
-                    MapLocation tempMapLocation = new MapLocation(homePlanet, x, y);
-                    long karboniteAtTempMapLocation = homeMap.initialKarboniteAt(tempMapLocation);
-                    if (karboniteAtTempMapLocation > 0)
-                    {
-                        earthKarboniteLocations.add(tempMapLocation);
-                    }
-                }
-            }
-        }
-        else
-        {
-            earthKarboniteLocations = null;
-        }
-    }
-
-    public static boolean moveUnitInDirection(Unit unit, Direction candidateDirection)
+    public static void moveUnitInDirection(Unit unit, Direction candidateDirection)
     {
         int directionIndex = candidateDirection.swigValue();
-        boolean didUnitMove = false;
         if (gc.isMoveReady(unit.id()))
         {
             int delta = 1;
@@ -126,94 +44,70 @@ public class Player
             if (gc.canMove(unit.id(), candidateDirection))
             {
                 gc.moveRobot(unit.id(), candidateDirection);
-                return true;
             }
         }
-        return false;
     }
 
-    public static boolean moveUnitTowards(Unit unit, Location targetLocation)
+    public static void moveUnitTowards(Unit unit, Location targetLocation)
     {
         Direction targetDirection = unit.location().mapLocation().directionTo(targetLocation.mapLocation());
-        return moveUnitInDirection(unit, targetDirection);
+        moveUnitInDirection(unit, targetDirection);
     }
 
-    public static boolean moveUnitAwayFrom(Unit unit, MapLocation targetLocation)
+    public static void moveUnitAwayFrom(Unit unit, MapLocation targetLocation)
     {
         Direction targetDirection = unit.location().mapLocation().directionTo(targetLocation);
         targetDirection = bc.bcDirectionOpposite(targetDirection);
-        return moveUnitInDirection(unit, targetDirection);
+        moveUnitInDirection(unit, targetDirection);
     }
 
-    public static boolean moveUnitAwayFrom(Unit unit, Location targetLocation)
+    public static void moveUnitAwayFrom(Unit unit, Location targetLocation)
     {
-        return moveUnitAwayFrom(unit, targetLocation.mapLocation());
+        moveUnitAwayFrom(unit, targetLocation.mapLocation());
     }
 
-    public static boolean moveUnitInRandomDirection(Unit unit)
+    // Move Unit In Random Direction
+    public static void moveUnitInRandomDirection(Unit unit)
     {
         Random random = new Random();
-        return moveUnitInDirection(unit, directions[random.nextInt(8)]);
-    }
-
-    // Best Function Ever!
-    // Resolve Center Direction at some later day
-    public static void moveUnitAwayFromMultipleUnits(VecUnit nearbyUnits, Unit unit)
-    {
-        long[] directionArray = {1,1,1,1,1,1,1,1,1};
-        long numberOfNearbyUnits = nearbyUnits.size();
-        long count = 8;
-        MapLocation unitLocation = unit.location().mapLocation();
-        for(int i = 0; i< numberOfNearbyUnits; i++)
-        {
-            // Gives Direction Between Units
-            Direction directionToOtherUnit = unitLocation.directionTo(nearbyUnits.get(i).location().mapLocation());
-            directionArray[directionToOtherUnit.ordinal()] = 0;
-        }
-        for(int j = 0; j < 8; j++)
-        {
-            if(directionArray[j] != 0)
-            {
-                if(moveUnitInDirection(unit, Direction.values()[j]))
-                {
-                    break;
-                }
-            }
-            else
-            {
-                count--;
-            }
-        }
-        if(count == 0)
-        {
-            moveUnitInRandomDirection(unit);
-        }
-    }
-
-    // Unloads a robot, if possible
-    public static boolean unloadRobot(Unit factory)
-    {
-        for (int i = 0; i < directions.length - 1; i++)
-        {
-            Direction unloadDirection = directions[i];
-            if (gc.canUnload(factory.id(), unloadDirection))
-            {
-                gc.unload(factory.id(), unloadDirection);
-                return true;
-            }
-        }
-        return false;
+        moveUnitInDirection(unit, Direction.values()[1 + random.nextInt(8)]);
     }
 
     // Both Movement and Attack on Cooldown
-    // TODO - Add Ability Cooldown Later
-    public static boolean unitFrozenByHeat(Unit unit)
+    // ++++ TODO - Add Ability Cooldown Later
+    public static boolean unitFrozenByHeat(GameController gc, Unit unit)
     {
         return !gc.isAttackReady(unit.id()) && unit.movementCooldown() > 9;
     }
 
+    /**
+     * Produces a robot and updates unit lists. CHECK BEFORE CALL
+     *
+     * @param factory             where the robot should be spawned
+     * @param type                of the robot to be spawned
+     * @param typeSortedUnitLists HashMap where the spawned robot will be added to keep track
+     */
+    public static void produceAndAddRobot(Unit factory, UnitType type, HashMap<UnitType, LinkedList<Unit>> typeSortedUnitLists)
+    {
+        gc.produceRobot(factory.id(), type);
+        Direction unloadDirection = directions[0];
+        int j = 1;
+        while (j < directions.length - 1 &&
+                !gc.canUnload(factory.id(), unloadDirection))
+        {
+            unloadDirection = directions[j++];
+        }
+        if (gc.canUnload(factory.id(), unloadDirection))
+        {
+            gc.unload(factory.id(), unloadDirection);
+            MapLocation unloadLocation = factory.location().mapLocation().add(unloadDirection);
+            Unit newUnit = gc.senseUnitAtLocation(unloadLocation);
+            typeSortedUnitLists.get(type).add(newUnit);
+        }
+    }
+
     // Decides the incentive to attack an unit by Rangers
-    // TODO - Make it live rather fixed static values, if computation allows
+    // **** TODO - Make it live rather fixed static values, if computation allows
     public static long setBountyScore(Unit unit, Unit enemyUnit)
     {
         UnitType unitType = unit.unitType();
@@ -242,7 +136,7 @@ public class Player
         {
             if (enemyUnitType == UnitType.Knight)
             {
-                // TODO - Add run away instructions later
+                // **** TODO - Add run away instructions later
                 //(6 * 4 * 40 / 2)
                 incentiveToHunt += 6 * (distanceBetweenUnitsSquared - 3) * 20;
             }
@@ -288,8 +182,9 @@ public class Player
                 incentiveToHunt = 10 - distanceBetweenUnitsSquared;
             }
         }
-        else if (unitType == UnitType.Healer)
+        else
         {
+            // Unrequired else case
             return 0;
         }
         return incentiveToHunt;
@@ -297,57 +192,83 @@ public class Player
 
     public static void main(String[] args)
     {
-        initializeGlobals();
+        // Connect to the manager, starting the game
+        gc = new GameController();
 
-        gc.queueResearch(UnitType.Rocket);
+        // Random number generator
+        Random random = new Random();
 
-        // Set of unfinished blueprints
-        Set<Unit> unfinishedBlueprints = new HashSet<Unit>();
+        // Cardinal directions
+        directions = Direction.values();
 
-        // Hash map of units
-        HashMap<UnitType, ArrayList<Unit>> typeSortedUnitLists = new HashMap<UnitType, ArrayList<Unit>>();
-        // Initialize with empty lists
-        for (int i = 0; i < unitTypes.length; i++)
-        {
-            typeSortedUnitLists.put(unitTypes[i], new ArrayList<Unit>());
-        }
+        // Unit types
+        UnitType[] unitTypes = UnitType.values();
 
-        // Queue researches
+        // Research Info
+        ResearchInfo researchInfo = new ResearchInfo();
+
+        // Get initial map states
+        homeMap = gc.startingMap(gc.planet());
         if (gc.planet() == Planet.Mars)
         {
-            for(int i = 0; i<10; i++)
-            {
-                gc.queueResearch(RESEARCH_QUEUE_HARD[i]);
-            }
+            awayMap = gc.startingMap(Planet.Earth);
+        }
+        else
+        {
+            awayMap = gc.startingMap(Planet.Mars);
         }
 
-        // Find potential landing spots and store in a priority queue
-        // (Add priority logic later using Pair class and comparators)
-        // potentialLandingSites = new PriorityQueue<MapLocation>();
-        potentialLandingSites = new LinkedList<MapLocation>();
-        if (gc.planet() == Planet.Earth)
+        Team ourTeam = gc.team();
+        Team enemyTeam;
+        if (ourTeam == Team.Blue)
         {
-            MapLocation temp;
-            for (int i = 0; i < mapWidth; i++)
+            enemyTeam = Team.Red;
+        }
+        else
+        {
+            enemyTeam = Team.Blue;
+        }
+
+        initialWorkers = homeMap.getInitial_units().size();
+        mapWidth = homeMap.getWidth();
+        mapHeight = homeMap.getHeight();
+
+        // Initial karbonite locations
+        HashMap<MapLocation, Long> earthKarboniteLocations = new HashMap<MapLocation, Long>();
+
+        for (int x = 0; x < mapWidth; x++)
+        {
+            for (int y = 0; y < mapHeight; y++)
             {
-                for (int j = 0; j < mapHeight; j++)
+                MapLocation tempMapLocation = new MapLocation(gc.planet(), x, y);
+                long karboniteAtTempMapLocation = homeMap.initialKarboniteAt(tempMapLocation);
+                if (karboniteAtTempMapLocation > 0)
                 {
-                    temp = new MapLocation(Planet.Mars, i, j);
-                    if (awayMap.isPassableTerrainAt(temp) != 0)
-                    {
-                        potentialLandingSites.add(temp);
-                    }
+                    earthKarboniteLocations.put(tempMapLocation, karboniteAtTempMapLocation);
                 }
             }
         }
 
+        // List of blueprints
+        LinkedList<Unit> unfinishedBlueprints = new LinkedList<Unit>();
+
+        // Hashmap of units
+        HashMap<UnitType, LinkedList<Unit>> typeSortedUnitLists = new HashMap<UnitType, LinkedList<Unit>>();
+
+        for (int i = 0; i < unitTypes.length; i++)
+        {
+            typeSortedUnitLists.put(unitTypes[i], new LinkedList<Unit>());
+        }
+
         while (true)
         {
-            long currentRound = gc.round();
-            if(currentRound % 50 == 1)
+            if(gc.round() % 50 == 1)
             {
-                System.out.println("Time left at start of round " + currentRound + " : " + gc.getTimeLeftMs());
+                System.out.println("Time left at start of round " + gc.round() + " : " + gc.getTimeLeftMs());
             }
+
+            // System.out.println("Current round: " + gc.round());
+            // System.out.println("Karbonite: " + gc.karbonite());
 
             // Clear unit lists
             for (int i = 0; i < unitTypes.length; i++)
@@ -355,7 +276,7 @@ public class Player
                 typeSortedUnitLists.get(unitTypes[i]).clear();
             }
 
-            // Fetch current units and sort by type
+            // Fetch current units
             VecUnit units = gc.myUnits();
             for (int i = 0; i < units.size(); i++)
             {
@@ -363,95 +284,91 @@ public class Player
                 typeSortedUnitLists.get(unit.unitType()).add(unit);
             }
 
-            // Maintain a list of number of current units by type
-            int[] unitsOfType = new int[typeSortedUnitLists.size()];
-            for (int i = 0; i < unitsOfType.length; i++)
+            // Research code
+            if (gc.planet() == Planet.Mars)
             {
-                unitsOfType[i] = typeSortedUnitLists.get(unitTypes[i]).size();
+                //First research should be workers
+                if (researchInfo.getLevel(UnitType.Worker) < 2)
+                {
+                    gc.queueResearch(UnitType.Worker);
+                }
+                else if (researchInfo.getLevel(UnitType.Rocket) < 1)
+                {
+                    gc.queueResearch(UnitType.Rocket);
+                }
+                // Removed else, replace with decision based research tree
+                // Update researchInfo to new state
+                researchInfo = gc.researchInfo();
+                if (researchInfo.hasNextInQueue())
+                {
+                    UnitType currentResearchType = researchInfo.nextInQueue();
+                    long currentResearchLevel = researchInfo.getLevel(currentResearchType) + 1;
+//                    System.out.println(">> Researching " + currentResearchType + " Level " + currentResearchLevel);
+//                    System.out.println("Research left " + researchInfo.roundsLeft());
+                }
             }
 
-            if (homePlanet == Planet.Earth)
+            // Remove obsolete karboniteMapLocations
+            Set<MapLocation> karboniteMapLocationSet = earthKarboniteLocations.keySet();
+            LinkedList<MapLocation> removalList = new LinkedList<MapLocation>();
+            for (MapLocation karboniteMapLocation : karboniteMapLocationSet)
             {
-                // Remove obsolete mine locations
-                LinkedList<MapLocation> obsoleteMines = new LinkedList<MapLocation>();
-                for (MapLocation karboniteMapLocation : earthKarboniteLocations)
+                if (gc.canSenseLocation(karboniteMapLocation) &&
+                        gc.karboniteAt(karboniteMapLocation) == 0)
                 {
-                    if (gc.canSenseLocation(karboniteMapLocation) &&
-                            gc.karboniteAt(karboniteMapLocation) == 0)
-                    {
-                        obsoleteMines.add(karboniteMapLocation);
-                    }
+                    removalList.add(karboniteMapLocation);
                 }
-                for (MapLocation obsoleteMine : obsoleteMines)
-                {
-                    earthKarboniteLocations.remove(obsoleteMine);
-                }
+            }
+            for (MapLocation obsolete : removalList)
+            {
+                earthKarboniteLocations.remove(obsolete);
+            }
 
-                // Process unit
-                for (int i = 0; i < unitTypes.length; i++)
+            // Unit processing
+            for (int i = 0; i < unitTypes.length; i++)
+            {
+                LinkedList<Unit> unitList = typeSortedUnitLists.get(unitTypes[i]);
+                for (int u = 0; u < unitList.size(); u++)
                 {
-                    ArrayList<Unit> unitList = typeSortedUnitLists.get(unitTypes[i]);
-                    for (int u = 0; u < unitList.size(); u++)
+                    Unit unit = unitList.get(u);
+                    if (gc.planet() == Planet.Earth)
                     {
-                        Unit unit = unitList.get(u);
-                        Location unitLocation = unit.location();
-                        // Process active unit only
-                        if (!unitLocation.isInGarrison() && !unitLocation.isInSpace())
+                        if (!unit.location().isInGarrison() && !unit.location().isInSpace())
                         {
-                            VecUnit adjacentUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 2, ourTeam);
-                            MapLocation unitMapLocation = unitLocation.mapLocation();
                             if (unitTypes[i] == UnitType.Worker)
                             {
-                                boolean workerBuiltThisTurn = false;
-                                boolean workedMinedThisTurn = false;
-                                boolean workedReplicatedThisTurn = false;
                                 // Build a structure if adjacent to one
-                                for (int j = 0; j < adjacentUnits.size(); j++)
+                                VecUnit nearbyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 2, gc.team());
+                                for (int j = 0; j < nearbyUnits.size(); j++)
                                 {
-                                    Unit adjacentUnit = adjacentUnits.get(j);
-                                    if (adjacentUnit.unitType() == UnitType.Factory || adjacentUnit.unitType() == UnitType.Rocket)
+                                    Unit nearbyUnit = nearbyUnits.get(j);
+                                    if (nearbyUnit.unitType() == UnitType.Factory || nearbyUnit.unitType() == UnitType.Rocket)
                                     {
-                                        if (gc.canBuild(unit.id(), adjacentUnit.id()))
+                                        if (gc.canBuild(unit.id(), nearbyUnit.id()))
                                         {
-                                            gc.build(unit.id(), adjacentUnit.id());
-                                            workerBuiltThisTurn = true;
+                                            gc.build(unit.id(), nearbyUnit.id());
                                         }
                                     }
                                 }
 
-                                // Mine karbonite if adjacent to or standing on a mine
+                                // Karbonite mining
                                 for (int j = 0; j < directions.length; j++)
                                 {
                                     if (gc.canHarvest(unit.id(), directions[j]))
                                     {
                                         gc.harvest(unit.id(), directions[j]);
-                                        workedMinedThisTurn = true;
+                                        MapLocation minedMapLocation = unit.location().mapLocation().add(directions[j]);
+                                        // remove from initial locations if depleted
+                                        if (gc.karboniteAt(minedMapLocation) == 0)
+                                        {
+                                            earthKarboniteLocations.remove(minedMapLocation);
+                                        }
                                         break;
                                     }
                                 }
 
-                                // Make space for other units
-                                // (Kushal's suggestion : make this the last movement priority,
-                                //  moving to building and mining targets is more important)
-                                if(!workedMinedThisTurn && !workerBuiltThisTurn)
-                                {
-                                    moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
-                                }
-
-
-                                // Make space for other units
-                                // (Kushal's suggestion : make this the last movement priority,
-                                //  moving to building and mining targets is more important)
-                                if (!workedMinedThisTurn && !workerBuiltThisTurn)
-                                {
-                                    moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
-                                }
-
-                                // Replicate worker
-                                if (unitsOfType[UnitType.Worker.swigValue()] < 20 && currentRound < 650 ||
-                                        ((currentRound > 130 && currentRound < 400) &&
-                                                (unitsOfType[UnitType.Worker.swigValue()] < mapSize * 2 / (mapHeight + mapWidth) - 10) ||
-                                                unitsOfType[UnitType.Worker.swigValue()] < 10))
+                                // Worker replication
+                                if (unitList.size() < 30)
                                 {
                                     for (int j = 0; j < directions.length - 1; j++)
                                     {
@@ -459,14 +376,13 @@ public class Player
                                         if (gc.canReplicate(unit.id(), replicateDirection))
                                         {
                                             gc.replicate(unit.id(), replicateDirection);
-                                            unitsOfType[UnitType.Worker.swigValue()]++;
-                                            workedReplicatedThisTurn = true;
+                                            unitList.add(gc.senseUnitAtLocation(unit.location().mapLocation().add(replicateDirection)));
                                             break;
                                         }
                                     }
                                 }
 
-                                // Remove obsolete blueprints
+                                // Structure building
                                 LinkedList<Unit> obsoleteBlueprints = new LinkedList<Unit>();
                                 for (Unit blueprint : unfinishedBlueprints)
                                 {
@@ -477,15 +393,9 @@ public class Player
                                         {
                                             obsoleteBlueprints.add(blueprint);
                                         }
-                                        else
+                                        else if (gc.senseUnitAtLocation(blueprintMapLocation).structureIsBuilt() == 1)
                                         {
-                                            Unit unitAtLocation = gc.senseUnitAtLocation(blueprintMapLocation);
-                                            if ((unitAtLocation.unitType() == UnitType.Factory ||
-                                                    unitAtLocation.unitType() == UnitType.Rocket) &&
-                                                    unitAtLocation.structureIsBuilt() == 1)
-                                            {
-                                                obsoleteBlueprints.add(blueprint);
-                                            }
+                                            obsoleteBlueprints.add(blueprint);
                                         }
                                     }
                                 }
@@ -493,55 +403,92 @@ public class Player
                                 {
                                     unfinishedBlueprints.remove(obsoleteBlueprint);
                                 }
-                                // Blueprint factories (change if condition)
-                                if (unitsOfType[UnitType.Factory.swigValue()] < 8)
+                                if (typeSortedUnitLists.get(UnitType.Factory).size() < Math.sqrt(gc.round()))
                                 {
-                                    for (int j = 0; j < directions.length - 1; j++)
+                                    Direction blueprintDirection = directions[0];
+                                    int j = 1;
+                                    //grouping of  ANDs and ORs
+                                    while (j < directions.length - 1 &&
+                                            (!gc.canBlueprint(unit.id(), UnitType.Factory, blueprintDirection) ||
+                                                    gc.canSenseLocation(unit.location().mapLocation().add(blueprintDirection)) &&
+                                                            gc.karboniteAt(unit.location().mapLocation().add(blueprintDirection)) != 0))
                                     {
-                                        Direction blueprintDirection = directions[j];
-                                        if (gc.canBlueprint(unit.id(), UnitType.Factory, blueprintDirection))
-                                        {
-                                            gc.blueprint(unit.id(), UnitType.Factory, blueprintDirection);
-                                            unitsOfType[UnitType.Factory.swigValue()]++;
-                                        }
+                                        blueprintDirection = directions[j++];
                                     }
-                                }
 
-                                // Blueprint rockets (change if condition)
-                                if (unitsOfType[UnitType.Rocket.swigValue()] < 5)
-                                {
-                                    for (int j = 0; j < directions.length - 1; j++)
+                                    // Copying Factory Code, needs a decision tree
+                                    if (gc.canBlueprint(unit.id(), UnitType.Rocket, blueprintDirection))
                                     {
-                                        Direction blueprintDirection = directions[j];
+                                        gc.blueprint(unit.id(), UnitType.Rocket, blueprintDirection);
+                                        MapLocation blueprintLocation = unit.location().mapLocation().add(blueprintDirection);
+                                        unfinishedBlueprints.add(gc.senseUnitAtLocation(blueprintLocation));
+                                    }
+                                    else
+                                    {
+                                        blueprintDirection = directions[0];
+                                        j = 1;
+                                        while (j < directions.length - 1 &&
+                                                !gc.canBlueprint(unit.id(), UnitType.Rocket, blueprintDirection))
+                                        {
+                                            blueprintDirection = directions[j++];
+                                        }
                                         if (gc.canBlueprint(unit.id(), UnitType.Rocket, blueprintDirection))
                                         {
                                             gc.blueprint(unit.id(), UnitType.Rocket, blueprintDirection);
-                                            unitsOfType[UnitType.Rocket.swigValue()]++;
+                                            MapLocation blueprintLocation = unit.location().mapLocation().add(blueprintDirection);
+                                            Unit newFactory = gc.senseUnitAtLocation(blueprintLocation);
+                                            unfinishedBlueprints.add(newFactory);
+                                            typeSortedUnitLists.get(UnitType.Rocket).add(newFactory);
+                                        }
+                                    }
+
+                                    if (gc.canBlueprint(unit.id(), UnitType.Factory, blueprintDirection))
+                                    {
+                                        gc.blueprint(unit.id(), UnitType.Factory, blueprintDirection);
+                                        MapLocation blueprintLocation = unit.location().mapLocation().add(blueprintDirection);
+                                        unfinishedBlueprints.add(gc.senseUnitAtLocation(blueprintLocation));
+                                    }
+                                    else
+                                    {
+                                        blueprintDirection = directions[0];
+                                        j = 1;
+                                        while (j < directions.length - 1 &&
+                                                !gc.canBlueprint(unit.id(), UnitType.Factory, blueprintDirection))
+                                        {
+                                            blueprintDirection = directions[j++];
+                                        }
+                                        if (gc.canBlueprint(unit.id(), UnitType.Factory, blueprintDirection))
+                                        {
+                                            gc.blueprint(unit.id(), UnitType.Factory, blueprintDirection);
+                                            MapLocation blueprintLocation = unit.location().mapLocation().add(blueprintDirection);
+                                            Unit newFactory = gc.senseUnitAtLocation(blueprintLocation);
+                                            unfinishedBlueprints.add(newFactory);
+                                            typeSortedUnitLists.get(UnitType.Factory).add(newFactory);
                                         }
                                     }
                                 }
-
-                                // Move towards nearest structure
-                                Unit nearestStructure = null;
-                                long minDistanceSquared = (long) 1e5;
-                                for (Unit structure : unfinishedBlueprints)
+                                if (!unfinishedBlueprints.isEmpty())
                                 {
-                                    long distanceSquaredToStructure = structure.location().mapLocation().distanceSquaredTo(unitMapLocation);
-                                    if (distanceSquaredToStructure < minDistanceSquared)
+                                    Unit blueprint = unfinishedBlueprints.getFirst();
+                                    Unit structure = gc.senseUnitAtLocation(blueprint.location().mapLocation());
+                                    if (unit.location().isAdjacentTo(structure.location()))
                                     {
-                                        nearestStructure = structure;
-                                        minDistanceSquared = distanceSquaredToStructure;
+                                        if (gc.canBuild(unit.id(), structure.id()))
+                                        {
+                                            gc.build(unit.id(), structure.id());
+                                        }
                                     }
-                                }
-                                if (nearestStructure != null)
-                                {
-                                    moveUnitTowards(unit, nearestStructure.location());
+                                    else
+                                    {
+                                        moveUnitTowards(unit, structure.location());
+                                    }
                                 }
 
                                 // Move toward mines
+                                karboniteMapLocationSet = earthKarboniteLocations.keySet();
                                 MapLocation closestMineMapLocation = null;
                                 MapLocation unitLoc = unit.location().mapLocation();
-                                for (MapLocation karboniteMapLocation : earthKarboniteLocations)
+                                for (MapLocation karboniteMapLocation : karboniteMapLocationSet)
                                 {
                                     if (closestMineMapLocation == null)
                                     {
@@ -559,22 +506,20 @@ public class Player
                             }
                             if (unit.unitType() == UnitType.Factory)
                             {
-                                unloadRobot(unit);
                                 if (unit.isFactoryProducing() == 0)
                                 {
-                                    int workerCount = unitsOfType[UnitType.Worker.swigValue()]; // rarely produced
-                                    int knightCount = unitsOfType[UnitType.Knight.swigValue()]; // not being produced
-                                    int rangerCount = unitsOfType[UnitType.Ranger.swigValue()];
-                                    int mageCount = unitsOfType[UnitType.Mage.swigValue()];
-                                    int healerCount = unitsOfType[UnitType.Healer.swigValue()];
+                                    int workerCount = typeSortedUnitLists.get(UnitType.Worker).size(); // rarely produced
+                                    int knightCount = typeSortedUnitLists.get(UnitType.Knight).size(); // not being produced
+                                    int rangerCount = typeSortedUnitLists.get(UnitType.Ranger).size();
+                                    int mageCount = typeSortedUnitLists.get(UnitType.Mage).size();
+                                    int healerCount = typeSortedUnitLists.get(UnitType.Healer).size();
 
-                                    // Think of better condition later; produce workers if existing ones are being massacred
+                                    // think of better condition later; produce workers if existing ones are being massacred
                                     if (workerCount == 0)
                                     {
                                         if (gc.canProduceRobot(unit.id(), UnitType.Worker))
                                         {
-                                            gc.produceRobot(unit.id(), UnitType.Worker);
-                                            unitsOfType[UnitType.Worker.swigValue()]++;
+                                            produceAndAddRobot(unit, UnitType.Worker, typeSortedUnitLists);
                                         }
                                     }
 
@@ -583,16 +528,14 @@ public class Player
                                         UnitType typeToBeProduced = (mageCount > healerCount) ? (UnitType.Healer) : (UnitType.Mage);
                                         if (gc.canProduceRobot(unit.id(), typeToBeProduced))
                                         {
-                                            gc.produceRobot(unit.id(), typeToBeProduced);
-                                            unitsOfType[typeToBeProduced.swigValue()]++;
+                                            produceAndAddRobot(unit, typeToBeProduced, typeSortedUnitLists);
                                         }
                                     }
                                     else
                                     {
                                         if (gc.canProduceRobot(unit.id(), UnitType.Ranger))
                                         {
-                                            gc.produceRobot(unit.id(), UnitType.Ranger);
-                                            unitsOfType[UnitType.Ranger.swigValue()]++;
+                                            produceAndAddRobot(unit, UnitType.Ranger, typeSortedUnitLists);
                                         }
                                     }
                                 }
@@ -602,10 +545,10 @@ public class Player
                                 if (!unit.location().isInGarrison())
                                 {
                                     VecUnit nearbyEnemyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
-                                            70, theirTeam);
+                                            70, enemyTeam);
 
                                     // Must be refined later with movement code above this
-                                    if (unitFrozenByHeat(unit))
+                                    if (unitFrozenByHeat(gc, unit))
                                     {
                                         continue;
                                     }
@@ -646,11 +589,12 @@ public class Player
                             {
                                 if (!unit.location().isInGarrison())
                                 {
-                                    VecUnit nearbyEnemyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 30, theirTeam);
+                                    VecUnit nearbyEnemyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
+                                            30, enemyTeam);
 
                                     long desireToKill = -500;
                                     long rememberUnit = -1;
-                                    if (unitFrozenByHeat(unit))
+                                    if (unitFrozenByHeat(gc, unit))
                                     {
                                         continue;
                                     }
@@ -685,17 +629,17 @@ public class Player
                             {
                                 if (!unit.location().isInGarrison())
                                 {
-                                    VecUnit nearbyFriendlyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
+                                    VecUnit nearbyFriendyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
                                             50, ourTeam);
 
-                                    if (unitFrozenByHeat(unit))
+                                    if (unitFrozenByHeat(gc, unit))
                                     {
                                         continue;
                                     }
 
-                                    for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
+                                    for (int j = 0; j < nearbyFriendyUnits.size(); j++)
                                     {
-                                        Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
+                                        Unit nearbyFriendlyUnit = nearbyFriendyUnits.get(j);
                                         {
                                             if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()))
                                             {
@@ -712,11 +656,11 @@ public class Player
                                 if (!unit.location().isInGarrison())
                                 {
                                     VecUnit nearbyEnemyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
-                                            50, theirTeam);
+                                            50, enemyTeam);
 
                                     long desireToKill = -500;
                                     long rememberUnit = -1;
-                                    if (unitFrozenByHeat(unit))
+                                    if (unitFrozenByHeat(gc, unit))
                                     {
                                         continue;
                                     }
@@ -751,7 +695,7 @@ public class Player
                                 if (unit.structureIsBuilt() == 1)
                                 {
                                     // Check all adjacent squares
-                                    VecUnit nearbyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 2, ourTeam);
+                                    VecUnit nearbyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 2, gc.team());
                                     for (int j = 0; j < nearbyUnits.size(); j++)
                                     {
                                         Unit nearbyUnit = nearbyUnits.get(j);
@@ -762,51 +706,45 @@ public class Player
                                     }
                                     if (unit.structureGarrison().size() >= unit.structureMaxCapacity() / 2)
                                     {
-                                        MapLocation dest = potentialLandingSites.remove();
-                                        // potentialLandingSites is supposed to have only those spots
-                                        // that are passable, and not already used as a destination.
-                                        // Hence, this check should always pass.
-                                        if (gc.canLaunchRocket(unit.id(), dest))
+                                        int x = random.nextInt((int) mapWidth);
+                                        int y = random.nextInt((int) mapHeight);
+                                        MapLocation randomLocationOnMars = new MapLocation(Planet.Mars, x, y);
+                                        if (gc.canLaunchRocket(unit.id(), randomLocationOnMars))
                                         {
-                                            gc.launchRocket(unit.id(), dest);
+                                            gc.launchRocket(unit.id(), new MapLocation(Planet.Mars, x, y));
                                         }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if (homePlanet == Planet.Mars)
-            {
-                // Process unit
-                for (int i = 0; i < unitTypes.length; i++)
-                {
-                    ArrayList<Unit> unitList = typeSortedUnitLists.get(unitTypes[i]);
-                    for (int u = 0; u < unitList.size(); u++)
-                    {
-                        Unit unit = unitList.get(u);
-                        Location unitLocation = unit.location();
-                        // Process active unit only
-                        if (!unitLocation.isInGarrison() && !unitLocation.isInSpace())
-                        {
-                            VecUnit adjacentUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 2, ourTeam);
-                            MapLocation unitMapLocation = unitLocation.mapLocation();
-                            if (unit.unitType() == UnitType.Rocket)
-                            {
-                                for (Direction direction : directions)
-                                {
-                                    if (gc.canUnload(unit.id(), direction))
-                                    {
-                                        gc.unload(unit.id(), direction);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+                                        /*
+                                        MapLocation mapLocation;
+                                        for(int x = 0; x < mapWidth; x++)
+                                        {
+                                            for(int y = 0; x < mapHeight; y++)
+                                            {
 
+                                            }
+                                        }
+                                        */
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Mars code here
+                        if (unit.unitType() == UnitType.Rocket)
+                        {
+                            for (Direction direction : Direction.values())
+                            {
+                                if (gc.canUnload(unit.id(), direction))
+                                {
+                                    gc.unload(unit.id(), direction);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             // Submit the actions we've done, and wait for our next turn.
             gc.nextTurn();
         }
