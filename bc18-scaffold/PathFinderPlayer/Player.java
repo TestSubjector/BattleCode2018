@@ -133,7 +133,8 @@ public class Player
                 }
             }
         }
-        System.out.println(edges);
+        System.out.println("Waypoints: " + waypoints.size());
+        System.out.println("Edges: " + edges);
 
         // List of blueprints
         LinkedList<Unit> unfinishedBlueprints = new LinkedList<Unit>();
@@ -148,6 +149,7 @@ public class Player
 
         while (true)
         {
+            System.out.println("Time left at start of round " + gc.round() + " : " + gc.getTimeLeftMs());
             // Clear unit lists
             for (int i = 0; i < unitTypes.length; i++)
             {
