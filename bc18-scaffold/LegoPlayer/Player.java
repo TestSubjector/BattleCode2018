@@ -111,6 +111,8 @@ public class Player
         {
             earthKarboniteLocations = null;
         }
+        potentialLandingSites = new PriorityQueue<QueuePair<Long, MapLocation>>();
+        updatedAppealSites = new ArrayList<QueuePair<Long, MapLocation>>();
     }
 
     public static boolean moveUnitInDirection(Unit unit, Direction candidateDirection)
@@ -329,7 +331,8 @@ public class Player
                     tempLoc = new MapLocation(Planet.Mars, temp_x + x, temp_y + y);
                     if (awayMap.isPassableTerrainAt(tempLoc) != 0)
                     {
-                        updatedAppealSites.add(0, new QueuePair<>(destPair.getFirst() - WEIGHT_ROCKET, destPair.getSecond())); // newer updates come earlier, can break once encountered.
+                        updatedAppealSites.add(0, new QueuePair<>(destPair.getFirst() - WEIGHT_ROCKET, destPair.getSecond()));
+                        // newer updates come earlier, can break once encountered.
                     }
                 }
             }
@@ -365,32 +368,28 @@ public class Player
          potentialLandingSites = new PriorityQueue<>();
         if (gc.planet() == Planet.Earth)
         {
-            MapLocation tempLoc;
-            int temp_x, temp_y;
             for (int i = 0; i < awayMap.getWidth(); i++)
             {
                 for (int j = 0; j < awayMap.getHeight(); j++)
                 {
-                    tempLoc = new MapLocation(Planet.Mars, i, j);
-                    temp_x = tempLoc.getX();
-                    temp_y = tempLoc.getY();
+                    MapLocation tempLoc = new MapLocation(Planet.Mars, i, j);
                     if (awayMap.isPassableTerrainAt(tempLoc) != 0)
                     {
                         long appeal = WEIGHT_NONE;
 
                         // top row
-                        appeal += getLocationAppeal(temp_x - 1,temp_y + 1);
-                        appeal += getLocationAppeal(temp_x,temp_y + 1);
-                        appeal += getLocationAppeal(temp_x + 1,temp_y + 1);
+                        appeal += getLocationAppeal(i - 1,j + 1);
+                        appeal += getLocationAppeal(i,j + 1);
+                        appeal += getLocationAppeal(i + 1,j + 1);
 
                         // middle row
-                        appeal += getLocationAppeal(temp_x - 1,temp_y);
-                        appeal += getLocationAppeal(temp_x + 1,temp_y);
+                        appeal += getLocationAppeal(i - 1,j);
+                        appeal += getLocationAppeal(i + 1,j);
 
                         // bottom row
-                        appeal += getLocationAppeal(temp_x - 1,temp_y - 1);
-                        appeal += getLocationAppeal(temp_x,temp_y - 1);
-                        appeal += getLocationAppeal(temp_x + 1,temp_y - 1);
+                        appeal += getLocationAppeal(i - 1,j - 1);
+                        appeal += getLocationAppeal(i,j - 1);
+                        appeal += getLocationAppeal(i + 1,j - 1);
 
                         potentialLandingSites.add(new QueuePair<>(appeal, tempLoc));
                     }
