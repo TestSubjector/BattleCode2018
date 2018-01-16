@@ -38,6 +38,6 @@ public class QueuePair<A extends Comparable<A>, B> implements Comparable<QueuePa
     @Override
     public int compareTo(QueuePair<A, B> o)
     {
-        return this.first.compareTo(o.first);
+        return o.first.compareTo(this.first);
     }
 }
