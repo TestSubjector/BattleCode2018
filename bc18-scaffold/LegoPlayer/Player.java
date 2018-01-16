@@ -1,7 +1,6 @@
 // import the API.
 
 import bc.*;
-
 import java.util.*;
 
 public class Player
@@ -12,6 +11,7 @@ public class Player
     static long initialWorkers;
     static long mapWidth;
     static long mapHeight;
+    static long mapSize;
     static Direction[] directions;
     static HashMap<Integer, Integer> timesMovementFailed;
 
@@ -24,6 +24,12 @@ public class Player
     static final int initialKnightAttackDistance = 1;
     static final int initialKnightMovementCooldown = 15;
     static final int initialKnightAttackCooldown = 20;
+
+    //25+25+25+100+100+75+100+100+25+75+200+25+75
+    static final UnitType[] RESEARCH_QUEUE_HARD = {UnitType.Worker, UnitType.Ranger, UnitType.Mage, UnitType.Rocket,
+                                                    UnitType.Ranger, UnitType.Mage, UnitType.Mage, UnitType.Rocket,
+                                                    UnitType.Healer, UnitType.Healer, UnitType.Mage, UnitType.Knight,
+                                                    UnitType.Knight};
 
     public static void moveUnitInDirection(Unit unit, Direction candidateDirection)
     {
@@ -231,6 +237,7 @@ public class Player
         initialWorkers = homeMap.getInitial_units().size();
         mapWidth = homeMap.getWidth();
         mapHeight = homeMap.getHeight();
+        mapSize = mapHeight * mapHeight;
 
         // Initial karbonite locations
         HashMap<MapLocation, Long> earthKarboniteLocations = new HashMap<MapLocation, Long>();
@@ -253,6 +260,15 @@ public class Player
 
         // Hashmap of units
         HashMap<UnitType, LinkedList<Unit>> typeSortedUnitLists = new HashMap<UnitType, LinkedList<Unit>>();
+
+        // Research code
+        if (gc.planet() == Planet.Mars)
+        {
+            for(int i = 0; i<10; i++)
+            {
+                gc.queueResearch(RESEARCH_QUEUE_HARD[i]);
+            }
+        }
 
         for (int i = 0; i < unitTypes.length; i++)
         {
@@ -277,30 +293,6 @@ public class Player
             {
                 Unit unit = units.get(i);
                 typeSortedUnitLists.get(unit.unitType()).add(unit);
-            }
-
-            // Research code
-            if (gc.planet() == Planet.Mars)
-            {
-                //First research should be workers
-                if (researchInfo.getLevel(UnitType.Worker) < 2)
-                {
-                    gc.queueResearch(UnitType.Worker);
-                }
-                else if (researchInfo.getLevel(UnitType.Rocket) < 1)
-                {
-                    gc.queueResearch(UnitType.Rocket);
-                }
-                // Removed else, replace with decision based research tree
-                // Update researchInfo to new state
-                researchInfo = gc.researchInfo();
-                if (researchInfo.hasNextInQueue())
-                {
-                    UnitType currentResearchType = researchInfo.nextInQueue();
-                    long currentResearchLevel = researchInfo.getLevel(currentResearchType) + 1;
-//                    System.out.println(">> Researching " + currentResearchType + " Level " + currentResearchLevel);
-//                    System.out.println("Research left " + researchInfo.roundsLeft());
-                }
             }
 
             // Remove obsolete karboniteMapLocations
@@ -343,6 +335,10 @@ public class Player
                                         {
                                             gc.build(unit.id(), nearbyUnit.id());
                                         }
+                                        else
+                                        {
+                                            moveUnitAwayFrom(unit, nearbyUnit.location());
+                                        }
                                     }
                                 }
 
@@ -363,7 +359,8 @@ public class Player
                                 }
 
                                 // Worker replication
-                                if (unitList.size() < 30)
+                                //Requires Several If-Else Conditions
+                                if (unitList.size() < 20) //|| (gc.round() > 150 && unitList.size() < mapSize/20 - 10))
                                 {
                                     for (int j = 0; j < directions.length - 1; j++)
                                     {
@@ -388,9 +385,15 @@ public class Player
                                         {
                                             obsoleteBlueprints.add(blueprint);
                                         }
-                                        else if (gc.senseUnitAtLocation(blueprintMapLocation).structureIsBuilt() == 1)
+                                        else
                                         {
-                                            obsoleteBlueprints.add(blueprint);
+                                            Unit unitAtLocation = gc.senseUnitAtLocation(blueprintMapLocation);
+                                            if ((unitAtLocation.unitType() == UnitType.Factory ||
+                                                    unitAtLocation.unitType() == UnitType.Rocket) &&
+                                                    unitAtLocation.structureIsBuilt() == 1)
+                                            {
+                                                obsoleteBlueprints.add(blueprint);
+                                            }
                                         }
                                     }
                                 }
@@ -623,7 +626,7 @@ public class Player
                             {
                                 if (!unit.location().isInGarrison())
                                 {
-                                    VecUnit nearbyFriendyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
+                                    VecUnit nearbyFriendlyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
                                             50, ourTeam);
 
                                     if (unitFrozenByHeat(gc, unit))
@@ -631,9 +634,9 @@ public class Player
                                         continue;
                                     }
 
-                                    for (int j = 0; j < nearbyFriendyUnits.size(); j++)
+                                    for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
                                     {
-                                        Unit nearbyFriendlyUnit = nearbyFriendyUnits.get(j);
+                                        Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
                                         {
                                             if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()))
                                             {
