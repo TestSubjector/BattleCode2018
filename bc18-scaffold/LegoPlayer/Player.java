@@ -438,15 +438,6 @@ public class Player
                                     moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
                                 }
 
-
-                                // Make space for other units
-                                // (Kushal's suggestion : make this the last movement priority,
-                                //  moving to building and mining targets is more important)
-                                if (!workedMinedThisTurn && !workerBuiltThisTurn)
-                                {
-                                    moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
-                                }
-
                                 // Replicate worker
                                 if (unitsOfType[UnitType.Worker.swigValue()] < 20 && currentRound < 650 ||
                                         ((currentRound > 130 && currentRound < 400) &&
