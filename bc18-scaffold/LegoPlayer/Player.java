@@ -325,14 +325,13 @@ public class Player
         // (Add priority logic later using Pair class and comparators)
         // potentialLandingSites = new PriorityQueue<QueuePair<Long, MapLocation>>();
         potentialLandingSites = new LinkedList<MapLocation>();
-        if (gc.planet() == Planet.Earth)
+        if (homePlanet == Planet.Earth)
         {
-            MapLocation temp;
-            for (int i = 0; i < mapWidth; i++)
+            for (int i = 0; i < awayMap.getWidth(); i++)
             {
-                for (int j = 0; j < mapHeight; j++)
+                for (int j = 0; j < awayMap.getHeight(); j++)
                 {
-                    temp = new MapLocation(Planet.Mars, i, j);
+                    MapLocation temp = new MapLocation(awayPlanet, i, j);
                     if (awayMap.isPassableTerrainAt(temp) != 0)
                     {
                         potentialLandingSites.add(temp);
@@ -428,14 +427,6 @@ public class Player
                                         workedMinedThisTurn = true;
                                         break;
                                     }
-                                }
-
-                                // Make space for other units
-                                // (Kushal's suggestion : make this the last movement priority,
-                                //  moving to building and mining targets is more important)
-                                if(!workedMinedThisTurn && !workerBuiltThisTurn)
-                                {
-                                    moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
                                 }
 
                                 // Replicate worker
@@ -546,6 +537,13 @@ public class Player
                                 if (closestMineMapLocation != null)
                                 {
                                     moveUnitInDirection(unit, unitLoc.directionTo(closestMineMapLocation));
+                                }
+
+                                // Make space for other units
+                                // Moved this to end to check results
+                                if(!workedMinedThisTurn && !workerBuiltThisTurn)
+                                {
+                                    moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
                                 }
                             }
                             if (unit.unitType() == UnitType.Factory)
