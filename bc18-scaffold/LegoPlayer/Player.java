@@ -1,5 +1,7 @@
 // import the API.
+
 import java.util.*;
+
 import bc.*;
 
 public class Player
@@ -16,6 +18,7 @@ public class Player
     static Team theirTeam;
     static long mapWidth;
     static long mapHeight;
+    static long mapSize;
     static VecUnit initialWorkers;
     static Set<MapLocation> earthKarboniteLocations;
 
@@ -28,6 +31,12 @@ public class Player
     final static int INITIAL_KNIGHT_ATTACK_DISTANCE = 1;
     final static int INITIAL_KNIGHT_MOVEMENT_COOLDOWN = 15;
     final static int INITIAL_KNIGHT_ATTACK_COOLDOWN = 20;
+
+    //25+25+25+100+100+75+100+100+25+75+200+25+75
+    final static UnitType[] RESEARCH_QUEUE_HARD = {UnitType.Worker, UnitType.Ranger, UnitType.Mage, UnitType.Rocket,
+            UnitType.Ranger, UnitType.Mage, UnitType.Mage, UnitType.Rocket,
+            UnitType.Healer, UnitType.Healer, UnitType.Mage, UnitType.Knight,
+            UnitType.Knight};
 
     public static void initializeGlobals()
     {
@@ -68,9 +77,10 @@ public class Player
             theirTeam = Team.Blue;
         }
 
-        // Get map dimensions
+        // Get map dimensions and calculate size
         mapWidth = homeMap.getWidth();
         mapHeight = homeMap.getHeight();
+        mapSize = mapHeight * mapHeight;
 
         if (homePlanet == Planet.Earth)
         {
@@ -98,7 +108,7 @@ public class Player
         }
     }
 
-    public static void moveUnitInDirection(Unit unit, Direction candidateDirection)
+    public static boolean moveUnitInDirection(Unit unit, Direction candidateDirection)
     {
         int directionIndex = candidateDirection.swigValue();
         if (gc.isMoveReady(unit.id()))
@@ -116,32 +126,68 @@ public class Player
             if (gc.canMove(unit.id(), candidateDirection))
             {
                 gc.moveRobot(unit.id(), candidateDirection);
+                return true;
             }
         }
+        return false;
     }
 
-    public static void moveUnitTowards(Unit unit, Location targetLocation)
+    public static boolean moveUnitTowards(Unit unit, Location targetLocation)
     {
         Direction targetDirection = unit.location().mapLocation().directionTo(targetLocation.mapLocation());
-        moveUnitInDirection(unit, targetDirection);
+        return moveUnitInDirection(unit, targetDirection);
     }
 
-    public static void moveUnitAwayFrom(Unit unit, MapLocation targetLocation)
+    public static boolean moveUnitAwayFrom(Unit unit, MapLocation targetLocation)
     {
         Direction targetDirection = unit.location().mapLocation().directionTo(targetLocation);
         targetDirection = bc.bcDirectionOpposite(targetDirection);
-        moveUnitInDirection(unit, targetDirection);
+        return moveUnitInDirection(unit, targetDirection);
     }
 
-    public static void moveUnitAwayFrom(Unit unit, Location targetLocation)
+    public static boolean moveUnitAwayFrom(Unit unit, Location targetLocation)
     {
-        moveUnitAwayFrom(unit, targetLocation.mapLocation());
+        return moveUnitAwayFrom(unit, targetLocation.mapLocation());
     }
 
-    public static void moveUnitInRandomDirection(Unit unit)
+    public static boolean moveUnitInRandomDirection(Unit unit)
     {
         Random random = new Random();
-        moveUnitInDirection(unit, Direction.values()[1 + random.nextInt(8)]);
+        return moveUnitInDirection(unit, directions[random.nextInt(8)]);
+    }
+
+    // Best Function Ever!
+    // Resolve Center Direction at some later day
+    public static void moveUnitAwayFromMultipleUnits(VecUnit nearbyUnits, Unit unit)
+    {
+        long[] directionArray = {1,1,1,1,1,1,1,1,1};
+        long numberOfNearbyUnits = nearbyUnits.size();
+        long count = 8;
+        MapLocation unitLocation = unit.location().mapLocation();
+        for(int i = 0; i< numberOfNearbyUnits; i++)
+        {
+            // Gives Direction Between Units
+            Direction directionToOtherUnit = unitLocation.directionTo(nearbyUnits.get(i).location().mapLocation());
+            directionArray[directionToOtherUnit.ordinal()] = 0;
+        }
+        for(int j = 0; j < 8; j++)
+        {
+            if(directionArray[j] != 0)
+            {
+                if(moveUnitInDirection(unit, Direction.values()[j]))
+                {
+                    break;
+                }
+            }
+            else
+            {
+                count--;
+            }
+        }
+        if(count == 0)
+        {
+            moveUnitInRandomDirection(unit);
+        }
     }
 
     // Unloads a robot, if possible
@@ -258,19 +304,30 @@ public class Player
         // Set of unfinished blueprints
         Set<Unit> unfinishedBlueprints = new HashSet<Unit>();
 
-        // Hashmap of units
+        // Hash map of units
         HashMap<UnitType, ArrayList<Unit>> typeSortedUnitLists = new HashMap<UnitType, ArrayList<Unit>>();
-
+        // Initialize with empty lists
         for (int i = 0; i < unitTypes.length; i++)
         {
             typeSortedUnitLists.put(unitTypes[i], new ArrayList<Unit>());
         }
 
+        // Research code
+        if (gc.planet() == Planet.Mars)
+        {
+            for(int i = 0; i<10; i++)
+            {
+                gc.queueResearch(RESEARCH_QUEUE_HARD[i]);
+            }
+        }
+
         while (true)
         {
-            System.out.println("Time left at start of round " + gc.round() + " : " + gc.getTimeLeftMs());
-            // System.out.println("Current round: " + gc.round());
-            // System.out.println("Karbonite: " + gc.karbonite());
+            long currentRound = gc.round();
+            if(currentRound % 50 == 1)
+            {
+                System.out.println("Time left at start of round " + currentRound + " : " + gc.getTimeLeftMs());
+            }
 
             // Clear unit lists
             for (int i = 0; i < unitTypes.length; i++)
@@ -310,7 +367,7 @@ public class Player
                     earthKarboniteLocations.remove(obsoleteMine);
                 }
 
-                // Unit processing
+                // Process unit
                 for (int i = 0; i < unitTypes.length; i++)
                 {
                     ArrayList<Unit> unitList = typeSortedUnitLists.get(unitTypes[i]);
@@ -325,6 +382,9 @@ public class Player
                             MapLocation unitMapLocation = unitLocation.mapLocation();
                             if (unitTypes[i] == UnitType.Worker)
                             {
+                                boolean workerBuiltThisTurn = false;
+                                boolean workedMinedThisTurn = false;
+                                boolean workedReplicatedThisTurn = false;
                                 // Build a structure if adjacent to one
                                 for (int j = 0; j < adjacentUnits.size(); j++)
                                 {
@@ -334,6 +394,7 @@ public class Player
                                         if (gc.canBuild(unit.id(), adjacentUnit.id()))
                                         {
                                             gc.build(unit.id(), adjacentUnit.id());
+                                            workerBuiltThisTurn = true;
                                         }
                                     }
                                 }
@@ -344,12 +405,33 @@ public class Player
                                     if (gc.canHarvest(unit.id(), directions[j]))
                                     {
                                         gc.harvest(unit.id(), directions[j]);
+                                        workedMinedThisTurn = true;
                                         break;
                                     }
                                 }
 
-                                // Replicate if less than 30 workers
-                                if (unitsOfType[UnitType.Worker.swigValue()] < 30)
+                                // Make space for other units
+                                // (Kushal's suggestion : make this the last movement priority,
+                                //  moving to building and mining targets is more important)
+                                if(!workedMinedThisTurn && !workerBuiltThisTurn)
+                                {
+                                    moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
+                                }
+
+
+                                // Make space for other units
+                                // (Kushal's suggestion : make this the last movement priority,
+                                //  moving to building and mining targets is more important)
+                                if (!workedMinedThisTurn && !workerBuiltThisTurn)
+                                {
+                                    moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
+                                }
+
+                                // Replicate worker
+                                if (unitsOfType[UnitType.Worker.swigValue()] < 20 && currentRound < 650 ||
+                                        ((currentRound > 130 && currentRound < 400) &&
+                                                (unitsOfType[UnitType.Worker.swigValue()] < mapSize * 2 / (mapHeight + mapWidth) - 10) ||
+                                                unitsOfType[UnitType.Worker.swigValue()] < 10))
                                 {
                                     for (int j = 0; j < directions.length - 1; j++)
                                     {
@@ -358,6 +440,7 @@ public class Player
                                         {
                                             gc.replicate(unit.id(), replicateDirection);
                                             unitsOfType[UnitType.Worker.swigValue()]++;
+                                            workedReplicatedThisTurn = true;
                                             break;
                                         }
                                     }
@@ -385,7 +468,7 @@ public class Player
                                     unfinishedBlueprints.remove(obsoleteBlueprint);
                                 }
 
-                                // Blueprint factories
+                                // Blueprint factories (change if condition)
                                 if (unitsOfType[UnitType.Factory.swigValue()] < 8)
                                 {
                                     for (int j = 0; j < directions.length - 1; j++)
@@ -399,7 +482,7 @@ public class Player
                                     }
                                 }
 
-                                // Blueprint rockets
+                                // Blueprint rockets (change if condition)
                                 if (unitsOfType[UnitType.Rocket.swigValue()] < 5)
                                 {
                                     for (int j = 0; j < directions.length - 1; j++)
@@ -670,7 +753,7 @@ public class Player
             }
             if (homePlanet == Planet.Mars)
             {
-                // Unit processing
+                // Process unit
                 for (int i = 0; i < unitTypes.length; i++)
                 {
                     ArrayList<Unit> unitList = typeSortedUnitLists.get(unitTypes[i]);
@@ -685,7 +768,7 @@ public class Player
                             MapLocation unitMapLocation = unitLocation.mapLocation();
                             if (unit.unitType() == UnitType.Rocket)
                             {
-                                for (Direction direction : Direction.values())
+                                for (Direction direction : directions)
                                 {
                                     if (gc.canUnload(unit.id(), direction))
                                     {
