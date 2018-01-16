@@ -191,7 +191,7 @@ public class Player
     }
 
     // Unloads a robot, if possible
-    public static boolean unloadRobot(Unit factory)
+    public static boolean tryToUnloadRobot(Unit factory)
     {
         for (int i = 0; i < directions.length - 1; i++)
         {
@@ -343,10 +343,10 @@ public class Player
         while (true)
         {
             long currentRound = gc.round();
-            if(currentRound % 50 == 1)
-            {
-                System.out.println("Time left at start of round " + currentRound + " : " + gc.getTimeLeftMs());
-            }
+//            if(currentRound % 50 == 1)
+//            {
+//                System.out.println("Time left at start of round " + currentRound + " : " + gc.getTimeLeftMs());
+//            }
 
             // Clear unit lists
             for (int i = 0; i < unitTypes.length; i++)
@@ -508,6 +508,7 @@ public class Player
                                 long minDistanceSquared = (long) 1e5;
                                 for (Unit structure : unfinishedBlueprints)
                                 {
+                                    System.out.println(structure.location().mapLocation());
                                     long distanceSquaredToStructure = structure.location().mapLocation().distanceSquaredTo(unitMapLocation);
                                     if (distanceSquaredToStructure < minDistanceSquared)
                                     {
@@ -517,6 +518,7 @@ public class Player
                                 }
                                 if (nearestStructure != null)
                                 {
+                                    System.out.println(nearestStructure.location().mapLocation());
                                     moveUnitTowards(unit, nearestStructure.location());
                                 }
 
@@ -541,49 +543,10 @@ public class Player
 
                                 // Make space for other units
                                 // Moved this to end to check results
+                                // Seems better at the bottom
                                 if(!workedMinedThisTurn && !workerBuiltThisTurn)
                                 {
                                     moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
-                                }
-                            }
-                            if (unit.unitType() == UnitType.Factory)
-                            {
-                                unloadRobot(unit);
-                                if (unit.isFactoryProducing() == 0)
-                                {
-                                    int workerCount = unitsOfType[UnitType.Worker.swigValue()]; // rarely produced
-                                    int knightCount = unitsOfType[UnitType.Knight.swigValue()]; // not being produced
-                                    int rangerCount = unitsOfType[UnitType.Ranger.swigValue()];
-                                    int mageCount = unitsOfType[UnitType.Mage.swigValue()];
-                                    int healerCount = unitsOfType[UnitType.Healer.swigValue()];
-
-                                    // Think of better condition later; produce workers if existing ones are being massacred
-                                    if (workerCount == 0)
-                                    {
-                                        if (gc.canProduceRobot(unit.id(), UnitType.Worker))
-                                        {
-                                            gc.produceRobot(unit.id(), UnitType.Worker);
-                                            unitsOfType[UnitType.Worker.swigValue()]++;
-                                        }
-                                    }
-
-                                    if (rangerCount >= (mageCount + healerCount))
-                                    {
-                                        UnitType typeToBeProduced = (mageCount > healerCount) ? (UnitType.Healer) : (UnitType.Mage);
-                                        if (gc.canProduceRobot(unit.id(), typeToBeProduced))
-                                        {
-                                            gc.produceRobot(unit.id(), typeToBeProduced);
-                                            unitsOfType[typeToBeProduced.swigValue()]++;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (gc.canProduceRobot(unit.id(), UnitType.Ranger))
-                                        {
-                                            gc.produceRobot(unit.id(), UnitType.Ranger);
-                                            unitsOfType[UnitType.Ranger.swigValue()]++;
-                                        }
-                                    }
                                 }
                             }
                             if (unit.unitType() == UnitType.Ranger)
@@ -735,8 +698,58 @@ public class Player
                                     }
                                 }
                             }
+                            if (unit.unitType() == UnitType.Factory)
+                            {
+                                // If it's a new blueprint, add to the set
+                                if (unit.structureIsBuilt() == 0 && !unfinishedBlueprints.contains(unit))
+                                {
+                                    unfinishedBlueprints.add(unit);
+                                }
+                                tryToUnloadRobot(unit);
+                                if (unit.isFactoryProducing() == 0)
+                                {
+                                    int workerCount = unitsOfType[UnitType.Worker.swigValue()]; // rarely produced
+                                    int knightCount = unitsOfType[UnitType.Knight.swigValue()]; // not being produced
+                                    int rangerCount = unitsOfType[UnitType.Ranger.swigValue()];
+                                    int mageCount = unitsOfType[UnitType.Mage.swigValue()];
+                                    int healerCount = unitsOfType[UnitType.Healer.swigValue()];
+
+                                    // Think of better condition later; produce workers if existing ones are being massacred
+                                    if (workerCount == 0)
+                                    {
+                                        if (gc.canProduceRobot(unit.id(), UnitType.Worker))
+                                        {
+                                            gc.produceRobot(unit.id(), UnitType.Worker);
+                                            unitsOfType[UnitType.Worker.swigValue()]++;
+                                        }
+                                    }
+
+                                    if (rangerCount >= (mageCount + healerCount))
+                                    {
+                                        UnitType typeToBeProduced = (mageCount > healerCount) ? (UnitType.Healer) : (UnitType.Mage);
+                                        if (gc.canProduceRobot(unit.id(), typeToBeProduced))
+                                        {
+                                            gc.produceRobot(unit.id(), typeToBeProduced);
+                                            unitsOfType[typeToBeProduced.swigValue()]++;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (gc.canProduceRobot(unit.id(), UnitType.Ranger))
+                                        {
+                                            gc.produceRobot(unit.id(), UnitType.Ranger);
+                                            unitsOfType[UnitType.Ranger.swigValue()]++;
+                                        }
+                                    }
+                                }
+                            }
                             if (unit.unitType() == UnitType.Rocket)
                             {
+                                // If it's a new blueprint, add to the set
+                                if (unit.structureIsBuilt() == 0 && !unfinishedBlueprints.contains(unit))
+                                {
+                                    unfinishedBlueprints.add(unit);
+                                }
                                 if (unit.structureIsBuilt() == 1)
                                 {
                                     // Check all adjacent squares
