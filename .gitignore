@@ -2,3 +2,4 @@ viewer/
 *.bc18
 .idea/
 BattleCode2018.iml
+bc18-scaffold/viewer*

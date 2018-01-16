@@ -62,6 +62,11 @@ public class Player
         return true;
     }
 
+    public static long diagonalDistanceBetween(MapLocation first, MapLocation second)
+    {
+        return Math.abs(first.getX() - second.getX()) + Math.abs(first.getY() - second.getY());
+    }
+
     public static void main(String[] args)
     {
         // Connect to the manager, starting the game
@@ -128,7 +133,7 @@ public class Player
                 }
                 if (isUninterruptedPathBetween(fromWaypoint, toWaypoint))
                 {
-                    fromWaypointList.add(new Pair<MapLocation, Long>(toWaypoint, fromWaypoint.distanceSquaredTo(toWaypoint)));
+                    fromWaypointList.add(new Pair<MapLocation, Long>(toWaypoint, diagonalDistanceBetween(fromWaypoint, toWaypoint)));
                     edges++;
                 }
             }

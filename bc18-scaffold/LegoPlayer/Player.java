@@ -1,4 +1,5 @@
 // import the API.
+
 import bc.*;
 
 import java.util.*;
@@ -81,11 +82,13 @@ public class Player
 
     /**
      * Produces a robot and updates unit lists. CHECK BEFORE CALL
-     * @param factory where the robot should be spawned
-     * @param type of the robot to be spawned
+     *
+     * @param factory             where the robot should be spawned
+     * @param type                of the robot to be spawned
      * @param typeSortedUnitLists HashMap where the spawned robot will be added to keep track
      */
-    public static void produceAndAddRobot(Unit factory, UnitType type, HashMap<UnitType, LinkedList<Unit>> typeSortedUnitLists) {
+    public static void produceAndAddRobot(Unit factory, UnitType type, HashMap<UnitType, LinkedList<Unit>> typeSortedUnitLists)
+    {
         gc.produceRobot(factory.id(), type);
         Direction unloadDirection = directions[0];
         int j = 1;
@@ -117,11 +120,11 @@ public class Player
         long distanceBetweenUnitsSquared = (int) Math.floor(Math.sqrt(unitMapLocation.distanceSquaredTo(enemyMapLocation)));
 
         // Same type of enemy unit, but higher health.
-        if(unitType == enemyUnitType && unitHealth < incentiveToHunt)
+        if (unitType == enemyUnitType && unitHealth < incentiveToHunt)
         {
             incentiveToHunt += unitHealth;
         }
-        else if(enemyUnitType == UnitType.Worker)
+        else if (enemyUnitType == UnitType.Worker)
         {
             incentiveToHunt = 10 - distanceBetweenUnitsSquared;
         }
@@ -129,19 +132,19 @@ public class Player
         {
             incentiveToHunt = 11 - distanceBetweenUnitsSquared;
         }
-        else if(unitType == UnitType.Ranger)
+        else if (unitType == UnitType.Ranger)
         {
-            if(enemyUnitType == UnitType.Knight)
+            if (enemyUnitType == UnitType.Knight)
             {
                 // **** TODO - Add run away instructions later
                 //(6 * 4 * 40 / 2)
-                incentiveToHunt += 6 * (distanceBetweenUnitsSquared - 3)* 20;
+                incentiveToHunt += 6 * (distanceBetweenUnitsSquared - 3) * 20;
             }
-            else if(enemyUnitType == UnitType.Mage)
+            else if (enemyUnitType == UnitType.Mage)
             {
                 //Match steps with Mage
                 //(Is infinite, if we don't consider non-perfect movement)
-                incentiveToHunt += 20 * Math.floor(unitHealth * 2/60) + (distanceBetweenUnitsSquared - 3) * 40;
+                incentiveToHunt += 20 * Math.floor(unitHealth * 2 / 60) + (distanceBetweenUnitsSquared - 3) * 40;
             }
             else
             {
@@ -149,13 +152,13 @@ public class Player
                 incentiveToHunt = 10 - distanceBetweenUnitsSquared; //(Kill others first)
             }
         }
-        else if(unitType == UnitType.Knight)
+        else if (unitType == UnitType.Knight)
         {
-            if(enemyUnitType == UnitType.Ranger)
+            if (enemyUnitType == UnitType.Ranger)
             {
                 incentiveToHunt += unitHealth;
             }
-            else if(enemyUnitType == UnitType.Mage)
+            else if (enemyUnitType == UnitType.Mage)
             {
                 incentiveToHunt += unitHealth;
             }
@@ -164,15 +167,15 @@ public class Player
                 incentiveToHunt = 10 - distanceBetweenUnitsSquared;
             }
         }
-        else if(unitType == UnitType.Mage)
+        else if (unitType == UnitType.Mage)
         {
-            if(enemyUnitType == UnitType.Knight)
+            if (enemyUnitType == UnitType.Knight)
             {
-                incentiveToHunt += 60*(distanceBetweenUnitsSquared - 1);
+                incentiveToHunt += 60 * (distanceBetweenUnitsSquared - 1);
             }
-            else if(enemyUnitType == UnitType.Ranger)
+            else if (enemyUnitType == UnitType.Ranger)
             {
-                incentiveToHunt += 60*(5 - distanceBetweenUnitsSquared);
+                incentiveToHunt += 60 * (5 - distanceBetweenUnitsSquared);
             }
             else
             {
@@ -181,7 +184,7 @@ public class Player
         }
         else
         {
-            // Unrequired Else case
+            // Unrequired else case
             return 0;
         }
         return incentiveToHunt;
@@ -215,8 +218,8 @@ public class Player
             awayMap = gc.startingMap(Planet.Mars);
         }
 
-        Team enemyTeam;
         Team ourTeam = gc.team();
+        Team enemyTeam;
         if (ourTeam == Team.Blue)
         {
             enemyTeam = Team.Red;
@@ -281,11 +284,11 @@ public class Player
             if (gc.planet() == Planet.Mars)
             {
                 //First research should be workers
-                if(researchInfo.getLevel(UnitType.Worker)< 2)
+                if (researchInfo.getLevel(UnitType.Worker) < 2)
                 {
                     gc.queueResearch(UnitType.Worker);
                 }
-                else if(researchInfo.getLevel(UnitType.Rocket)< 1)
+                else if (researchInfo.getLevel(UnitType.Rocket) < 1)
                 {
                     gc.queueResearch(UnitType.Rocket);
                 }
@@ -307,7 +310,7 @@ public class Player
             for (MapLocation karboniteMapLocation : karboniteMapLocationSet)
             {
                 if (gc.canSenseLocation(karboniteMapLocation) &&
-                    gc.karboniteAt(karboniteMapLocation) == 0)
+                        gc.karboniteAt(karboniteMapLocation) == 0)
                 {
                     removalList.add(karboniteMapLocation);
                 }
@@ -326,7 +329,7 @@ public class Player
                     Unit unit = unitList.get(u);
                     if (gc.planet() == Planet.Earth)
                     {
-                        if(!unit.location().isInGarrison() && !unit.location().isInSpace())
+                        if (!unit.location().isInGarrison() && !unit.location().isInSpace())
                         {
                             if (unitTypes[i] == UnitType.Worker)
                             {
@@ -335,7 +338,7 @@ public class Player
                                 for (int j = 0; j < nearbyUnits.size(); j++)
                                 {
                                     Unit nearbyUnit = nearbyUnits.get(j);
-                                    if ( nearbyUnit.unitType() == UnitType.Factory || nearbyUnit.unitType() == UnitType.Rocket)
+                                    if (nearbyUnit.unitType() == UnitType.Factory || nearbyUnit.unitType() == UnitType.Rocket)
                                     {
                                         if (gc.canBuild(unit.id(), nearbyUnit.id()))
                                         {
@@ -376,10 +379,25 @@ public class Player
                                 }
 
                                 // Structure building
-                                while (!unfinishedBlueprints.isEmpty() &&
-                                        (gc.senseUnitAtLocation(unfinishedBlueprints.getFirst().location().mapLocation()).structureIsBuilt() == 1))
+                                LinkedList<Unit> obsoleteBlueprints = new LinkedList<Unit>();
+                                for (Unit blueprint : unfinishedBlueprints)
                                 {
-                                    unfinishedBlueprints.removeFirst();
+                                    MapLocation blueprintMapLocation = blueprint.location().mapLocation();
+                                    if (gc.canSenseLocation(blueprintMapLocation))
+                                    {
+                                        if (!gc.hasUnitAtLocation(blueprintMapLocation))
+                                        {
+                                            obsoleteBlueprints.add(blueprint);
+                                        }
+                                        else if (gc.senseUnitAtLocation(blueprintMapLocation).structureIsBuilt() == 1)
+                                        {
+                                            obsoleteBlueprints.add(blueprint);
+                                        }
+                                    }
+                                }
+                                for (Unit obsoleteBlueprint : obsoleteBlueprints)
+                                {
+                                    unfinishedBlueprints.remove(obsoleteBlueprint);
                                 }
                                 if (typeSortedUnitLists.get(UnitType.Factory).size() < Math.sqrt(gc.round()))
                                 {
@@ -455,7 +473,8 @@ public class Player
                                         {
                                             gc.build(unit.id(), structure.id());
                                         }
-                                    } else
+                                    }
+                                    else
                                     {
                                         moveUnitTowards(unit, structure.location());
                                     }
@@ -470,7 +489,8 @@ public class Player
                                     if (closestMineMapLocation == null)
                                     {
                                         closestMineMapLocation = karboniteMapLocation;
-                                    } else if (unitLoc.distanceSquaredTo(closestMineMapLocation) > unitLoc.distanceSquaredTo(karboniteMapLocation))
+                                    }
+                                    else if (unitLoc.distanceSquaredTo(closestMineMapLocation) > unitLoc.distanceSquaredTo(karboniteMapLocation))
                                     {
                                         closestMineMapLocation = karboniteMapLocation;
                                     }
@@ -541,7 +561,7 @@ public class Player
                                             if (gc.canAttack(unit.id(), nearbyEnemyUnit.id()))
                                             {
                                                 long possibleDesireToKill = setBountyScore(unit, nearbyEnemyUnit);
-                                                if(desireToKill < possibleDesireToKill)
+                                                if (desireToKill < possibleDesireToKill)
                                                 {
                                                     desireToKill = possibleDesireToKill;
                                                     rememberUnit = j;
@@ -549,7 +569,7 @@ public class Player
                                             }
                                         }
                                     }
-                                    if(rememberUnit != -1)
+                                    if (rememberUnit != -1)
                                     {
                                         gc.attack(unit.id(), nearbyEnemyUnits.get(rememberUnit).id());
                                         //moveUnitAwayFrom(unit, nearbyEnemyUnits.get(rememberUnit).location());
@@ -582,7 +602,7 @@ public class Player
                                             if (gc.canAttack(unit.id(), nearbyEnemyUnit.id()))
                                             {
                                                 long possibleDesireToKill = setBountyScore(unit, nearbyEnemyUnit);
-                                                if(desireToKill < possibleDesireToKill)
+                                                if (desireToKill < possibleDesireToKill)
                                                 {
                                                     desireToKill = possibleDesireToKill;
                                                     rememberUnit = j;
@@ -590,7 +610,7 @@ public class Player
                                             }
                                         }
                                     }
-                                    if(rememberUnit != -1)
+                                    if (rememberUnit != -1)
                                     {
                                         gc.attack(unit.id(), nearbyEnemyUnits.get(rememberUnit).id());
                                     }
@@ -648,7 +668,7 @@ public class Player
                                             if (gc.canAttack(unit.id(), nearbyEnemyUnit.id()))
                                             {
                                                 long possibleDesireToKill = setBountyScore(unit, nearbyEnemyUnit);
-                                                if(desireToKill < possibleDesireToKill)
+                                                if (desireToKill < possibleDesireToKill)
                                                 {
                                                     desireToKill = possibleDesireToKill;
                                                     rememberUnit = j;
@@ -656,7 +676,7 @@ public class Player
                                             }
                                         }
                                     }
-                                    if(rememberUnit != -1)
+                                    if (rememberUnit != -1)
                                     {
                                         gc.attack(unit.id(), nearbyEnemyUnits.get(rememberUnit).id());
                                     }
@@ -668,7 +688,7 @@ public class Player
                             }
                             if (unit.unitType() == UnitType.Rocket)
                             {
-                                if(unit.structureIsBuilt() == 1)
+                                if (unit.structureIsBuilt() == 1)
                                 {
                                     // Check all adjacent squares
                                     VecUnit nearbyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 2, gc.team());
@@ -680,12 +700,12 @@ public class Player
                                             gc.load(unit.id(), nearbyUnit.id());
                                         }
                                     }
-                                    if(unit.structureGarrison().size() >= unit.structureMaxCapacity()/2)
+                                    if (unit.structureGarrison().size() >= unit.structureMaxCapacity() / 2)
                                     {
-                                        int x = random.nextInt((int)mapWidth);
-                                        int y = random.nextInt((int)mapHeight);
-                                        MapLocation randomLocationOnMars =  new MapLocation(Planet.Mars, x, y);
-                                        if(gc.canLaunchRocket(unit.id(), randomLocationOnMars))
+                                        int x = random.nextInt((int) mapWidth);
+                                        int y = random.nextInt((int) mapHeight);
+                                        MapLocation randomLocationOnMars = new MapLocation(Planet.Mars, x, y);
+                                        if (gc.canLaunchRocket(unit.id(), randomLocationOnMars))
                                         {
                                             gc.launchRocket(unit.id(), new MapLocation(Planet.Mars, x, y));
                                         }
@@ -710,9 +730,9 @@ public class Player
                         // Mars code here
                         if (unit.unitType() == UnitType.Rocket)
                         {
-                            for(Direction direction: Direction.values())
+                            for (Direction direction : Direction.values())
                             {
-                                if(gc.canUnload(unit.id(), direction))
+                                if (gc.canUnload(unit.id(), direction))
                                 {
                                     gc.unload(unit.id(), direction);
                                 }
