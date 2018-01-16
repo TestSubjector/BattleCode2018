@@ -323,7 +323,7 @@ public class Player
 
         // Find potential landing spots and store in a priority queue
         // (Add priority logic later using Pair class and comparators)
-        // potentialLandingSites = new PriorityQueue<MapLocation>();
+        // potentialLandingSites = new PriorityQueue<QueuePair<Long, MapLocation>>();
         potentialLandingSites = new LinkedList<MapLocation>();
         if (gc.planet() == Planet.Earth)
         {
