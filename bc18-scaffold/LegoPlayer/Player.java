@@ -20,7 +20,7 @@ public class Player
     static VecUnit initialWorkers;
     static Set<MapLocation> earthKarboniteLocations;
     static PriorityQueue<QueuePair<Long, MapLocation>> potentialLandingSites;
-    static ArrayList<MapLocation> prevLandingSites;
+    static ArrayList<QueuePair<Long, MapLocation>> updatedAppealSites;
 
     final static int INITIAL_RANGER_ATTACK_DISTANCE = 7;  // Rounding For Now
     final static int INITIAL_RANGER_MOVEMENT_COOLDOWN = 20;
@@ -313,6 +313,28 @@ public class Player
         // only called from Earth, so awayMap will be Mars
         if (awayMap.isPassableTerrainAt(tempLoc) == 0) return WEIGHT_IMPASSABLE;
         else return WEIGHT_NONE;
+    }
+
+    public static void updateSurroundingAppeal(QueuePair<Long, MapLocation> destPair)
+    {
+        int temp_x = destPair.getSecond().getX();
+        int temp_y = destPair.getSecond().getY();
+
+        MapLocation tempLoc;
+        for (int x = -1; x <= 1; x++)
+        {
+            for (int y = -1; y <= 1; y++)
+            {
+                if(!(x == 0 && y == 0))
+                {
+                    tempLoc = new MapLocation(Planet.Mars, temp_x + x, temp_y + y);
+                    if (awayMap.isPassableTerrainAt(tempLoc) != 0)
+                    {
+                        updatedAppealSites.add(0, new QueuePair<>(destPair.getFirst() - WEIGHT_ROCKET, destPair.getSecond())); // newer updates come earlier, can break once encountered.
+                    }
+                }
+            }
+        }
     }
 
     public static void main(String[] args)
@@ -801,14 +823,31 @@ public class Player
                                     }
                                     if (unit.structureGarrison().size() >= unit.structureMaxCapacity() / 2)
                                     {
-                                        MapLocation dest = potentialLandingSites.poll().getSecond();
+                                        QueuePair<Long, MapLocation> destPair = potentialLandingSites.poll();
+                                        boolean isOutdated = true;
+                                        while (isOutdated)
+                                        {
+                                            isOutdated = false;
+                                            for (int j = 0; j < updatedAppealSites.size(); j++)
+                                            {
+                                                if (updatedAppealSites.get(j).getSecond().equals(destPair.getSecond())
+                                                        && !(updatedAppealSites.get(j).getFirst().equals(destPair.getFirst())))
+                                                {
+                                                    isOutdated = true;
+                                                    destPair = potentialLandingSites.poll();
+                                                    break;
+                                                }
+                                            }
+                                        }
+
+                                        MapLocation dest = destPair.getSecond();
                                         // potentialLandingSites is supposed to have only those spots
                                         // that are passable, and not already used as a destination.
                                         // Hence, this check should always pass.
                                         if (gc.canLaunchRocket(unit.id(), dest))
                                         {
                                             gc.launchRocket(unit.id(), dest);
-                                            prevLandingSites.add(dest);
+                                            updateSurroundingAppeal(destPair);
                                         }
                                     }
                                 }
