@@ -305,9 +305,9 @@ public class Player
 
     public static long getLocationAppeal(int x, int y)
     {
-        if (x < 0 || x >= mapWidth) return WEIGHT_IMPASSABLE;
+        if (x < 0 || x >= awayMap.getWidth()) return WEIGHT_IMPASSABLE;
 
-        if (y < 0 || y >= mapHeight) return WEIGHT_IMPASSABLE;
+        if (y < 0 || y >= awayMap.getHeight()) return WEIGHT_IMPASSABLE;
 
         MapLocation tempLoc = new MapLocation(Planet.Mars, x, y);
 
