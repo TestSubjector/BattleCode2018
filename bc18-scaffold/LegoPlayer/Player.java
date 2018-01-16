@@ -21,6 +21,7 @@ public class Player
     static long mapSize;
     static VecUnit initialWorkers;
     static Set<MapLocation> earthKarboniteLocations;
+    static Queue<MapLocation> potentialLandingSites;
 
     final static int INITIAL_RANGER_ATTACK_DISTANCE = 7;  // Rounding For Now
     final static int INITIAL_RANGER_MOVEMENT_COOLDOWN = 20;
@@ -312,12 +313,32 @@ public class Player
             typeSortedUnitLists.put(unitTypes[i], new ArrayList<Unit>());
         }
 
-        // Research code
+        // Queue researches
         if (gc.planet() == Planet.Mars)
         {
             for(int i = 0; i<10; i++)
             {
                 gc.queueResearch(RESEARCH_QUEUE_HARD[i]);
+            }
+        }
+
+        // Find potential landing spots and store in a priority queue
+        // (Add priority logic later using Pair class and comparators)
+        // potentialLandingSites = new PriorityQueue<MapLocation>();
+        potentialLandingSites = new LinkedList<MapLocation>();
+        if (gc.planet() == Planet.Earth)
+        {
+            MapLocation temp;
+            for (int i = 0; i < mapWidth; i++)
+            {
+                for (int j = 0; j < mapHeight; j++)
+                {
+                    temp = new MapLocation(Planet.Mars, i, j);
+                    if (awayMap.isPassableTerrainAt(temp) != 0)
+                    {
+                        potentialLandingSites.add(temp);
+                    }
+                }
             }
         }
 
@@ -737,12 +758,13 @@ public class Player
                                     }
                                     if (unit.structureGarrison().size() >= unit.structureMaxCapacity() / 2)
                                     {
-                                        int x = random.nextInt((int) mapWidth);
-                                        int y = random.nextInt((int) mapHeight);
-                                        MapLocation randomLocationOnMars = new MapLocation(Planet.Mars, x, y);
-                                        if (gc.canLaunchRocket(unit.id(), randomLocationOnMars))
+                                        MapLocation dest = potentialLandingSites.remove();
+                                        // potentialLandingSites is supposed to have only those spots
+                                        // that are passable, and not already used as a destination.
+                                        // Hence, this check should always pass.
+                                        if (gc.canLaunchRocket(unit.id(), dest))
                                         {
-                                            gc.launchRocket(unit.id(), new MapLocation(Planet.Mars, x, y));
+                                            gc.launchRocket(unit.id(), dest);
                                         }
                                     }
                                 }
