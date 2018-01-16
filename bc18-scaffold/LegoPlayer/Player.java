@@ -343,10 +343,10 @@ public class Player
         while (true)
         {
             long currentRound = gc.round();
-//            if(currentRound % 50 == 1)
-//            {
-//                System.out.println("Time left at start of round " + currentRound + " : " + gc.getTimeLeftMs());
-//            }
+            if(currentRound % 50 == 1)
+            {
+                System.out.println("Time left at start of round " + currentRound + " : " + gc.getTimeLeftMs());
+            }
 
             // Clear unit lists
             for (int i = 0; i < unitTypes.length; i++)
@@ -508,7 +508,6 @@ public class Player
                                 long minDistanceSquared = (long) 1e5;
                                 for (Unit structure : unfinishedBlueprints)
                                 {
-                                    System.out.println(structure.location().mapLocation());
                                     long distanceSquaredToStructure = structure.location().mapLocation().distanceSquaredTo(unitMapLocation);
                                     if (distanceSquaredToStructure < minDistanceSquared)
                                     {
@@ -518,7 +517,6 @@ public class Player
                                 }
                                 if (nearestStructure != null)
                                 {
-                                    System.out.println(nearestStructure.location().mapLocation());
                                     moveUnitTowards(unit, nearestStructure.location());
                                 }
 
