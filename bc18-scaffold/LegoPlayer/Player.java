@@ -1,6 +1,7 @@
 // import the API.
 import java.util.*;
 import bc.*;
+import org.omg.PortableInterceptor.NON_EXISTENT;
 
 public class Player
 {
@@ -22,6 +23,7 @@ public class Player
     static Set<MapLocation> earthKarboniteLocations;
     static PriorityQueue<QueuePair<Long, MapLocation>> potentialLandingSites;
     static ArrayList<QueuePair<Long, MapLocation>> updatedAppealSites;
+    static ArrayList<ArrayList<Long>> potentialFactorySpots;
 
     final static int INITIAL_RANGER_ATTACK_DISTANCE = 7;  // Rounding For Now
     final static int INITIAL_RANGER_MOVEMENT_COOLDOWN = 20;
@@ -35,9 +37,7 @@ public class Player
     static int rangerTalentVision = 0;
 
     final static long WEIGHT_IMPASSABLE = -2;
-//    final static long WEIGHT_KARBONITE_CENTER = -1; // central tile is Karb; undesirable
     final static long WEIGHT_ROCKET = -1;
-//    final static long WEIGHT_KARBONITE_SIDE = +1; // Karb to the side; desirable
     final static long WEIGHT_NONE = 0;
     // 25+25+100+100+100+25+75+100+25+75+100+25+75+100+25+75
     final static UnitType[] RESEARCH_QUEUE_HARD = {UnitType.Worker, UnitType.Ranger, UnitType.Ranger, UnitType.Rocket,
@@ -94,18 +94,41 @@ public class Player
 
         if (homePlanet == Planet.Earth)
         {
-            // Get initial karbonite locations
+            // Get initial karbonite locations and factory appeal values
             earthKarboniteLocations = new HashSet<MapLocation>();
+            potentialFactorySpots = new ArrayList<>();
             for (int x = 0; x < mapWidth; x++)
             {
                 for (int y = 0; y < mapHeight; y++)
                 {
                     MapLocation tempMapLocation = new MapLocation(homePlanet, x, y);
                     long karboniteAtTempMapLocation = homeMap.initialKarboniteAt(tempMapLocation);
+
                     if (karboniteAtTempMapLocation > 0)
                     {
                         earthKarboniteLocations.add(tempMapLocation);
                         earthInitialTotalKarbonite += karboniteAtTempMapLocation;
+                    }
+
+                    if (homeMap.isPassableTerrainAt(tempMapLocation) != 0)
+                    {
+                        long appeal = WEIGHT_NONE;
+
+                        // top row
+                        appeal += getFactoryLocationAppeal(x - 1,y + 1);
+                        appeal += getFactoryLocationAppeal(x,y + 1);
+                        appeal += getFactoryLocationAppeal(x + 1,y + 1);
+
+                        // middle row
+                        appeal += getFactoryLocationAppeal(x - 1,y);
+                        appeal += getFactoryLocationAppeal(x + 1,y);
+
+                        // bottom row
+                        appeal += getFactoryLocationAppeal(x - 1,y - 1);
+                        appeal += getFactoryLocationAppeal(x,y - 1);
+                        appeal += getFactoryLocationAppeal(x + 1,y - 1);
+
+                        potentialFactorySpots.get(x).set(y, appeal);
                     }
                 }
             }
@@ -306,7 +329,7 @@ public class Player
         return incentiveToHunt;
     }
 
-    public static long getLocationAppeal(int x, int y)
+    public static long getLandingLocationAppeal(int x, int y)
     {
         if (x < 0 || x >= awayMap.getWidth()) return WEIGHT_IMPASSABLE;
 
@@ -316,6 +339,19 @@ public class Player
 
         // only called from Earth, so awayMap will be Mars
         if (awayMap.isPassableTerrainAt(tempLoc) == 0) return WEIGHT_IMPASSABLE;
+        else return WEIGHT_NONE;
+    }
+
+    public static long getFactoryLocationAppeal(int x, int y)
+    {
+        if (x < 0 || x >= homeMap.getWidth()) return WEIGHT_IMPASSABLE;
+
+        if (y < 0 || y >= homeMap.getHeight()) return WEIGHT_IMPASSABLE;
+
+        MapLocation tempLoc = new MapLocation(Planet.Earth, x, y);
+
+        // only called from Earth
+        if (homeMap.isPassableTerrainAt(tempLoc) == 0) return WEIGHT_IMPASSABLE;
         else return WEIGHT_NONE;
     }
 
@@ -636,18 +672,18 @@ public class Player
                         long appeal = WEIGHT_NONE;
 
                         // top row
-                        appeal += getLocationAppeal(i - 1,j + 1);
-                        appeal += getLocationAppeal(i,j + 1);
-                        appeal += getLocationAppeal(i + 1,j + 1);
+                        appeal += getLandingLocationAppeal(i - 1,j + 1);
+                        appeal += getLandingLocationAppeal(i,j + 1);
+                        appeal += getLandingLocationAppeal(i + 1,j + 1);
 
                         // middle row
-                        appeal += getLocationAppeal(i - 1,j);
-                        appeal += getLocationAppeal(i + 1,j);
+                        appeal += getLandingLocationAppeal(i - 1,j);
+                        appeal += getLandingLocationAppeal(i + 1,j);
 
                         // bottom row
-                        appeal += getLocationAppeal(i - 1,j - 1);
-                        appeal += getLocationAppeal(i,j - 1);
-                        appeal += getLocationAppeal(i + 1,j - 1);
+                        appeal += getLandingLocationAppeal(i - 1,j - 1);
+                        appeal += getLandingLocationAppeal(i,j - 1);
+                        appeal += getLandingLocationAppeal(i + 1,j - 1);
 
                         potentialLandingSites.add(new QueuePair<>(appeal, tempLoc));
                     }
@@ -795,13 +831,35 @@ public class Player
                                 // Blueprint factories (change if condition)
                                 if (unitsOfType[UnitType.Factory.ordinal()] < 8)
                                 {
-                                    for (int j = 0; j < directions.length - 1; j++)
+                                    MapLocation tempLoc = null;
+                                    PriorityQueue<QueuePair<Long, MapLocation>> tempQueue = new PriorityQueue<>();
+                                    for (int x = -1; x <= 1; x++)
                                     {
-                                        Direction blueprintDirection = directions[j];
+                                        for (int y = -1; y <= 1; y++)
+                                        {
+                                            if(!(x == 0 && y == 0))
+                                            {
+                                                tempLoc = new MapLocation(homePlanet, unitMapLocation.getX() + x, unitMapLocation.getY() + y);
+                                                if (homeMap.isPassableTerrainAt(tempLoc) != 0)
+                                                {
+                                                    long newAppeal = potentialFactorySpots.get(tempLoc.getX()).get(tempLoc.getY());
+                                                    newAppeal -= gc.karboniteAt(tempLoc); // reduce appeal by amount of karbonite at loc
+                                                    tempQueue.add(new QueuePair<>(newAppeal, tempLoc));
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // tempQueue now contains appeal ordered neighbours
+                                    Direction blueprintDirection = null;
+                                    while (!tempQueue.isEmpty())
+                                    {
+                                        blueprintDirection = unitMapLocation.directionTo(tempQueue.poll().getSecond());
                                         if (gc.canBlueprint(unit.id(), UnitType.Factory, blueprintDirection))
                                         {
                                             gc.blueprint(unit.id(), UnitType.Factory, blueprintDirection);
                                             unitsOfType[UnitType.Factory.ordinal()]++;
+                                            break;
                                         }
                                     }
                                 }
