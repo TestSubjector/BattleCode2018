@@ -109,7 +109,7 @@ public class Player
 
     public static long diagonalDistanceBetween(MapLocation first, MapLocation second)
     {
-        return Math.abs(first.getX() - second.getX()) + Math.abs(first.getY() - second.getY());
+        return Math.max(Math.abs(first.getX() - second.getX()), Math.abs(first.getY() - second.getY()));
     }
 
     public static boolean isUninterruptedPathBetween(MapLocation from, MapLocation to)
