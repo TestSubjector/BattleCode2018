@@ -344,8 +344,6 @@ public class Player
 
     public static long maxWorkerLimitAtTurn(long currentRound)
     {
-        long maxWorkers = 0;
-
         if(mapSize <=500)
         {
             if(currentRound < 75)
@@ -362,6 +360,10 @@ public class Player
                 {
                     return 5;
                 }
+            }
+            else
+            {
+                return 10;
             }
         }
         else if(mapSize <=900)
@@ -381,6 +383,21 @@ public class Player
                     return 5;
                 }
             }
+            else
+            {
+                if(earthInititalTotalKarbonite < 500)
+                {
+                    return 12;
+                }
+                else if(earthInititalTotalKarbonite > 1000)
+                {
+                    return 20;
+                }
+                else
+                {
+                    return 15;
+                }
+            }
         }
         else
         {
@@ -394,21 +411,147 @@ public class Player
                 {
                     return 20;
                 }
-                else if(earthInititalTotalKarbonite < 1000)
+                else
                 {
                     return 10;
                 }
             }
+            else
+            {
+                if(earthInititalTotalKarbonite < 500)
+                {
+                    return 10;
+                }
+                else if(earthInititalTotalKarbonite > 1500)
+                {
+                    return 25;
+                }
+                else
+                {
+                    return 15;
+                }
+            }
         }
-        if(earthInititalTotalKarbonite < 100)
+    return 10;
+    }
+
+    /*
+    public static long maxFactoryLimitAtTurn(long currentRound)
+    {
+        if(mapSize <=500)
         {
-            return 5;
+            if(currentRound < 200)
+            {
+                return 3;
+            }
+            else if(currentRound < 600)
+            {
+                return 5;
+            }
+            else
+            {
+                return 3;
+            }
+        }
+        else if(mapSize <=900)
+        {
+            if(currentRound < 200)
+            {
+                return 5;
+            }
+            else if(currentRound < 650)
+            {
+                return 10;
+            }
+            else
+            {
+                return 8;
+            }
         }
         else
         {
-            return 10;
+            if(currentRound < 200)
+            {
+                return 10;
+            }
+            else if(currentRound < 650)
+            {
+                return 20;
+            }
+            else
+            {
+                return 10;
+            }
         }
     }
+
+    public static long maxRocketLimitAtTurn(long currentRound)
+    {
+        if(mapSize <=500)
+        {
+            if(currentRound < 200)
+            {
+                return 3;
+            }
+            else if(currentRound < 600)
+            {
+                return 6;
+            }
+            else
+            {
+                return 10;
+            }
+        }
+        else if(mapSize <=900)
+        {
+            if(currentRound < 200)
+            {
+                if(earthInititalTotalKarbonite > 1000)
+                {
+                    return 5;
+                }
+                else
+                {
+                    return 3;
+                }
+            }
+            else if(currentRound < 650)
+            {
+                return 10;
+            }
+            else
+            {
+                return 20;
+            }
+        }
+        else
+        {
+            if(currentRound < 200)
+            {
+                if(earthInititalTotalKarbonite > 3000)
+                {
+                    return 6;
+                }
+                else if(earthInititalTotalKarbonite > 1000)
+                {
+                    return 4;
+                }
+                else
+                {
+                    return 3;
+                }
+            }
+            else if(currentRound < 650)
+            {
+                return 15;
+            }
+            else
+            {
+                return 25;
+            }
+        }
+    }
+    */
 
     public static void main(String[] args)
     {
@@ -620,7 +763,7 @@ public class Player
                                 }
 
                                 // Blueprint rockets (change if condition)
-                                if (unitsOfType[UnitType.Rocket.ordinal()] < 5)
+                                if (unitsOfType[UnitType.Rocket.ordinal()] < 6)
                                 {
                                     for (int j = 0; j < directions.length - 1; j++)
                                     {
@@ -827,7 +970,8 @@ public class Player
                                     {
                                         Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
                                         {
-                                            if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()))
+                                            if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()) &&
+                                                nearbyFriendlyUnit.health() < 100)
                                             {
                                                 gc.heal(unit.id(), nearbyFriendlyUnit.id());
                                                 break;
@@ -1019,7 +1163,8 @@ public class Player
                                     {
                                         Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
                                         {
-                                            if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()))
+                                            if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()) &&
+                                                    nearbyFriendlyUnit.health() < 100)
                                             {
                                                 gc.heal(unit.id(), nearbyFriendlyUnit.id());
                                                 break;
