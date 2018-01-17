@@ -355,6 +355,24 @@ public class Player
         else return WEIGHT_NONE;
     }
 
+    public static void modifyAdjacentAppeal(MapLocation loc, long amount)
+    {
+        int temp_x = loc.getX();
+        int temp_y = loc.getY();
+
+        for (int x = -1; x <= 1; x++)
+        {
+            for (int y = -1; y <= 1; y++)
+            {
+                if(!(x == 0 && y == 0))
+                {
+                    long tmp = potentialFactorySpots.get(temp_x).get(temp_y);
+                    potentialFactorySpots.get(temp_x).set(temp_y, tmp + amount);
+                }
+            }
+        }
+    }
+
     public static void updateSurroundingAppeal(QueuePair<Long, MapLocation> destPair)
     {
         int temp_x = destPair.getSecond().getX();
@@ -811,15 +829,24 @@ public class Player
                                         if (!gc.hasUnitAtLocation(blueprintMapLocation))
                                         {
                                             obsoleteBlueprints.add(blueprint);
+                                            // increase appeal
+                                            modifyAdjacentAppeal(blueprintMapLocation, +1);
                                         }
                                         else
                                         {
                                             Unit unitAtLocation = gc.senseUnitAtLocation(blueprintMapLocation);
                                             if ((unitAtLocation.unitType() == UnitType.Factory ||
-                                                    unitAtLocation.unitType() == UnitType.Rocket) &&
-                                                    unitAtLocation.structureIsBuilt() == 1)
+                                                    unitAtLocation.unitType() == UnitType.Rocket))
                                             {
-                                                obsoleteBlueprints.add(blueprint);
+                                                if (unitAtLocation.structureIsBuilt() == 1)
+                                                {
+                                                    obsoleteBlueprints.add(blueprint);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                // increase appeal
+                                                modifyAdjacentAppeal(blueprintMapLocation, +1);
                                             }
                                         }
                                     }
@@ -854,11 +881,13 @@ public class Player
                                     Direction blueprintDirection = null;
                                     while (!tempQueue.isEmpty())
                                     {
-                                        blueprintDirection = unitMapLocation.directionTo(tempQueue.poll().getSecond());
+                                        tempLoc = tempQueue.poll().getSecond();
+                                        blueprintDirection = unitMapLocation.directionTo(tempLoc);
                                         if (gc.canBlueprint(unit.id(), UnitType.Factory, blueprintDirection))
                                         {
                                             gc.blueprint(unit.id(), UnitType.Factory, blueprintDirection);
                                             unitsOfType[UnitType.Factory.ordinal()]++;
+                                            modifyAdjacentAppeal(tempLoc, -1);
                                             break;
                                         }
                                     }
