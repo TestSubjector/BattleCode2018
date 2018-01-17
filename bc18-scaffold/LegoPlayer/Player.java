@@ -7,6 +7,7 @@ public class Player
     static Random random;
     static GameController gc;
     static Direction[] directions;
+    static ArrayList<Direction> randomDirections;
     static UnitType[] unitTypes;
     static Planet homePlanet;
     static Planet awayPlanet;
@@ -54,6 +55,9 @@ public class Player
 
         // Cardinal directions
         directions = Direction.values();
+
+        // Direction list (to be randomized before each use)
+        randomDirections = new ArrayList<Direction>(Arrays.asList(directions));
 
         // Unit types
         unitTypes = UnitType.values();
@@ -231,9 +235,14 @@ public class Player
     // Unloads a robot, if possible
     public static boolean tryToUnloadRobot(Unit factory)
     {
-        for (int i = 0; i < directions.length - 1; i++)
+        Collections.shuffle(randomDirections);
+        for (int i = 0; i < randomDirections.size(); i++)
         {
-            Direction unloadDirection = directions[i];
+            Direction unloadDirection = randomDirections.get(i);
+            if (unloadDirection == Direction.Center)
+            {
+                continue;
+            }
             if (gc.canUnload(factory.id(), unloadDirection))
             {
                 gc.unload(factory.id(), unloadDirection);
@@ -818,11 +827,12 @@ public class Player
                                 }
 
                                 // Mine karbonite if adjacent to or standing on a mine
-                                for (int j = 0; j < directions.length; j++)
+                                Collections.shuffle(randomDirections);
+                                for (int j = 0; j < randomDirections.size(); j++)
                                 {
-                                    if (gc.canHarvest(unit.id(), directions[j]))
+                                    if (gc.canHarvest(unit.id(), randomDirections.get(j)))
                                     {
-                                        gc.harvest(unit.id(), directions[j]);
+                                        gc.harvest(unit.id(), randomDirections.get(j));
                                         workerMinedThisTurn = true;
                                         break;
                                     }
@@ -903,11 +913,16 @@ public class Player
                                 }
 
                                 // Blueprint rockets (change if condition)
+                                Collections.shuffle(randomDirections);
                                 if (unitsOfType[UnitType.Rocket.ordinal()] < 6)
                                 {
-                                    for (int j = 0; j < directions.length - 1; j++)
+                                    for (int j = 0; j < randomDirections.size(); j++)
                                     {
-                                        Direction blueprintDirection = directions[j];
+                                        Direction blueprintDirection = randomDirections.get(j);
+                                        if (blueprintDirection == Direction.Center)
+                                        {
+                                            continue;
+                                        }
                                         if (gc.canBlueprint(unit.id(), UnitType.Rocket, blueprintDirection))
                                         {
                                             gc.blueprint(unit.id(), UnitType.Rocket, blueprintDirection);
@@ -955,9 +970,14 @@ public class Player
                                 // Replicate worker
                                 if (unitsOfType[UnitType.Worker.ordinal()] < maxWorkerLimitAtTurn(currentRound))
                                 {
-                                    for (int j = 0; j < directions.length - 1; j++)
+                                    Collections.shuffle(randomDirections);
+                                    for (int j = 0; j < randomDirections.size(); j++)
                                     {
-                                        Direction replicateDirection = directions[j];
+                                        Direction replicateDirection = randomDirections.get(j);
+                                        if (replicateDirection == Direction.Center)
+                                        {
+                                            continue;
+                                        }
                                         if (gc.canReplicate(unit.id(), replicateDirection))
                                         {
                                             gc.replicate(unit.id(), replicateDirection);
@@ -1283,11 +1303,18 @@ public class Player
                             MapLocation unitMapLocation = unitLocation.mapLocation();
                             if (unit.unitType() == UnitType.Rocket)
                             {
-                                for (Direction direction : directions)
+                                Collections.shuffle(randomDirections);
+                                for (int j = 0; j < randomDirections.size(); j++)
                                 {
-                                    if (gc.canUnload(unit.id(), direction))
+                                    Direction unloadDirection = randomDirections.get(j);
+                                    if (unloadDirection == Direction.Center)
                                     {
-                                        gc.unload(unit.id(), direction);
+                                        continue;
+                                    }
+                                    if (gc.canUnload(unit.id(), unloadDirection))
+                                    {
+                                        gc.unload(unit.id(), unloadDirection);
+                                        break;
                                     }
                                 }
                             }
@@ -1312,11 +1339,12 @@ public class Player
                                 }
 
                                 // Mine karbonite if adjacent to or standing on a mine
-                                for (int j = 0; j < directions.length; j++)
+                                Collections.shuffle(randomDirections);
+                                for (int j = 0; j < randomDirections.size(); j++)
                                 {
-                                    if (gc.canHarvest(unit.id(), directions[j]))
+                                    if (gc.canHarvest(unit.id(), randomDirections.get(j)))
                                     {
-                                        gc.harvest(unit.id(), directions[j]);
+                                        gc.harvest(unit.id(), randomDirections.get(j));
                                         workerMinedThisTurn = true;
                                         break;
                                     }
@@ -1331,9 +1359,14 @@ public class Player
                                 // Replicate worker if enough Karbonite or Earth flooded
                                 if(currentRound > 749 || gc.karbonite() > 100)
                                 {
-                                    for (int j = 0; j < directions.length - 1; j++)
+                                    Collections.shuffle(randomDirections);
+                                    for (int j = 0; j < randomDirections.size(); j++)
                                     {
-                                        Direction replicateDirection = directions[j];
+                                        Direction replicateDirection = randomDirections.get(j);
+                                        if (replicateDirection == Direction.Center)
+                                        {
+                                            continue;
+                                        }
                                         if (gc.canReplicate(unit.id(), replicateDirection))
                                         {
                                             gc.replicate(unit.id(), replicateDirection);
