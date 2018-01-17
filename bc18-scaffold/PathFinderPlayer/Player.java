@@ -1,3 +1,4 @@
+// import the API.
 import java.util.*;
 import bc.*;
 
@@ -17,9 +18,12 @@ public class Player
     static long mapHeight;
     static long mapSize;
     static VecUnit initialWorkers;
+    static long earthInititalTotalKarbonite = 0;
     static Set<MapLocation> earthKarboniteLocations;
-    static Queue<MapLocation> potentialLandingSites;
+    static PriorityQueue<QueuePair<Long, MapLocation>> potentialLandingSites;
+    static ArrayList<QueuePair<Long, MapLocation>> updatedAppealSites;
     static HashMap<MapLocation, LinkedList<GraphPair<MapLocation, Long>>> waypointAdjacencyList;
+
 
     final static int INITIAL_RANGER_ATTACK_DISTANCE = 7;  // Rounding For Now
     final static int INITIAL_RANGER_MOVEMENT_COOLDOWN = 20;
@@ -30,12 +34,18 @@ public class Player
     final static int INITIAL_KNIGHT_ATTACK_DISTANCE = 1;
     final static int INITIAL_KNIGHT_MOVEMENT_COOLDOWN = 15;
     final static int INITIAL_KNIGHT_ATTACK_COOLDOWN = 20;
+    static int rangerTalentVision = 0;
 
-    //25+25+25+100+100+75+100+100+25+75+200+25+75
-    final static UnitType[] RESEARCH_QUEUE_HARD = {UnitType.Worker, UnitType.Ranger, UnitType.Mage, UnitType.Rocket,
-            UnitType.Ranger, UnitType.Mage, UnitType.Mage, UnitType.Rocket,
-            UnitType.Healer, UnitType.Healer, UnitType.Mage, UnitType.Knight,
-            UnitType.Knight};
+    final static long WEIGHT_IMPASSABLE = -2;
+    //    final static long WEIGHT_KARBONITE_CENTER = -1; // central tile is Karb; undesirable
+    final static long WEIGHT_ROCKET = -1;
+    //    final static long WEIGHT_KARBONITE_SIDE = +1; // Karb to the side; desirable
+    final static long WEIGHT_NONE = 0;
+    // 25+25+100+100+100+25+75+100+25+75+100+25+75+100+25+75
+    final static UnitType[] RESEARCH_QUEUE_HARD = {UnitType.Worker, UnitType.Ranger, UnitType.Ranger, UnitType.Rocket,
+            UnitType.Rocket, UnitType.Healer, UnitType.Healer, UnitType.Rocket, UnitType.Worker,
+            UnitType.Worker, UnitType.Worker, UnitType.Mage, UnitType.Mage, UnitType.Mage,
+            UnitType.Knight, UnitType.Knight};
 
     public static void initializeGlobals()
     {
@@ -81,11 +91,11 @@ public class Player
         mapHeight = homeMap.getHeight();
         mapSize = mapHeight * mapHeight;
 
+        // Get initial worker units
+        initialWorkers = homeMap.getInitial_units();
+
         if (homePlanet == Planet.Earth)
         {
-            // Get initial worker units
-            initialWorkers = homeMap.getInitial_units();
-
             // Get initial karbonite locations
             earthKarboniteLocations = new HashSet<MapLocation>();
             for (int x = 0; x < mapWidth; x++)
@@ -97,6 +107,7 @@ public class Player
                     if (karboniteAtTempMapLocation > 0)
                     {
                         earthKarboniteLocations.add(tempMapLocation);
+                        earthInititalTotalKarbonite += karboniteAtTempMapLocation;
                     }
                 }
             }
@@ -105,6 +116,93 @@ public class Player
         {
             earthKarboniteLocations = null;
         }
+        potentialLandingSites = new PriorityQueue<QueuePair<Long, MapLocation>>();
+        updatedAppealSites = new ArrayList<QueuePair<Long, MapLocation>>();
+
+        waypointAdjacencyList = new HashMap<MapLocation, LinkedList<GraphPair<MapLocation, Long>>>();
+    }
+
+    public static void findPotentialLandingSites()
+    {
+        // Find potential landing spots and store in a priority queue
+        // (Add priority logic later using Pair class and comparators)
+        if (gc.planet() == Planet.Earth)
+        {
+            for (int i = 0; i < awayMap.getWidth(); i++)
+            {
+                for (int j = 0; j < awayMap.getHeight(); j++)
+                {
+                    MapLocation tempLoc = new MapLocation(Planet.Mars, i, j);
+                    if (awayMap.isPassableTerrainAt(tempLoc) != 0)
+                    {
+                        long appeal = WEIGHT_NONE;
+
+                        // top row
+                        appeal += getLocationAppeal(i - 1,j + 1);
+                        appeal += getLocationAppeal(i,j + 1);
+                        appeal += getLocationAppeal(i + 1,j + 1);
+
+                        // middle row
+                        appeal += getLocationAppeal(i - 1,j);
+                        appeal += getLocationAppeal(i + 1,j);
+
+                        // bottom row
+                        appeal += getLocationAppeal(i - 1,j - 1);
+                        appeal += getLocationAppeal(i,j - 1);
+                        appeal += getLocationAppeal(i + 1,j - 1);
+
+                        potentialLandingSites.add(new QueuePair<>(appeal, tempLoc));
+                    }
+                }
+            }
+        }
+    }
+
+    public static void computeWaypointGraph()
+    {
+        // Compute waypoints
+        for (int x = 0; x < mapWidth; x++)
+        {
+            for (int y = 0; y < mapHeight; y++)
+            {
+                MapLocation possibleCornerMapLocation = new MapLocation(gc.planet(), x, y);
+                for (int i = 1; i < directions.length - 1; i += 2)
+                {
+                    MapLocation possibleObstacleMapLocation = possibleCornerMapLocation.add(directions[i]);
+                    MapLocation possibleFreeMapLocation1 = possibleCornerMapLocation.add(directions[i - 1]);
+                    MapLocation possibleFreeMapLocation2 = possibleCornerMapLocation.add(directions[(i + 1) % 8]);
+                    if (homeMap.onMap(possibleObstacleMapLocation) &&
+                            homeMap.isPassableTerrainAt(possibleObstacleMapLocation) == 0 &&
+                            homeMap.isPassableTerrainAt(possibleFreeMapLocation1) == 1 &&
+                            homeMap.isPassableTerrainAt(possibleFreeMapLocation2) == 1)
+                    {
+                        waypointAdjacencyList.put(possibleCornerMapLocation, new LinkedList<GraphPair<MapLocation, Long>>());
+                    }
+                }
+            }
+        }
+
+        // Compute straight line paths
+        long edges = 0;
+        Set<MapLocation> waypoints = waypointAdjacencyList.keySet();
+        for (MapLocation fromWaypoint : waypoints)
+        {
+            LinkedList<GraphPair<MapLocation, Long>> fromWaypointList = waypointAdjacencyList.get(fromWaypoint);
+            for (MapLocation toWaypoint : waypoints)
+            {
+                if (fromWaypoint.equals(toWaypoint))
+                {
+                    continue;
+                }
+                if (isUninterruptedPathBetween(fromWaypoint, toWaypoint))
+                {
+                    fromWaypointList.add(new GraphPair<MapLocation, Long>(toWaypoint, diagonalDistanceBetween(fromWaypoint, toWaypoint)));
+                    edges++;
+                }
+            }
+        }
+        System.out.println("Waypoints: " + waypoints.size());
+        System.out.println("Edges: " + edges);
     }
 
     public static long diagonalDistanceBetween(MapLocation first, MapLocation second)
@@ -127,7 +225,7 @@ public class Player
 
     public static boolean moveUnitInDirection(Unit unit, Direction candidateDirection)
     {
-        int directionIndex = candidateDirection.swigValue();
+        int directionIndex = candidateDirection.ordinal();
         boolean didUnitMove = false;
         if (gc.isMoveReady(unit.id()))
         {
@@ -209,7 +307,7 @@ public class Player
     }
 
     // Unloads a robot, if possible
-    public static boolean unloadRobot(Unit factory)
+    public static boolean tryToUnloadRobot(Unit factory)
     {
         for (int i = 0; i < directions.length - 1; i++)
         {
@@ -313,11 +411,256 @@ public class Player
         return incentiveToHunt;
     }
 
+    public static long getLocationAppeal(int x, int y)
+    {
+        if (x < 0 || x >= awayMap.getWidth()) return WEIGHT_IMPASSABLE;
+
+        if (y < 0 || y >= awayMap.getHeight()) return WEIGHT_IMPASSABLE;
+
+        MapLocation tempLoc = new MapLocation(Planet.Mars, x, y);
+
+        // only called from Earth, so awayMap will be Mars
+        if (awayMap.isPassableTerrainAt(tempLoc) == 0) return WEIGHT_IMPASSABLE;
+        else return WEIGHT_NONE;
+    }
+
+    public static void updateSurroundingAppeal(QueuePair<Long, MapLocation> destPair)
+    {
+        int temp_x = destPair.getSecond().getX();
+        int temp_y = destPair.getSecond().getY();
+
+        MapLocation tempLoc;
+        for (int x = -1; x <= 1; x++)
+        {
+            for (int y = -1; y <= 1; y++)
+            {
+                if(!(x == 0 && y == 0))
+                {
+                    tempLoc = new MapLocation(Planet.Mars, temp_x + x, temp_y + y);
+                    if (awayMap.isPassableTerrainAt(tempLoc) != 0)
+                    {
+                        updatedAppealSites.add(0, new QueuePair<>(destPair.getFirst() - WEIGHT_ROCKET, destPair.getSecond()));
+                        // newer updates come earlier, can break once encountered.
+                    }
+                }
+            }
+        }
+    }
+
+    public static long maxWorkerLimitAtTurn(long currentRound)
+    {
+        if(mapSize <=500)
+        {
+            if(currentRound < 75)
+            {
+                if(earthInititalTotalKarbonite > 1000)
+                {
+                    return 20;
+                }
+                else if(earthInititalTotalKarbonite > 750)
+                {
+                    return 15;
+                }
+                else if(earthInititalTotalKarbonite < 100)
+                {
+                    return 5;
+                }
+            }
+            else
+            {
+                return 10;
+            }
+        }
+        else if(mapSize <=900)
+        {
+            if(currentRound < 85)
+            {
+                if(earthInititalTotalKarbonite > 1000)
+                {
+                    return 20;
+                }
+                else if(earthInititalTotalKarbonite > 750)
+                {
+                    return 15;
+                }
+                else if(earthInititalTotalKarbonite < 100)
+                {
+                    return 5;
+                }
+            }
+            else
+            {
+                if(earthInititalTotalKarbonite < 500)
+                {
+                    return 12;
+                }
+                else if(earthInititalTotalKarbonite > 1000)
+                {
+                    return 20;
+                }
+                else
+                {
+                    return 15;
+                }
+            }
+        }
+        else
+        {
+            if(currentRound < 75)
+            {
+                if(earthInititalTotalKarbonite > 3000)
+                {
+                    return 30;
+                }
+                else if(earthInititalTotalKarbonite > 1000)
+                {
+                    return 20;
+                }
+                else
+                {
+                    return 10;
+                }
+            }
+            else
+            {
+                if(earthInititalTotalKarbonite < 500)
+                {
+                    return 10;
+                }
+                else if(earthInititalTotalKarbonite > 1500)
+                {
+                    return 25;
+                }
+                else
+                {
+                    return 15;
+                }
+            }
+        }
+        return 10;
+    }
+
+    /*
+    public static long maxFactoryLimitAtTurn(long currentRound)
+    {
+        if(mapSize <=500)
+        {
+            if(currentRound < 200)
+            {
+                return 3;
+            }
+            else if(currentRound < 600)
+            {
+                return 5;
+            }
+            else
+            {
+                return 3;
+            }
+        }
+        else if(mapSize <=900)
+        {
+            if(currentRound < 200)
+            {
+                return 5;
+            }
+            else if(currentRound < 650)
+            {
+                return 10;
+            }
+            else
+            {
+                return 8;
+            }
+        }
+        else
+        {
+            if(currentRound < 200)
+            {
+                return 10;
+            }
+            else if(currentRound < 650)
+            {
+                return 20;
+            }
+            else
+            {
+                return 10;
+            }
+        }
+    }
+
+    public static long maxRocketLimitAtTurn(long currentRound)
+    {
+        if(mapSize <=500)
+        {
+            if(currentRound < 200)
+            {
+                return 3;
+            }
+            else if(currentRound < 600)
+            {
+                return 6;
+            }
+            else
+            {
+                return 10;
+            }
+        }
+        else if(mapSize <=900)
+        {
+            if(currentRound < 200)
+            {
+                if(earthInititalTotalKarbonite > 1000)
+                {
+                    return 5;
+                }
+                else
+                {
+                    return 3;
+                }
+            }
+            else if(currentRound < 650)
+            {
+                return 10;
+            }
+            else
+            {
+                return 20;
+            }
+        }
+        else
+        {
+            if(currentRound < 200)
+            {
+                if(earthInititalTotalKarbonite > 3000)
+                {
+                    return 6;
+                }
+                else if(earthInititalTotalKarbonite > 1000)
+                {
+                    return 4;
+                }
+                else
+                {
+                    return 3;
+                }
+            }
+            else if(currentRound < 650)
+            {
+                return 15;
+            }
+            else
+            {
+                return 25;
+            }
+        }
+    }
+    */
+
     public static void main(String[] args)
     {
         initializeGlobals();
-
-        gc.queueResearch(UnitType.Rocket);
 
         // Set of unfinished blueprints
         Set<Unit> unfinishedBlueprints = new HashSet<Unit>();
@@ -339,71 +682,9 @@ public class Player
             }
         }
 
-        // Find potential landing spots and store in a priority queue
-        // (Add priority logic later using Pair class and comparators)
-        // potentialLandingSites = new PriorityQueue<MapLocation>();
-        potentialLandingSites = new LinkedList<MapLocation>();
-        if (gc.planet() == Planet.Earth)
-        {
-            MapLocation temp;
-            for (int i = 0; i < mapWidth; i++)
-            {
-                for (int j = 0; j < mapHeight; j++)
-                {
-                    temp = new MapLocation(Planet.Mars, i, j);
-                    if (awayMap.isPassableTerrainAt(temp) != 0)
-                    {
-                        potentialLandingSites.add(temp);
-                    }
-                }
-            }
-        }
+        findPotentialLandingSites();
 
-        waypointAdjacencyList = new HashMap<MapLocation, LinkedList<GraphPair<MapLocation, Long>>>();
-
-        // Compute waypoints
-        for (int x = 0; x < mapWidth; x++)
-        {
-            for (int y = 0; y < mapHeight; y++)
-            {
-                MapLocation possibleCornerMapLocation = new MapLocation(gc.planet(), x, y);
-                for (int i = 1; i < directions.length - 1; i += 2)
-                {
-                    MapLocation possibleObstacleMapLocation = possibleCornerMapLocation.add(directions[i]);
-                    MapLocation possibleFreeMapLocation1 = possibleCornerMapLocation.add(directions[i - 1]);
-                    MapLocation possibleFreeMapLocation2 = possibleCornerMapLocation.add(directions[(i + 1) % 8]);
-                    if (homeMap.onMap(possibleObstacleMapLocation) &&
-                            homeMap.isPassableTerrainAt(possibleObstacleMapLocation) == 0 &&
-                            homeMap.isPassableTerrainAt(possibleFreeMapLocation1) == 1 &&
-                            homeMap.isPassableTerrainAt(possibleFreeMapLocation2) == 1)
-                    {
-                        waypointAdjacencyList.put(possibleCornerMapLocation, new LinkedList<GraphPair<MapLocation, Long>>());
-                    }
-                }
-            }
-        }
-
-        // Compute straight line paths
-        long edges = 0;
-        Set<MapLocation> waypoints = waypointAdjacencyList.keySet();
-        for (MapLocation fromWaypoint : waypoints)
-        {
-            LinkedList<GraphPair<MapLocation, Long>> fromWaypointList = waypointAdjacencyList.get(fromWaypoint);
-            for (MapLocation toWaypoint : waypoints)
-            {
-                if (fromWaypoint.equals(toWaypoint))
-                {
-                    continue;
-                }
-                if (isUninterruptedPathBetween(fromWaypoint, toWaypoint))
-                {
-                    fromWaypointList.add(new GraphPair<MapLocation, Long>(toWaypoint, diagonalDistanceBetween(fromWaypoint, toWaypoint)));
-                    edges++;
-                }
-            }
-        }
-        System.out.println("Waypoints: " + waypoints.size());
-        System.out.println("Edges: " + edges);
+        computeWaypointGraph();
 
         while (true)
         {
@@ -413,6 +694,10 @@ public class Player
                 System.out.println("Time left at start of round " + currentRound + " : " + gc.getTimeLeftMs());
             }
 
+            if(currentRound == 150)
+            {
+                rangerTalentVision = 30;
+            }
             // Clear unit lists
             for (int i = 0; i < unitTypes.length; i++)
             {
@@ -467,8 +752,8 @@ public class Player
                             if (unitTypes[i] == UnitType.Worker)
                             {
                                 boolean workerBuiltThisTurn = false;
-                                boolean workedMinedThisTurn = false;
-                                boolean workedReplicatedThisTurn = false;
+                                boolean workerMinedThisTurn = false;
+                                boolean workerReplicatedThisTurn = false;
                                 // Build a structure if adjacent to one
                                 for (int j = 0; j < adjacentUnits.size(); j++)
                                 {
@@ -479,6 +764,7 @@ public class Player
                                         {
                                             gc.build(unit.id(), adjacentUnit.id());
                                             workerBuiltThisTurn = true;
+                                            break;
                                         }
                                     }
                                 }
@@ -489,33 +775,13 @@ public class Player
                                     if (gc.canHarvest(unit.id(), directions[j]))
                                     {
                                         gc.harvest(unit.id(), directions[j]);
-                                        workedMinedThisTurn = true;
+                                        workerMinedThisTurn = true;
                                         break;
                                     }
                                 }
 
-                                // Make space for other units
-                                // (Kushal's suggestion : make this the last movement priority,
-                                //  moving to building and mining targets is more important)
-                                if(!workedMinedThisTurn && !workerBuiltThisTurn)
-                                {
-                                    moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
-                                }
-
-
-                                // Make space for other units
-                                // (Kushal's suggestion : make this the last movement priority,
-                                //  moving to building and mining targets is more important)
-                                if (!workedMinedThisTurn && !workerBuiltThisTurn)
-                                {
-                                    moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
-                                }
-
                                 // Replicate worker
-                                if (unitsOfType[UnitType.Worker.swigValue()] < 20 && currentRound < 650 ||
-                                        ((currentRound > 130 && currentRound < 400) &&
-                                                (unitsOfType[UnitType.Worker.swigValue()] < mapSize * 2 / (mapHeight + mapWidth) - 10) ||
-                                                unitsOfType[UnitType.Worker.swigValue()] < 10))
+                                if (unitsOfType[UnitType.Worker.ordinal()] < maxWorkerLimitAtTurn(currentRound))
                                 {
                                     for (int j = 0; j < directions.length - 1; j++)
                                     {
@@ -523,8 +789,8 @@ public class Player
                                         if (gc.canReplicate(unit.id(), replicateDirection))
                                         {
                                             gc.replicate(unit.id(), replicateDirection);
-                                            unitsOfType[UnitType.Worker.swigValue()]++;
-                                            workedReplicatedThisTurn = true;
+                                            unitsOfType[UnitType.Worker.ordinal()]++;
+                                            workerReplicatedThisTurn = true;
                                             break;
                                         }
                                     }
@@ -558,7 +824,7 @@ public class Player
                                     unfinishedBlueprints.remove(obsoleteBlueprint);
                                 }
                                 // Blueprint factories (change if condition)
-                                if (unitsOfType[UnitType.Factory.swigValue()] < 8)
+                                if (unitsOfType[UnitType.Factory.ordinal()] < 8)
                                 {
                                     for (int j = 0; j < directions.length - 1; j++)
                                     {
@@ -566,13 +832,13 @@ public class Player
                                         if (gc.canBlueprint(unit.id(), UnitType.Factory, blueprintDirection))
                                         {
                                             gc.blueprint(unit.id(), UnitType.Factory, blueprintDirection);
-                                            unitsOfType[UnitType.Factory.swigValue()]++;
+                                            unitsOfType[UnitType.Factory.ordinal()]++;
                                         }
                                     }
                                 }
 
                                 // Blueprint rockets (change if condition)
-                                if (unitsOfType[UnitType.Rocket.swigValue()] < 5)
+                                if (unitsOfType[UnitType.Rocket.ordinal()] < 6)
                                 {
                                     for (int j = 0; j < directions.length - 1; j++)
                                     {
@@ -580,7 +846,7 @@ public class Player
                                         if (gc.canBlueprint(unit.id(), UnitType.Rocket, blueprintDirection))
                                         {
                                             gc.blueprint(unit.id(), UnitType.Rocket, blueprintDirection);
-                                            unitsOfType[UnitType.Rocket.swigValue()]++;
+                                            unitsOfType[UnitType.Rocket.ordinal()]++;
                                         }
                                     }
                                 }
@@ -620,53 +886,21 @@ public class Player
                                 {
                                     moveUnitInDirection(unit, unitLoc.directionTo(closestMineMapLocation));
                                 }
-                            }
-                            if (unit.unitType() == UnitType.Factory)
-                            {
-                                unloadRobot(unit);
-                                if (unit.isFactoryProducing() == 0)
-                                {
-                                    int workerCount = unitsOfType[UnitType.Worker.swigValue()]; // rarely produced
-                                    int knightCount = unitsOfType[UnitType.Knight.swigValue()]; // not being produced
-                                    int rangerCount = unitsOfType[UnitType.Ranger.swigValue()];
-                                    int mageCount = unitsOfType[UnitType.Mage.swigValue()];
-                                    int healerCount = unitsOfType[UnitType.Healer.swigValue()];
 
-                                    // Think of better condition later; produce workers if existing ones are being massacred
-                                    if (workerCount == 0)
-                                    {
-                                        if (gc.canProduceRobot(unit.id(), UnitType.Worker))
-                                        {
-                                            gc.produceRobot(unit.id(), UnitType.Worker);
-                                            unitsOfType[UnitType.Worker.swigValue()]++;
-                                        }
-                                    }
-
-                                    if (rangerCount >= (mageCount + healerCount))
-                                    {
-                                        UnitType typeToBeProduced = (mageCount > healerCount) ? (UnitType.Healer) : (UnitType.Mage);
-                                        if (gc.canProduceRobot(unit.id(), typeToBeProduced))
-                                        {
-                                            gc.produceRobot(unit.id(), typeToBeProduced);
-                                            unitsOfType[typeToBeProduced.swigValue()]++;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (gc.canProduceRobot(unit.id(), UnitType.Ranger))
-                                        {
-                                            gc.produceRobot(unit.id(), UnitType.Ranger);
-                                            unitsOfType[UnitType.Ranger.swigValue()]++;
-                                        }
-                                    }
-                                }
+                                // Make space for other units
+                                // Moved this to end to check results
+                                // Seems better at the bottom
+//                                if(!workerMinedThisTurn && !workerBuiltThisTurn)
+//                                {
+//                                    moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
+//                                }
                             }
                             if (unit.unitType() == UnitType.Ranger)
                             {
                                 if (!unit.location().isInGarrison())
                                 {
                                     VecUnit nearbyEnemyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
-                                            70, theirTeam);
+                                            70 + rangerTalentVision, theirTeam);
 
                                     // Must be refined later with movement code above this
                                     if (unitFrozenByHeat(unit))
@@ -761,7 +995,8 @@ public class Player
                                     {
                                         Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
                                         {
-                                            if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()))
+                                            if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()) &&
+                                                    nearbyFriendlyUnit.health() < 100)
                                             {
                                                 gc.heal(unit.id(), nearbyFriendlyUnit.id());
                                                 break;
@@ -810,8 +1045,58 @@ public class Player
                                     }
                                 }
                             }
+                            if (unit.unitType() == UnitType.Factory)
+                            {
+                                // If it's a new blueprint, add to the set
+                                if (unit.structureIsBuilt() == 0 && !unfinishedBlueprints.contains(unit))
+                                {
+                                    unfinishedBlueprints.add(unit);
+                                }
+                                tryToUnloadRobot(unit);
+                                if (unit.isFactoryProducing() == 0)
+                                {
+                                    int workerCount = unitsOfType[UnitType.Worker.ordinal()]; // rarely produced
+                                    int knightCount = unitsOfType[UnitType.Knight.ordinal()]; // not being produced
+                                    int rangerCount = unitsOfType[UnitType.Ranger.ordinal()];
+                                    int mageCount = unitsOfType[UnitType.Mage.ordinal()];
+                                    int healerCount = unitsOfType[UnitType.Healer.ordinal()];
+
+                                    // Think of better condition later; produce workers if existing ones are being massacred
+                                    if (workerCount == 0)
+                                    {
+                                        if (gc.canProduceRobot(unit.id(), UnitType.Worker))
+                                        {
+                                            gc.produceRobot(unit.id(), UnitType.Worker);
+                                            unitsOfType[UnitType.Worker.ordinal()]++;
+                                        }
+                                    }
+
+                                    if (rangerCount >= 8 * (healerCount))
+                                    {
+                                        UnitType typeToBeProduced = UnitType.Healer;
+                                        if (gc.canProduceRobot(unit.id(), typeToBeProduced))
+                                        {
+                                            gc.produceRobot(unit.id(), typeToBeProduced);
+                                            unitsOfType[typeToBeProduced.ordinal()]++;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (gc.canProduceRobot(unit.id(), UnitType.Ranger))
+                                        {
+                                            gc.produceRobot(unit.id(), UnitType.Ranger);
+                                            unitsOfType[UnitType.Ranger.ordinal()]++;
+                                        }
+                                    }
+                                }
+                            }
                             if (unit.unitType() == UnitType.Rocket)
                             {
+                                // If it's a new blueprint, add to the set
+                                if (unit.structureIsBuilt() == 0 && !unfinishedBlueprints.contains(unit))
+                                {
+                                    unfinishedBlueprints.add(unit);
+                                }
                                 if (unit.structureIsBuilt() == 1)
                                 {
                                     // Check all adjacent squares
@@ -826,13 +1111,31 @@ public class Player
                                     }
                                     if (unit.structureGarrison().size() >= unit.structureMaxCapacity() / 2)
                                     {
-                                        MapLocation dest = potentialLandingSites.remove();
+                                        QueuePair<Long, MapLocation> destPair = potentialLandingSites.poll();
+                                        boolean isOutdated = true;
+                                        while (isOutdated)
+                                        {
+                                            isOutdated = false;
+                                            for (int j = 0; j < updatedAppealSites.size(); j++)
+                                            {
+                                                if (updatedAppealSites.get(j).getSecond().equals(destPair.getSecond())
+                                                        && !(updatedAppealSites.get(j).getFirst().equals(destPair.getFirst())))
+                                                {
+                                                    isOutdated = true;
+                                                    destPair = potentialLandingSites.poll();
+                                                    break;
+                                                }
+                                            }
+                                        }
+
+                                        MapLocation dest = destPair.getSecond();
                                         // potentialLandingSites is supposed to have only those spots
                                         // that are passable, and not already used as a destination.
                                         // Hence, this check should always pass.
                                         if (gc.canLaunchRocket(unit.id(), dest))
                                         {
                                             gc.launchRocket(unit.id(), dest);
+                                            updateSurroundingAppeal(destPair);
                                         }
                                     }
                                 }
@@ -863,6 +1166,130 @@ public class Player
                                     if (gc.canUnload(unit.id(), direction))
                                     {
                                         gc.unload(unit.id(), direction);
+                                    }
+                                }
+                            }
+                            if (unitTypes[i] == UnitType.Worker)
+                            {
+                                boolean workerRepairedThisTurn = false;
+                                boolean workerMinedThisTurn = false;
+                                boolean workerReplicatedThisTurn = false;
+                                // Build a structure if adjacent to one
+                                for (int j = 0; j < adjacentUnits.size(); j++)
+                                {
+                                    Unit adjacentUnit = adjacentUnits.get(j);
+                                    if (adjacentUnit.unitType() == UnitType.Factory || adjacentUnit.unitType() == UnitType.Rocket)
+                                    {
+                                        if (gc.canRepair(unit.id(), adjacentUnit.id()))
+                                        {
+                                            gc.repair(unit.id(), adjacentUnit.id());
+                                            workerRepairedThisTurn = true;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                // Mine karbonite if adjacent to or standing on a mine
+                                for (int j = 0; j < directions.length; j++)
+                                {
+                                    if (gc.canHarvest(unit.id(), directions[j]))
+                                    {
+                                        gc.harvest(unit.id(), directions[j]);
+                                        workerMinedThisTurn = true;
+                                        break;
+                                    }
+                                }
+
+                                // Move Worker
+                                if(!workerMinedThisTurn && !workerRepairedThisTurn)
+                                {
+                                    moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
+                                }
+
+                                // Replicate worker if enough Karbonite or Earth flooded
+                                if(currentRound > 749 || gc.karbonite() > 100)
+                                {
+                                    for (int j = 0; j < directions.length - 1; j++)
+                                    {
+                                        Direction replicateDirection = directions[j];
+                                        if (gc.canReplicate(unit.id(), replicateDirection))
+                                        {
+                                            gc.replicate(unit.id(), replicateDirection);
+                                            unitsOfType[UnitType.Worker.ordinal()]++;
+                                            workerReplicatedThisTurn = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            if (unit.unitType() == UnitType.Healer)
+                            {
+                                if (!unit.location().isInGarrison())
+                                {
+                                    VecUnit nearbyFriendlyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
+                                            50, ourTeam);
+
+                                    if (unitFrozenByHeat(unit))
+                                    {
+                                        continue;
+                                    }
+
+                                    for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
+                                    {
+                                        Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
+                                        {
+                                            if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()) &&
+                                                    nearbyFriendlyUnit.health() < 100)
+                                            {
+                                                gc.heal(unit.id(), nearbyFriendlyUnit.id());
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    moveUnitInRandomDirection(unit);
+                                }
+                            }
+                            if (unit.unitType() == UnitType.Ranger)
+                            {
+                                if (!unit.location().isInGarrison())
+                                {
+                                    VecUnit nearbyEnemyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
+                                            70 + rangerTalentVision, theirTeam);
+
+                                    // Must be refined later with movement code above this
+                                    if (unitFrozenByHeat(unit))
+                                    {
+                                        continue;
+                                    }
+
+                                    long desireToKill = -500;
+                                    long rememberUnit = -1;
+                                    for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+                                    {
+                                        Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
+                                        // Check health of enemy unit ands see if you can win
+                                        // Make bounty rating for all sensed units and attack highest ranked unit
+                                        //if(nearbyEnemyUnit.unitType() != UnitType.Worker)
+                                        {
+                                            if (gc.canAttack(unit.id(), nearbyEnemyUnit.id()))
+                                            {
+                                                long possibleDesireToKill = setBountyScore(unit, nearbyEnemyUnit);
+                                                if (desireToKill < possibleDesireToKill)
+                                                {
+                                                    desireToKill = possibleDesireToKill;
+                                                    rememberUnit = j;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (rememberUnit != -1)
+                                    {
+                                        gc.attack(unit.id(), nearbyEnemyUnits.get(rememberUnit).id());
+                                        //moveUnitAwayFrom(unit, nearbyEnemyUnits.get(rememberUnit).location());
+                                    }
+                                    else
+                                    {
+                                        moveUnitInRandomDirection(unit);
                                     }
                                 }
                             }
