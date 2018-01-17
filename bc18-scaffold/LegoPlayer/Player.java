@@ -18,7 +18,7 @@ public class Player
     static long mapHeight;
     static long mapSize;
     static VecUnit initialWorkers;
-    static long earthInititalTotalKarbonite = 0;
+    static long earthInitialTotalKarbonite = 0;
     static Set<MapLocation> earthKarboniteLocations;
     static PriorityQueue<QueuePair<Long, MapLocation>> potentialLandingSites;
     static ArrayList<QueuePair<Long, MapLocation>> updatedAppealSites;
@@ -105,7 +105,7 @@ public class Player
                     if (karboniteAtTempMapLocation > 0)
                     {
                         earthKarboniteLocations.add(tempMapLocation);
-                        earthInititalTotalKarbonite += karboniteAtTempMapLocation;
+                        earthInitialTotalKarbonite += karboniteAtTempMapLocation;
                     }
                 }
             }
@@ -348,15 +348,15 @@ public class Player
         {
             if(currentRound < 75)
             {
-                if(earthInititalTotalKarbonite > 1000)
+                if(earthInitialTotalKarbonite > 1000)
                 {
                     return 20;
                 }
-                else if(earthInititalTotalKarbonite > 750)
+                else if(earthInitialTotalKarbonite > 750)
                 {
                     return 15;
                 }
-                else if(earthInititalTotalKarbonite < 100)
+                else if(earthInitialTotalKarbonite < 100)
                 {
                     return 5;
                 }
@@ -370,26 +370,26 @@ public class Player
         {
             if(currentRound < 85)
             {
-                if(earthInititalTotalKarbonite > 1000)
+                if(earthInitialTotalKarbonite > 1000)
                 {
                     return 20;
                 }
-                else if(earthInititalTotalKarbonite > 750)
+                else if(earthInitialTotalKarbonite > 750)
                 {
                     return 15;
                 }
-                else if(earthInititalTotalKarbonite < 100)
+                else if(earthInitialTotalKarbonite < 100)
                 {
                     return 5;
                 }
             }
             else
             {
-                if(earthInititalTotalKarbonite < 500)
+                if(earthInitialTotalKarbonite < 500)
                 {
                     return 12;
                 }
-                else if(earthInititalTotalKarbonite > 1000)
+                else if(earthInitialTotalKarbonite > 1000)
                 {
                     return 20;
                 }
@@ -403,11 +403,11 @@ public class Player
         {
             if(currentRound < 75)
             {
-                if(earthInititalTotalKarbonite > 3000)
+                if(earthInitialTotalKarbonite > 3000)
                 {
                     return 30;
                 }
-                else if(earthInititalTotalKarbonite > 1000)
+                else if(earthInitialTotalKarbonite > 1000)
                 {
                     return 20;
                 }
@@ -418,11 +418,11 @@ public class Player
             }
             else
             {
-                if(earthInititalTotalKarbonite < 500)
+                if(earthInitialTotalKarbonite < 500)
                 {
                     return 10;
                 }
-                else if(earthInititalTotalKarbonite > 1500)
+                else if(earthInitialTotalKarbonite > 1500)
                 {
                     return 25;
                 }
@@ -506,7 +506,7 @@ public class Player
         {
             if(currentRound < 200)
             {
-                if(earthInititalTotalKarbonite > 1000)
+                if(earthInitialTotalKarbonite > 1000)
                 {
                     return 5;
                 }
@@ -528,11 +528,11 @@ public class Player
         {
             if(currentRound < 200)
             {
-                if(earthInititalTotalKarbonite > 3000)
+                if(earthInitialTotalKarbonite > 3000)
                 {
                     return 6;
                 }
-                else if(earthInititalTotalKarbonite > 1000)
+                else if(earthInitialTotalKarbonite > 1000)
                 {
                     return 4;
                 }
@@ -552,6 +552,50 @@ public class Player
         }
     }
     */
+
+    // This for Rangers only currently
+    // Rational is purely on lost damage because of distance that needs to be travelled
+
+    public static long getEnemyUnitRank(Unit enemyUnit)
+    {
+        long enemyUnitPriority = 10;
+        if(enemyUnit.unitType() == UnitType.Worker)
+        {
+            enemyUnitPriority = 14;
+        }
+        else if(enemyUnit.unitType() == UnitType.Factory)
+        {
+            enemyUnitPriority = 12;
+        }
+        else if(enemyUnit.unitType() == UnitType.Rocket)
+        {
+            enemyUnitPriority = 10;
+        }
+        else if(enemyUnit.unitType() == UnitType.Knight)
+        {
+            enemyUnitPriority = 8;
+        }
+        else if(enemyUnit.unitType() == UnitType.Healer)
+        {
+            enemyUnitPriority = 6;
+        }
+        else if(enemyUnit.unitType() == UnitType.Mage)
+        {
+            enemyUnitPriority = 4;
+        }
+        else if(enemyUnit.unitType() == UnitType.Ranger)
+        {
+            enemyUnitPriority = 2;
+        }
+
+        // One-shot kill
+        if(enemyUnit.health() <=40)
+        {
+            enemyUnitPriority /= 2;
+        }
+
+        return enemyUnitPriority;
+    }
 
     public static void main(String[] args)
     {
@@ -629,11 +673,27 @@ public class Player
                 typeSortedUnitLists.get(unitTypes[i]).clear();
             }
 
+            HashMap<Integer, QueuePair<Long, MapLocation>> visibleEnemyPriorities = new HashMap<Integer, QueuePair<Long, MapLocation>>();
+
             // Fetch current units and sort by type
+            // Also includes code for targeting enemy units globally
             VecUnit units = gc.myUnits();
             for (int i = 0; i < units.size(); i++)
             {
                 Unit unit = units.get(i);
+                Location unitLocation = unit.location();
+                if (!unitLocation.isInGarrison() && !unitLocation.isInSpace())
+                {
+                    VecUnit visibleEnemyUnits  = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), unit.visionRange(), theirTeam);
+                    for(int j = 0; j < visibleEnemyUnits.size(); j++)
+                    {
+                        // Global micro-fighting priority decider
+                        Unit visibleEnemyUnit = visibleEnemyUnits.get(j);
+                        long enemyUnitRank = getEnemyUnitRank(visibleEnemyUnit);
+
+                        visibleEnemyPriorities.put(visibleEnemyUnit.id(), new QueuePair<>(enemyUnitRank, visibleEnemyUnit.location().mapLocation()));
+                    }
+                }
                 typeSortedUnitLists.get(unit.unitType()).add(unit);
             }
 
@@ -702,22 +762,6 @@ public class Player
                                         gc.harvest(unit.id(), directions[j]);
                                         workerMinedThisTurn = true;
                                         break;
-                                    }
-                                }
-
-                                // Replicate worker
-                                if (unitsOfType[UnitType.Worker.ordinal()] < maxWorkerLimitAtTurn(currentRound))
-                                {
-                                    for (int j = 0; j < directions.length - 1; j++)
-                                    {
-                                        Direction replicateDirection = directions[j];
-                                        if (gc.canReplicate(unit.id(), replicateDirection))
-                                        {
-                                            gc.replicate(unit.id(), replicateDirection);
-                                            unitsOfType[UnitType.Worker.ordinal()]++;
-                                            workerReplicatedThisTurn = true;
-                                            break;
-                                        }
                                     }
                                 }
 
@@ -812,6 +856,22 @@ public class Player
                                     moveUnitInDirection(unit, unitLoc.directionTo(closestMineMapLocation));
                                 }
 
+                                // Replicate worker
+                                if (unitsOfType[UnitType.Worker.ordinal()] < maxWorkerLimitAtTurn(currentRound))
+                                {
+                                    for (int j = 0; j < directions.length - 1; j++)
+                                    {
+                                        Direction replicateDirection = directions[j];
+                                        if (gc.canReplicate(unit.id(), replicateDirection))
+                                        {
+                                            gc.replicate(unit.id(), replicateDirection);
+                                            unitsOfType[UnitType.Worker.ordinal()]++;
+                                            workerReplicatedThisTurn = true;
+                                            break;
+                                        }
+                                    }
+                                }
+
                                 // Make space for other units
                                 // Moved this to end to check results
                                 // Seems better at the bottom
@@ -877,40 +937,67 @@ public class Player
                                     VecUnit nearbyEnemyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
                                             70 + rangerTalentVision, theirTeam);
 
-                                    // Must be refined later with movement code above this
-                                    if (unitFrozenByHeat(unit))
+                                    if(nearbyEnemyUnits.size() != 0)
                                     {
-                                        continue;
-                                    }
-
-                                    long desireToKill = -500;
-                                    long rememberUnit = -1;
-                                    for (int j = 0; j < nearbyEnemyUnits.size(); j++)
-                                    {
-                                        Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
-                                        // Check health of enemy unit ands see if you can win
-                                        // Make bounty rating for all sensed units and attack highest ranked unit
-                                        //if(nearbyEnemyUnit.unitType() != UnitType.Worker)
+                                        // Must be refined later with movement code above this
+                                        if (unitFrozenByHeat(unit))
                                         {
-                                            if (gc.canAttack(unit.id(), nearbyEnemyUnit.id()))
+                                            continue;
+                                        }
+
+                                        long desireToKill = -500;
+                                        long rememberUnit = -1;
+                                        for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+                                        {
+                                            Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
+                                            // Check health of enemy unit ands see if you can win
+                                            // Make bounty rating for all sensed units and attack highest ranked unit
+                                            //if(nearbyEnemyUnit.unitType() != UnitType.Worker)
                                             {
-                                                long possibleDesireToKill = setBountyScore(unit, nearbyEnemyUnit);
-                                                if (desireToKill < possibleDesireToKill)
+                                                if (gc.canAttack(unit.id(), nearbyEnemyUnit.id()))
                                                 {
-                                                    desireToKill = possibleDesireToKill;
-                                                    rememberUnit = j;
+                                                    long possibleDesireToKill = setBountyScore(unit, nearbyEnemyUnit);
+                                                    if (desireToKill < possibleDesireToKill)
+                                                    {
+                                                        desireToKill = possibleDesireToKill;
+                                                        rememberUnit = j;
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
-                                    if (rememberUnit != -1)
-                                    {
-                                        gc.attack(unit.id(), nearbyEnemyUnits.get(rememberUnit).id());
-                                        //moveUnitAwayFrom(unit, nearbyEnemyUnits.get(rememberUnit).location());
+                                        if (rememberUnit != -1)
+                                        {
+                                            gc.attack(unit.id(), nearbyEnemyUnits.get(rememberUnit).id());
+                                            //moveUnitAwayFrom(unit, nearbyEnemyUnits.get(rememberUnit).location());
+                                        }
+                                        else
+                                        {
+                                            moveUnitInRandomDirection(unit);
+                                        }
                                     }
                                     else
                                     {
-                                        moveUnitInRandomDirection(unit);
+                                        // QueuePair<Long, Unit> enemyData;
+                                        Integer bestEnemyRank = 15;
+                                        // To fix uninitialisation warning
+                                        MapLocation targetEnemyMapLocation = unitMapLocation;
+                                        for(HashMap.Entry<Integer, QueuePair<Long, MapLocation>> entry : visibleEnemyPriorities.entrySet())
+                                        {
+                                            Integer enemyUnitID = entry.getKey();
+                                            Long primitiveRank = entry.getValue().getFirst();
+                                            MapLocation enemyUnitMapLocation = entry.getValue().getSecond();
+                                            primitiveRank *= (1 + (2 * unitMapLocation.distanceSquaredTo(enemyUnitMapLocation) -
+                                                                    (70 + rangerTalentVision)/ (mapWidth + mapHeight)));
+                                            if(primitiveRank < bestEnemyRank)
+                                            {
+                                                targetEnemyMapLocation = enemyUnitMapLocation;
+                                            }
+                                        }
+                                        if(targetEnemyMapLocation == unitMapLocation ||
+                                                !moveUnitInDirection(unit, unitMapLocation.directionTo(targetEnemyMapLocation)));
+                                        {
+                                            moveUnitInRandomDirection(unit);
+                                        }
                                     }
                                 }
 
@@ -960,6 +1047,8 @@ public class Player
                                 {
                                     VecUnit nearbyFriendlyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
                                             50, ourTeam);
+                                    boolean hasHealedThisTurn = false;
+                                    boolean hasMovedThisTurn = false;
 
                                     if (unitFrozenByHeat(unit))
                                     {
@@ -968,14 +1057,26 @@ public class Player
 
                                     for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
                                     {
+
                                         Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
                                         {
+                                            // Since we are ony considering Workers & Rangers right now
                                             if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()) &&
                                                 nearbyFriendlyUnit.health() < 100)
                                             {
                                                 gc.heal(unit.id(), nearbyFriendlyUnit.id());
-                                                break;
+                                                hasHealedThisTurn = true;
                                             }
+                                            if(nearbyFriendlyUnit.health() < 100 &&
+                                                    moveUnitTowards(unit, nearbyFriendlyUnit.location()));
+                                            {
+                                                hasMovedThisTurn = true;
+                                            }
+                                        }
+
+                                        if(hasMovedThisTurn && hasHealedThisTurn)
+                                        {
+                                            break;
                                         }
                                     }
                                     moveUnitInRandomDirection(unit);
