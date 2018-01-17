@@ -1,7 +1,6 @@
 // import the API.
 import java.util.*;
 import bc.*;
-import org.omg.PortableInterceptor.NON_EXISTENT;
 
 public class Player
 {
@@ -99,6 +98,7 @@ public class Player
             potentialFactorySpots = new ArrayList<>();
             for (int x = 0; x < mapWidth; x++)
             {
+                potentialFactorySpots.add(new ArrayList<Long>((int)mapHeight));
                 for (int y = 0; y < mapHeight; y++)
                 {
                     MapLocation tempMapLocation = new MapLocation(homePlanet, x, y);
@@ -128,7 +128,11 @@ public class Player
                         appeal += getFactoryLocationAppeal(x,y - 1);
                         appeal += getFactoryLocationAppeal(x + 1,y - 1);
 
-                        potentialFactorySpots.get(x).set(y, appeal);
+                        potentialFactorySpots.get(x).add(appeal);
+                    }
+                    else
+                    {
+                        potentialFactorySpots.get(x).add(-1000L);
                     }
                 }
             }
@@ -335,7 +339,7 @@ public class Player
 
         if (y < 0 || y >= awayMap.getHeight()) return WEIGHT_IMPASSABLE;
 
-        MapLocation tempLoc = new MapLocation(Planet.Mars, x, y);
+        MapLocation tempLoc = new MapLocation(awayPlanet, x, y);
 
         // only called from Earth, so awayMap will be Mars
         if (awayMap.isPassableTerrainAt(tempLoc) == 0) return WEIGHT_IMPASSABLE;
@@ -366,8 +370,12 @@ public class Player
             {
                 if(!(x == 0 && y == 0))
                 {
-                    long tmp = potentialFactorySpots.get(temp_x).get(temp_y);
-                    potentialFactorySpots.get(temp_x).set(temp_y, tmp + amount);
+                    MapLocation tempLoc = new MapLocation(homePlanet, temp_x + x, temp_y + y);
+                    if (homeMap.onMap(tempLoc))
+                    {
+                        long tmp = potentialFactorySpots.get(temp_x + x).get(temp_y + y);
+                        potentialFactorySpots.get(temp_x + x).set(temp_y + y, tmp + amount);
+                    }
                 }
             }
         }
@@ -386,7 +394,7 @@ public class Player
                 if(!(x == 0 && y == 0))
                 {
                     tempLoc = new MapLocation(Planet.Mars, temp_x + x, temp_y + y);
-                    if (awayMap.isPassableTerrainAt(tempLoc) != 0)
+                    if (awayMap.onMap(tempLoc) && awayMap.isPassableTerrainAt(tempLoc) != 0)
                     {
                         updatedAppealSites.add(0, new QueuePair<>(destPair.getFirst() - WEIGHT_ROCKET, destPair.getSecond()));
                         // newer updates come earlier, can break once encountered.
@@ -776,8 +784,9 @@ public class Player
                 }
 
                 // Process unit
-                for (int i = 0; i < unitTypes.length; i++)
+                for (int ii = 0; ii < unitTypes.length; ii++)
                 {
+                    int i = (UnitType.Factory.ordinal() + ii) % unitTypes.length;
                     ArrayList<Unit> unitList = typeSortedUnitLists.get(unitTypes[i]);
                     for (int u = 0; u < unitList.size(); u++)
                     {
@@ -867,7 +876,7 @@ public class Player
                                             if(!(x == 0 && y == 0))
                                             {
                                                 tempLoc = new MapLocation(homePlanet, unitMapLocation.getX() + x, unitMapLocation.getY() + y);
-                                                if (homeMap.isPassableTerrainAt(tempLoc) != 0)
+                                                if (homeMap.onMap(tempLoc) && homeMap.isPassableTerrainAt(tempLoc) != 0)
                                                 {
                                                     long newAppeal = potentialFactorySpots.get(tempLoc.getX()).get(tempLoc.getY());
                                                     newAppeal -= gc.karboniteAt(tempLoc); // reduce appeal by amount of karbonite at loc
