@@ -1,232 +1,20 @@
-// import the API.
 import java.util.*;
+
 import bc.*;
+
+import utility.QueuePair;
+
+import static utility.Globals.*;
+import static utility.RocketLandingAlgos.*;
+import static utility.Pathfinding.*;
 
 public class Player
 {
-    static Random random;
-    static GameController gc;
-    static Direction[] directions;
-    static UnitType[] unitTypes;
-    static Planet homePlanet;
-    static Planet awayPlanet;
-    static PlanetMap homeMap;
-    static PlanetMap awayMap;
-    static Team ourTeam;
-    static Team theirTeam;
-    static long mapWidth;
-    static long mapHeight;
-    static long mapSize;
-    static VecUnit initialWorkers;
-    static long earthInititalTotalKarbonite = 0;
-    static Set<MapLocation> earthKarboniteLocations;
-    static PriorityQueue<QueuePair<Long, MapLocation>> potentialLandingSites;
-    static ArrayList<QueuePair<Long, MapLocation>> updatedAppealSites;
-    static HashMap<MapLocation, LinkedList<GraphPair<MapLocation, Long>>> waypointAdjacencyList;
 
-
-    final static int INITIAL_RANGER_ATTACK_DISTANCE = 7;  // Rounding For Now
-    final static int INITIAL_RANGER_MOVEMENT_COOLDOWN = 20;
-    final static int INITIAL_RANGER_ATTACK_COOLDOWN = 20;
-    final static int INITIAL_MAGE_ATTACK_DISTANCE = 5; // Rounding For Now
-    final static int INITIAL_MAGE_MOVEMENT_COOLDOWN = 20;
-    final static int INITIAL_MAGE_ATTACK_COOLDOWN = 20;
-    final static int INITIAL_KNIGHT_ATTACK_DISTANCE = 1;
-    final static int INITIAL_KNIGHT_MOVEMENT_COOLDOWN = 15;
-    final static int INITIAL_KNIGHT_ATTACK_COOLDOWN = 20;
-    static int rangerTalentVision = 0;
-
-    final static long WEIGHT_IMPASSABLE = -2;
-    //    final static long WEIGHT_KARBONITE_CENTER = -1; // central tile is Karb; undesirable
-    final static long WEIGHT_ROCKET = -1;
-    //    final static long WEIGHT_KARBONITE_SIDE = +1; // Karb to the side; desirable
-    final static long WEIGHT_NONE = 0;
-    // 25+25+100+100+100+25+75+100+25+75+100+25+75+100+25+75
-    final static UnitType[] RESEARCH_QUEUE_HARD = {UnitType.Worker, UnitType.Ranger, UnitType.Ranger, UnitType.Rocket,
-            UnitType.Rocket, UnitType.Healer, UnitType.Healer, UnitType.Rocket, UnitType.Worker,
-            UnitType.Worker, UnitType.Worker, UnitType.Mage, UnitType.Mage, UnitType.Mage,
-            UnitType.Knight, UnitType.Knight};
-
-    public static void initializeGlobals()
-    {
-        // Connect to the manager, starting the game
-        gc = new GameController();
-
-        // Random number generator
-        random = new Random();
-
-        // Cardinal directions
-        directions = Direction.values();
-
-        // Unit types
-        unitTypes = UnitType.values();
-
-        // Get planets and initial map states
-        homePlanet = gc.planet();
-        homeMap = gc.startingMap(gc.planet());
-        if (homePlanet == Planet.Mars)
-        {
-            awayPlanet = Planet.Earth;
-            awayMap = gc.startingMap(Planet.Earth);
-        }
-        else
-        {
-            awayPlanet = Planet.Mars;
-            awayMap = gc.startingMap(Planet.Mars);
-        }
-
-        // Get team designations
-        ourTeam = gc.team();
-        if (ourTeam == Team.Blue)
-        {
-            theirTeam = Team.Red;
-        }
-        else
-        {
-            theirTeam = Team.Blue;
-        }
-
-        // Get map dimensions and calculate size
-        mapWidth = homeMap.getWidth();
-        mapHeight = homeMap.getHeight();
-        mapSize = mapHeight * mapHeight;
-
-        // Get initial worker units
-        initialWorkers = homeMap.getInitial_units();
-
-        if (homePlanet == Planet.Earth)
-        {
-            // Get initial karbonite locations
-            earthKarboniteLocations = new HashSet<MapLocation>();
-            for (int x = 0; x < mapWidth; x++)
-            {
-                for (int y = 0; y < mapHeight; y++)
-                {
-                    MapLocation tempMapLocation = new MapLocation(homePlanet, x, y);
-                    long karboniteAtTempMapLocation = homeMap.initialKarboniteAt(tempMapLocation);
-                    if (karboniteAtTempMapLocation > 0)
-                    {
-                        earthKarboniteLocations.add(tempMapLocation);
-                        earthInititalTotalKarbonite += karboniteAtTempMapLocation;
-                    }
-                }
-            }
-        }
-        else
-        {
-            earthKarboniteLocations = null;
-        }
-        potentialLandingSites = new PriorityQueue<QueuePair<Long, MapLocation>>();
-        updatedAppealSites = new ArrayList<QueuePair<Long, MapLocation>>();
-
-        waypointAdjacencyList = new HashMap<MapLocation, LinkedList<GraphPair<MapLocation, Long>>>();
-    }
-
-    public static void findPotentialLandingSites()
-    {
-        // Find potential landing spots and store in a priority queue
-        // (Add priority logic later using Pair class and comparators)
-        if (gc.planet() == Planet.Earth)
-        {
-            for (int i = 0; i < awayMap.getWidth(); i++)
-            {
-                for (int j = 0; j < awayMap.getHeight(); j++)
-                {
-                    MapLocation tempLoc = new MapLocation(Planet.Mars, i, j);
-                    if (awayMap.isPassableTerrainAt(tempLoc) != 0)
-                    {
-                        long appeal = WEIGHT_NONE;
-
-                        // top row
-                        appeal += getLocationAppeal(i - 1,j + 1);
-                        appeal += getLocationAppeal(i,j + 1);
-                        appeal += getLocationAppeal(i + 1,j + 1);
-
-                        // middle row
-                        appeal += getLocationAppeal(i - 1,j);
-                        appeal += getLocationAppeal(i + 1,j);
-
-                        // bottom row
-                        appeal += getLocationAppeal(i - 1,j - 1);
-                        appeal += getLocationAppeal(i,j - 1);
-                        appeal += getLocationAppeal(i + 1,j - 1);
-
-                        potentialLandingSites.add(new QueuePair<>(appeal, tempLoc));
-                    }
-                }
-            }
-        }
-    }
-
-    public static void computeWaypointGraph()
-    {
-        // Compute waypoints
-        for (int x = 0; x < mapWidth; x++)
-        {
-            for (int y = 0; y < mapHeight; y++)
-            {
-                MapLocation possibleCornerMapLocation = new MapLocation(gc.planet(), x, y);
-                for (int i = 1; i < directions.length - 1; i += 2)
-                {
-                    MapLocation possibleObstacleMapLocation = possibleCornerMapLocation.add(directions[i]);
-                    MapLocation possibleFreeMapLocation1 = possibleCornerMapLocation.add(directions[i - 1]);
-                    MapLocation possibleFreeMapLocation2 = possibleCornerMapLocation.add(directions[(i + 1) % 8]);
-                    if (homeMap.onMap(possibleObstacleMapLocation) &&
-                            homeMap.isPassableTerrainAt(possibleObstacleMapLocation) == 0 &&
-                            homeMap.isPassableTerrainAt(possibleFreeMapLocation1) == 1 &&
-                            homeMap.isPassableTerrainAt(possibleFreeMapLocation2) == 1)
-                    {
-                        waypointAdjacencyList.put(possibleCornerMapLocation, new LinkedList<GraphPair<MapLocation, Long>>());
-                    }
-                }
-            }
-        }
-
-        // Compute straight line paths
-        long edges = 0;
-        Set<MapLocation> waypoints = waypointAdjacencyList.keySet();
-        for (MapLocation fromWaypoint : waypoints)
-        {
-            LinkedList<GraphPair<MapLocation, Long>> fromWaypointList = waypointAdjacencyList.get(fromWaypoint);
-            for (MapLocation toWaypoint : waypoints)
-            {
-                if (fromWaypoint.equals(toWaypoint))
-                {
-                    continue;
-                }
-                if (isUninterruptedPathBetween(fromWaypoint, toWaypoint))
-                {
-                    fromWaypointList.add(new GraphPair<MapLocation, Long>(toWaypoint, diagonalDistanceBetween(fromWaypoint, toWaypoint)));
-                    edges++;
-                }
-            }
-        }
-        System.out.println("Waypoints: " + waypoints.size());
-        System.out.println("Edges: " + edges);
-    }
-
-    public static long diagonalDistanceBetween(MapLocation first, MapLocation second)
-    {
-        return Math.max(Math.abs(first.getX() - second.getX()), Math.abs(first.getY() - second.getY()));
-    }
-
-    public static boolean isUninterruptedPathBetween(MapLocation from, MapLocation to)
-    {
-        while (!from.equals(to))
-        {
-            from = from.add(from.directionTo(to));
-            if (homeMap.isPassableTerrainAt(from) != 1)
-            {
-                return false;
-            }
-        }
-        return true;
-    }
 
     public static boolean moveUnitInDirection(Unit unit, Direction candidateDirection)
     {
         int directionIndex = candidateDirection.ordinal();
-        boolean didUnitMove = false;
         if (gc.isMoveReady(unit.id()))
         {
             int delta = 1;
@@ -276,21 +64,21 @@ public class Player
     // Resolve Center Direction at some later day
     public static void moveUnitAwayFromMultipleUnits(VecUnit nearbyUnits, Unit unit)
     {
-        long[] directionArray = {1,1,1,1,1,1,1,1,1};
+        long[] directionArray = {1, 1, 1, 1, 1, 1, 1, 1, 1};
         long numberOfNearbyUnits = nearbyUnits.size();
         long count = 8;
         MapLocation unitLocation = unit.location().mapLocation();
-        for(int i = 0; i< numberOfNearbyUnits; i++)
+        for (int i = 0; i < numberOfNearbyUnits; i++)
         {
             // Gives Direction Between Units
             Direction directionToOtherUnit = unitLocation.directionTo(nearbyUnits.get(i).location().mapLocation());
             directionArray[directionToOtherUnit.ordinal()] = 0;
         }
-        for(int j = 0; j < 8; j++)
+        for (int j = 0; j < 8; j++)
         {
-            if(directionArray[j] != 0)
+            if (directionArray[j] != 0)
             {
-                if(moveUnitInDirection(unit, Direction.values()[j]))
+                if (moveUnitInDirection(unit, Direction.values()[j]))
                 {
                     break;
                 }
@@ -300,7 +88,7 @@ public class Player
                 count--;
             }
         }
-        if(count == 0)
+        if (count == 0)
         {
             moveUnitInRandomDirection(unit);
         }
@@ -411,57 +199,21 @@ public class Player
         return incentiveToHunt;
     }
 
-    public static long getLocationAppeal(int x, int y)
-    {
-        if (x < 0 || x >= awayMap.getWidth()) return WEIGHT_IMPASSABLE;
-
-        if (y < 0 || y >= awayMap.getHeight()) return WEIGHT_IMPASSABLE;
-
-        MapLocation tempLoc = new MapLocation(Planet.Mars, x, y);
-
-        // only called from Earth, so awayMap will be Mars
-        if (awayMap.isPassableTerrainAt(tempLoc) == 0) return WEIGHT_IMPASSABLE;
-        else return WEIGHT_NONE;
-    }
-
-    public static void updateSurroundingAppeal(QueuePair<Long, MapLocation> destPair)
-    {
-        int temp_x = destPair.getSecond().getX();
-        int temp_y = destPair.getSecond().getY();
-
-        MapLocation tempLoc;
-        for (int x = -1; x <= 1; x++)
-        {
-            for (int y = -1; y <= 1; y++)
-            {
-                if(!(x == 0 && y == 0))
-                {
-                    tempLoc = new MapLocation(Planet.Mars, temp_x + x, temp_y + y);
-                    if (awayMap.isPassableTerrainAt(tempLoc) != 0)
-                    {
-                        updatedAppealSites.add(0, new QueuePair<>(destPair.getFirst() - WEIGHT_ROCKET, destPair.getSecond()));
-                        // newer updates come earlier, can break once encountered.
-                    }
-                }
-            }
-        }
-    }
-
     public static long maxWorkerLimitAtTurn(long currentRound)
     {
-        if(mapSize <=500)
+        if (homeMapSize <= 500)
         {
-            if(currentRound < 75)
+            if (currentRound < 75)
             {
-                if(earthInititalTotalKarbonite > 1000)
+                if (earthInititalTotalKarbonite > 1000)
                 {
                     return 20;
                 }
-                else if(earthInititalTotalKarbonite > 750)
+                else if (earthInititalTotalKarbonite > 750)
                 {
                     return 15;
                 }
-                else if(earthInititalTotalKarbonite < 100)
+                else if (earthInititalTotalKarbonite < 100)
                 {
                     return 5;
                 }
@@ -471,30 +223,30 @@ public class Player
                 return 10;
             }
         }
-        else if(mapSize <=900)
+        else if (homeMapSize <= 900)
         {
-            if(currentRound < 85)
+            if (currentRound < 85)
             {
-                if(earthInititalTotalKarbonite > 1000)
+                if (earthInititalTotalKarbonite > 1000)
                 {
                     return 20;
                 }
-                else if(earthInititalTotalKarbonite > 750)
+                else if (earthInititalTotalKarbonite > 750)
                 {
                     return 15;
                 }
-                else if(earthInititalTotalKarbonite < 100)
+                else if (earthInititalTotalKarbonite < 100)
                 {
                     return 5;
                 }
             }
             else
             {
-                if(earthInititalTotalKarbonite < 500)
+                if (earthInititalTotalKarbonite < 500)
                 {
                     return 12;
                 }
-                else if(earthInititalTotalKarbonite > 1000)
+                else if (earthInititalTotalKarbonite > 1000)
                 {
                     return 20;
                 }
@@ -506,13 +258,13 @@ public class Player
         }
         else
         {
-            if(currentRound < 75)
+            if (currentRound < 75)
             {
-                if(earthInititalTotalKarbonite > 3000)
+                if (earthInititalTotalKarbonite > 3000)
                 {
                     return 30;
                 }
-                else if(earthInititalTotalKarbonite > 1000)
+                else if (earthInititalTotalKarbonite > 1000)
                 {
                     return 20;
                 }
@@ -523,11 +275,11 @@ public class Player
             }
             else
             {
-                if(earthInititalTotalKarbonite < 500)
+                if (earthInititalTotalKarbonite < 500)
                 {
                     return 10;
                 }
-                else if(earthInititalTotalKarbonite > 1500)
+                else if (earthInititalTotalKarbonite > 1500)
                 {
                     return 25;
                 }
@@ -676,7 +428,7 @@ public class Player
         // Queue researches
         if (gc.planet() == Planet.Mars)
         {
-            for(int i = 0; i<10; i++)
+            for (int i = 0; i < 10; i++)
             {
                 gc.queueResearch(RESEARCH_QUEUE_HARD[i]);
             }
@@ -684,17 +436,17 @@ public class Player
 
         findPotentialLandingSites();
 
-        computeWaypointGraph();
+        computeShortestPathTrees();
 
         while (true)
         {
             long currentRound = gc.round();
-            if(currentRound % 50 == 1)
+            if (currentRound % 50 == 2)
             {
                 System.out.println("Time left at start of round " + currentRound + " : " + gc.getTimeLeftMs());
             }
 
-            if(currentRound == 150)
+            if (currentRound == 150)
             {
                 rangerTalentVision = 30;
             }
@@ -1099,7 +851,7 @@ public class Player
                                 }
                                 if (unit.structureIsBuilt() == 1)
                                 {
-                                    // Check all adjacent squares
+                                    // Check all adjacent squares and load all possible units
                                     VecUnit nearbyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 2, ourTeam);
                                     for (int j = 0; j < nearbyUnits.size(); j++)
                                     {
@@ -1111,31 +863,14 @@ public class Player
                                     }
                                     if (unit.structureGarrison().size() >= unit.structureMaxCapacity() / 2)
                                     {
-                                        QueuePair<Long, MapLocation> destPair = potentialLandingSites.poll();
-                                        boolean isOutdated = true;
-                                        while (isOutdated)
+                                        QueuePair<Long, MapLocation> destinationPair = getBestDestinationPair();
+                                        if (gc.canLaunchRocket(unit.id(), destinationPair.getSecond()))
                                         {
-                                            isOutdated = false;
-                                            for (int j = 0; j < updatedAppealSites.size(); j++)
-                                            {
-                                                if (updatedAppealSites.get(j).getSecond().equals(destPair.getSecond())
-                                                        && !(updatedAppealSites.get(j).getFirst().equals(destPair.getFirst())))
-                                                {
-                                                    isOutdated = true;
-                                                    destPair = potentialLandingSites.poll();
-                                                    break;
-                                                }
-                                            }
-                                        }
-
-                                        MapLocation dest = destPair.getSecond();
-                                        // potentialLandingSites is supposed to have only those spots
-                                        // that are passable, and not already used as a destination.
-                                        // Hence, this check should always pass.
-                                        if (gc.canLaunchRocket(unit.id(), dest))
-                                        {
-                                            gc.launchRocket(unit.id(), dest);
-                                            updateSurroundingAppeal(destPair);
+                                            // potentialLandingSites is supposed to have only those spots
+                                            // that are passable, and not already used as a destination.
+                                            // Hence, this check should always pass.
+                                            gc.launchRocket(unit.id(), destinationPair.getSecond());
+                                            updateSurroundingAppeal(destinationPair);
                                         }
                                     }
                                 }
@@ -1201,13 +936,13 @@ public class Player
                                 }
 
                                 // Move Worker
-                                if(!workerMinedThisTurn && !workerRepairedThisTurn)
+                                if (!workerMinedThisTurn && !workerRepairedThisTurn)
                                 {
                                     moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
                                 }
 
                                 // Replicate worker if enough Karbonite or Earth flooded
-                                if(currentRound > 749 || gc.karbonite() > 100)
+                                if (currentRound > 749 || gc.karbonite() > 100)
                                 {
                                     for (int j = 0; j < directions.length - 1; j++)
                                     {

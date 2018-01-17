@@ -1,5 +1,5 @@
-// import the API.
 import java.util.*;
+
 import bc.*;
 
 public class Player
@@ -35,9 +35,9 @@ public class Player
     static int rangerTalentVision = 0;
 
     final static long WEIGHT_IMPASSABLE = -2;
-//    final static long WEIGHT_KARBONITE_CENTER = -1; // central tile is Karb; undesirable
+    //    final static long WEIGHT_KARBONITE_CENTER = -1; // central tile is Karb; undesirable
     final static long WEIGHT_ROCKET = -1;
-//    final static long WEIGHT_KARBONITE_SIDE = +1; // Karb to the side; desirable
+    //    final static long WEIGHT_KARBONITE_SIDE = +1; // Karb to the side; desirable
     final static long WEIGHT_NONE = 0;
     // 25+25+100+100+100+25+75+100+25+75+100+25+75+100+25+75
     final static UnitType[] RESEARCH_QUEUE_HARD = {UnitType.Worker, UnitType.Ranger, UnitType.Ranger, UnitType.Rocket,
@@ -171,21 +171,21 @@ public class Player
     // Resolve Center Direction at some later day
     public static void moveUnitAwayFromMultipleUnits(VecUnit nearbyUnits, Unit unit)
     {
-        long[] directionArray = {1,1,1,1,1,1,1,1,1};
+        long[] directionArray = {1, 1, 1, 1, 1, 1, 1, 1, 1};
         long numberOfNearbyUnits = nearbyUnits.size();
         long count = 8;
         MapLocation unitLocation = unit.location().mapLocation();
-        for(int i = 0; i< numberOfNearbyUnits; i++)
+        for (int i = 0; i < numberOfNearbyUnits; i++)
         {
             // Gives Direction Between Units
             Direction directionToOtherUnit = unitLocation.directionTo(nearbyUnits.get(i).location().mapLocation());
             directionArray[directionToOtherUnit.ordinal()] = 0;
         }
-        for(int j = 0; j < 8; j++)
+        for (int j = 0; j < 8; j++)
         {
-            if(directionArray[j] != 0)
+            if (directionArray[j] != 0)
             {
-                if(moveUnitInDirection(unit, Direction.values()[j]))
+                if (moveUnitInDirection(unit, Direction.values()[j]))
                 {
                     break;
                 }
@@ -195,7 +195,7 @@ public class Player
                 count--;
             }
         }
-        if(count == 0)
+        if (count == 0)
         {
             moveUnitInRandomDirection(unit);
         }
@@ -308,15 +308,27 @@ public class Player
 
     public static long getLocationAppeal(int x, int y)
     {
-        if (x < 0 || x >= awayMap.getWidth()) return WEIGHT_IMPASSABLE;
+        if (x < 0 || x >= awayMap.getWidth())
+        {
+            return WEIGHT_IMPASSABLE;
+        }
 
-        if (y < 0 || y >= awayMap.getHeight()) return WEIGHT_IMPASSABLE;
+        if (y < 0 || y >= awayMap.getHeight())
+        {
+            return WEIGHT_IMPASSABLE;
+        }
 
         MapLocation tempLoc = new MapLocation(Planet.Mars, x, y);
 
         // only called from Earth, so awayMap will be Mars
-        if (awayMap.isPassableTerrainAt(tempLoc) == 0) return WEIGHT_IMPASSABLE;
-        else return WEIGHT_NONE;
+        if (awayMap.isPassableTerrainAt(tempLoc) == 0)
+        {
+            return WEIGHT_IMPASSABLE;
+        }
+        else
+        {
+            return WEIGHT_NONE;
+        }
     }
 
     public static void updateSurroundingAppeal(QueuePair<Long, MapLocation> destPair)
@@ -329,7 +341,7 @@ public class Player
         {
             for (int y = -1; y <= 1; y++)
             {
-                if(!(x == 0 && y == 0))
+                if (!(x == 0 && y == 0))
                 {
                     tempLoc = new MapLocation(Planet.Mars, temp_x + x, temp_y + y);
                     if (awayMap.isPassableTerrainAt(tempLoc) != 0)
@@ -344,19 +356,19 @@ public class Player
 
     public static long maxWorkerLimitAtTurn(long currentRound)
     {
-        if(mapSize <=500)
+        if (mapSize <= 500)
         {
-            if(currentRound < 75)
+            if (currentRound < 75)
             {
-                if(earthInititalTotalKarbonite > 1000)
+                if (earthInititalTotalKarbonite > 1000)
                 {
                     return 20;
                 }
-                else if(earthInititalTotalKarbonite > 750)
+                else if (earthInititalTotalKarbonite > 750)
                 {
                     return 15;
                 }
-                else if(earthInititalTotalKarbonite < 100)
+                else if (earthInititalTotalKarbonite < 100)
                 {
                     return 5;
                 }
@@ -366,30 +378,30 @@ public class Player
                 return 10;
             }
         }
-        else if(mapSize <=900)
+        else if (mapSize <= 900)
         {
-            if(currentRound < 85)
+            if (currentRound < 85)
             {
-                if(earthInititalTotalKarbonite > 1000)
+                if (earthInititalTotalKarbonite > 1000)
                 {
                     return 20;
                 }
-                else if(earthInititalTotalKarbonite > 750)
+                else if (earthInititalTotalKarbonite > 750)
                 {
                     return 15;
                 }
-                else if(earthInititalTotalKarbonite < 100)
+                else if (earthInititalTotalKarbonite < 100)
                 {
                     return 5;
                 }
             }
             else
             {
-                if(earthInititalTotalKarbonite < 500)
+                if (earthInititalTotalKarbonite < 500)
                 {
                     return 12;
                 }
-                else if(earthInititalTotalKarbonite > 1000)
+                else if (earthInititalTotalKarbonite > 1000)
                 {
                     return 20;
                 }
@@ -401,13 +413,13 @@ public class Player
         }
         else
         {
-            if(currentRound < 75)
+            if (currentRound < 75)
             {
-                if(earthInititalTotalKarbonite > 3000)
+                if (earthInititalTotalKarbonite > 3000)
                 {
                     return 30;
                 }
-                else if(earthInititalTotalKarbonite > 1000)
+                else if (earthInititalTotalKarbonite > 1000)
                 {
                     return 20;
                 }
@@ -418,11 +430,11 @@ public class Player
             }
             else
             {
-                if(earthInititalTotalKarbonite < 500)
+                if (earthInititalTotalKarbonite < 500)
                 {
                     return 10;
                 }
-                else if(earthInititalTotalKarbonite > 1500)
+                else if (earthInititalTotalKarbonite > 1500)
                 {
                     return 25;
                 }
@@ -432,7 +444,7 @@ public class Player
                 }
             }
         }
-    return 10;
+        return 10;
     }
 
     /*
@@ -571,7 +583,7 @@ public class Player
         // Queue researches
         if (gc.planet() == Planet.Mars)
         {
-            for(int i = 0; i<10; i++)
+            for (int i = 0; i < 10; i++)
             {
                 gc.queueResearch(RESEARCH_QUEUE_HARD[i]);
             }
@@ -579,7 +591,7 @@ public class Player
 
         // Find potential landing spots and store in a priority queue
         // (Add priority logic later using Pair class and comparators)
-         potentialLandingSites = new PriorityQueue<>();
+        potentialLandingSites = new PriorityQueue<>();
         if (gc.planet() == Planet.Earth)
         {
             for (int i = 0; i < awayMap.getWidth(); i++)
@@ -592,18 +604,18 @@ public class Player
                         long appeal = WEIGHT_NONE;
 
                         // top row
-                        appeal += getLocationAppeal(i - 1,j + 1);
-                        appeal += getLocationAppeal(i,j + 1);
-                        appeal += getLocationAppeal(i + 1,j + 1);
+                        appeal += getLocationAppeal(i - 1, j + 1);
+                        appeal += getLocationAppeal(i, j + 1);
+                        appeal += getLocationAppeal(i + 1, j + 1);
 
                         // middle row
-                        appeal += getLocationAppeal(i - 1,j);
-                        appeal += getLocationAppeal(i + 1,j);
+                        appeal += getLocationAppeal(i - 1, j);
+                        appeal += getLocationAppeal(i + 1, j);
 
                         // bottom row
-                        appeal += getLocationAppeal(i - 1,j - 1);
-                        appeal += getLocationAppeal(i,j - 1);
-                        appeal += getLocationAppeal(i + 1,j - 1);
+                        appeal += getLocationAppeal(i - 1, j - 1);
+                        appeal += getLocationAppeal(i, j - 1);
+                        appeal += getLocationAppeal(i + 1, j - 1);
 
                         potentialLandingSites.add(new QueuePair<>(appeal, tempLoc));
                     }
@@ -614,12 +626,12 @@ public class Player
         while (true)
         {
             long currentRound = gc.round();
-            if(currentRound % 50 == 1)
+            if (currentRound % 50 == 1)
             {
                 System.out.println("Time left at start of round " + currentRound + " : " + gc.getTimeLeftMs());
             }
 
-            if(currentRound == 150)
+            if (currentRound == 150)
             {
                 rangerTalentVision = 30;
             }
@@ -971,7 +983,7 @@ public class Player
                                         Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
                                         {
                                             if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()) &&
-                                                nearbyFriendlyUnit.health() < 100)
+                                                    nearbyFriendlyUnit.health() < 100)
                                             {
                                                 gc.heal(unit.id(), nearbyFriendlyUnit.id());
                                                 break;
@@ -1126,13 +1138,13 @@ public class Player
                                 }
 
                                 // Move Worker
-                                if(!workerMinedThisTurn && !workerRepairedThisTurn)
+                                if (!workerMinedThisTurn && !workerRepairedThisTurn)
                                 {
                                     moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
                                 }
 
                                 // Replicate worker if enough Karbonite or Earth flooded
-                                if(currentRound > 749 || gc.karbonite() > 100)
+                                if (currentRound > 749 || gc.karbonite() > 100)
                                 {
                                     for (int j = 0; j < directions.length - 1; j++)
                                     {

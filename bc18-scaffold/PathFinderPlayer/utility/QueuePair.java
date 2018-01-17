@@ -1,3 +1,5 @@
+package utility;
+
 public class QueuePair<A extends Comparable<A>, B> implements Comparable<QueuePair<A, B>>
 {
     private final A first;
