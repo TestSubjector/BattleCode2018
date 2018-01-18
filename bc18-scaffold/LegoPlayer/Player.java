@@ -256,7 +256,14 @@ public class Player
     // TODO - Add Ability Cooldown Later
     public static boolean unitFrozenByHeat(Unit unit)
     {
-        return !gc.isAttackReady(unit.id()) && unit.movementCooldown() > 9;
+        if(unit.unitType() == UnitType.Healer)
+        {
+            return !(gc.isHealReady(unit.id()) || gc.isMoveReady(unit.id()));
+        }
+        else
+        {
+            return !(gc.isAttackReady(unit.id()) || gc.isMoveReady(unit.id()));
+        }
     }
 
     // Decides the incentive to attack an unit by Rangers
@@ -1161,7 +1168,6 @@ public class Player
                             {
                                 if (!unit.location().isInGarrison())
                                 {
-                                    moveUnitInRandomDirection(unit);
                                     VecUnit nearbyFriendlyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
                                             50, ourTeam);
                                     boolean hasHealedThisTurn = false;
@@ -1174,14 +1180,18 @@ public class Player
 
                                     for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
                                     {
-
                                         Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
                                         {
-                                            if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()) &&
-                                                nearbyFriendlyUnit.health() < nearbyFriendlyUnit.maxHealth())
+                                            if(gc.isHealReady(unit.id()))
                                             {
-                                                gc.heal(unit.id(), nearbyFriendlyUnit.id());
-                                                hasHealedThisTurn = true;
+                                                if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()) &&
+                                                        nearbyFriendlyUnit.health() < nearbyFriendlyUnit.maxHealth())
+                                                {
+                                                    System.out.println("Healer Healed: " + nearbyFriendlyUnit.unitType() +
+                                                            " With Health: " + nearbyFriendlyUnit.health());
+                                                    gc.heal(unit.id(), nearbyFriendlyUnit.id());
+                                                    hasHealedThisTurn = true;
+                                                }
                                             }
                                             if(nearbyFriendlyUnit.health() < nearbyFriendlyUnit.maxHealth())
                                             {
@@ -1191,11 +1201,13 @@ public class Player
                                                 }
                                             }
                                         }
+
                                         if(hasMovedThisTurn && hasHealedThisTurn)
                                         {
                                             break;
                                         }
                                     }
+                                    moveUnitInRandomDirection(unit);
                                 }
                             }
                             if (unit.unitType() == UnitType.Knight)
@@ -1263,7 +1275,7 @@ public class Player
                                         }
                                     }
 
-                                    if (rangerCount >= 8 * (healerCount))
+                                    if (rangerCount >= 7 * (healerCount))
                                     {
                                         UnitType typeToBeProduced = UnitType.Healer;
                                         if (gc.canProduceRobot(unit.id(), typeToBeProduced))
@@ -1381,26 +1393,45 @@ public class Player
                             {
                                 if (!unit.location().isInGarrison())
                                 {
-                                    moveUnitInRandomDirection(unit);
                                     VecUnit nearbyFriendlyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
                                             50, ourTeam);
+                                    boolean hasHealedThisTurn = false;
+                                    boolean hasMovedThisTurn = false;
 
                                     if (unitFrozenByHeat(unit))
                                     {
                                         continue;
                                     }
+
                                     for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
                                     {
                                         Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
                                         {
-                                            if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()) &&
-                                                    nearbyFriendlyUnit.health() < nearbyFriendlyUnit.maxHealth())
+                                            if(gc.isHealReady(unit.id()))
                                             {
-                                                gc.heal(unit.id(), nearbyFriendlyUnit.id());
-                                                break;
+                                                if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()) &&
+                                                        nearbyFriendlyUnit.health() < nearbyFriendlyUnit.maxHealth())
+                                                {
+                                                    System.out.println("Healer Healed: " + nearbyFriendlyUnit.unitType() +
+                                                            " With Health: " + nearbyFriendlyUnit.health());
+                                                    gc.heal(unit.id(), nearbyFriendlyUnit.id());
+                                                    hasHealedThisTurn = true;
+                                                }
+                                            }
+                                            if(nearbyFriendlyUnit.health() < nearbyFriendlyUnit.maxHealth())
+                                            {
+                                                if(moveUnitTowards(unit, nearbyFriendlyUnit.location()))
+                                                {
+                                                    hasMovedThisTurn = true;
+                                                }
                                             }
                                         }
+                                        if(hasMovedThisTurn && hasHealedThisTurn)
+                                        {
+                                            break;
+                                        }
                                     }
+                                    moveUnitInRandomDirection(unit);
                                 }
                             }
                             if (unit.unitType() == UnitType.Ranger)
