@@ -49,6 +49,10 @@ public class Pathfinding
             for (int y = 0; y < homeMapHeight; y++)
             {
                 MapLocation possibleCornerMapLocation = mapLocationAt[x][y];
+                if (homeMap.isPassableTerrainAt(possibleCornerMapLocation) == 0)
+                {
+                    continue;
+                }
                 for (int i = 1; i < directions.length - 1; i += 2)
                 {
                     MapLocation possibleObstacleMapLocation = possibleCornerMapLocation.add(directions[i]);
@@ -144,22 +148,43 @@ public class Pathfinding
 
     public static MapLocation findNearestUnobstructedWaypoint(MapLocation mapLocation)
     {
+        if (nearestUnobstructedWaypoints.containsKey(mapLocation))
+        {
+            return nearestUnobstructedWaypoints.get(mapLocation);
+        }
         Set<MapLocation> waypoints = waypointAdjacencyList.keySet();
         MapLocation nearest = null;
         long distance = 100000L;
-        if (homeMap.isPassableTerrainAt(mapLocation) == 1)
+        for (MapLocation waypoint : waypoints)
         {
-            for (MapLocation waypoint : waypoints)
+            long newDistance = diagonalDistanceBetween(mapLocation, waypoint);
+            if (newDistance < distance && isUninterruptedPathBetween(mapLocation, waypoint))
             {
-                long newDistance = diagonalDistanceBetween(mapLocation, waypoint);
-                if (newDistance < distance && isUninterruptedPathBetween(mapLocation, waypoint))
+                nearest = waypoint;
+                distance = newDistance;
+                if (distance <= 1)
                 {
-                    nearest = waypoint;
-                    distance = newDistance;
+                    break;
                 }
             }
         }
         nearestUnobstructedWaypoints.put(mapLocation, nearest);
         return nearest;
+    }
+
+    public static void constructPathBetween(MapLocation startWaypoint, MapLocation endWaypoint)
+    {
+        Pair<MapLocation, MapLocation> key = new Pair<>(startWaypoint, endWaypoint);
+        if (!nextBestWaypoint.containsKey(key))
+        {
+            HashMap<MapLocation, MapLocation> shortestPathTree = shortestPathTrees.get(startWaypoint);
+            MapLocation son = endWaypoint;
+            while (!son.equals(startWaypoint))
+            {
+                MapLocation parent = shortestPathTree.get(son);
+                nextBestWaypoint.put(new Pair<MapLocation, MapLocation>(parent, endWaypoint), son);
+                son = parent;
+            }
+        }
     }
 }

@@ -87,7 +87,7 @@ public class WorkerBot
         }
 
         // Replicate worker
-        if (unitList.size() < Math.sqrt(currentRound))
+        if (unitList.size() < Math.sqrt(currentRound) * 2)
         {
             for (int j = 0; j < directions.length - 1; j++)
             {
@@ -146,7 +146,7 @@ public class WorkerBot
         }
         if (nearestStructure != null)
         {
-            moveUnitTowards(unit, nearestStructure.location().mapLocation());
+            moveUnitTo(unit, nearestStructure.location().mapLocation());
         }
 
         // Move towards nearest mine
@@ -163,7 +163,7 @@ public class WorkerBot
         }
         if (nearestMineMapLocation != null)
         {
-            moveUnitTowards(unit, nearestMineMapLocation);
+            moveUnitTo(unit, nearestMineMapLocation);
         }
     }
 

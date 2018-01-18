@@ -168,4 +168,9 @@ public class Globals
             typeSortedUnitLists.put(unitTypes[i], new ArrayList<Unit>());
         }
     }
+
+    public static MapLocation getConstantMapLocationRepresentation(MapLocation newRepresentation)
+    {
+        return mapLocationAt[newRepresentation.getX()][newRepresentation.getY()];
+    }
 }

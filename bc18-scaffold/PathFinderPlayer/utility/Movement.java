@@ -5,6 +5,7 @@ import java.util.*;
 import bc.*;
 
 import static utility.Globals.*;
+import static utility.Pathfinding.*;
 
 public class Movement
 {
@@ -49,5 +50,25 @@ public class Movement
     {
         Random random = new Random();
         return moveUnitInDirection(unit, directions[random.nextInt(8)]);
+    }
+
+    public static boolean moveUnitTo(Unit unit, MapLocation targetMapLocation)
+    {
+        MapLocation unitMapLocation = getConstantMapLocationRepresentation(unit.location().mapLocation());
+        targetMapLocation = getConstantMapLocationRepresentation(targetMapLocation);
+//        System.out.println(unitMapLocation);
+//        System.out.println(targetMapLocation);
+        MapLocation startWaypoint = findNearestUnobstructedWaypoint(unitMapLocation);
+        MapLocation endWaypoint = findNearestUnobstructedWaypoint(targetMapLocation);
+//        System.out.println(startWaypoint);
+//        System.out.println(endWaypoint);
+//        System.out.println("================================");
+        if (startWaypoint.equals(endWaypoint))
+        {
+            return moveUnitTowards(unit, targetMapLocation);
+        }
+        constructPathBetween(startWaypoint, endWaypoint);
+        MapLocation nextWaypoint = nextBestWaypoint.get(new Pair<MapLocation, MapLocation>(startWaypoint, endWaypoint));
+        return moveUnitTowards(unit, nextWaypoint);
     }
 }
