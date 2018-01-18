@@ -4,6 +4,9 @@ import java.util.*;
 
 import bc.*;
 
+import static utility.Pathfinding.*;
+import static utility.RocketLandingAlgos.*;
+
 public class Globals
 {
     // Variables
@@ -20,8 +23,9 @@ public class Globals
     public static long homeMapWidth;
     public static long homeMapHeight;
     public static long homeMapSize;
+    public static MapLocation[][] mapLocationAt;
     public static VecUnit initialWorkers;
-    public static long earthInititalTotalKarbonite = 0;
+    public static long earthInitialTotalKarbonite;
     public static Set<MapLocation> earthKarboniteLocations;
     public static PriorityQueue<QueuePair<Long, MapLocation>> potentialLandingSites;
     public static ArrayList<QueuePair<Long, MapLocation>> updatedAppealSites;
@@ -29,6 +33,12 @@ public class Globals
     public static HashMap<MapLocation, LinkedList<GraphPair<MapLocation, Long>>> waypointAdjacencyList;
     public static HashMap<MapLocation, HashMap<MapLocation, Boolean>> isReachable;
     public static HashMap<MapLocation, HashMap<MapLocation, MapLocation>> shortestPathTrees;
+    public static HashMap<MapLocation, MapLocation> nearestUnobstructedWaypoints;
+    public static HashMap<Pair<MapLocation, MapLocation>, MapLocation> nextBestWaypoint;
+    public static long currentRound;
+    public static Set<Unit> unfinishedBlueprints;
+    public static HashMap<UnitType, ArrayList<Unit>> typeSortedUnitLists;
+    public static ArrayList<Unit> unitList;
 
     // Combat constants
     public final static int INITIAL_RANGER_ATTACK_DISTANCE = 7;  // Rounding For Now
@@ -104,6 +114,16 @@ public class Globals
         homeMapHeight = homeMap.getHeight();
         homeMapSize = homeMapHeight * homeMapHeight;
 
+        // Map MapLocations to x and y for constant object references
+        mapLocationAt = new MapLocation[(int) homeMapWidth][(int) homeMapHeight];
+        for (int x = 0; x < homeMapWidth; x++)
+        {
+            for (int y = 0; y < homeMapHeight; y++)
+            {
+                mapLocationAt[x][y] = new MapLocation(homePlanet, x, y);
+            }
+        }
+
         // Get initial worker units
         initialWorkers = homeMap.getInitial_units();
 
@@ -115,12 +135,12 @@ public class Globals
             {
                 for (int y = 0; y < homeMapHeight; y++)
                 {
-                    MapLocation tempMapLocation = new MapLocation(homePlanet, x, y);
+                    MapLocation tempMapLocation = mapLocationAt[x][y];
                     long karboniteAtTempMapLocation = homeMap.initialKarboniteAt(tempMapLocation);
                     if (karboniteAtTempMapLocation > 0)
                     {
                         earthKarboniteLocations.add(tempMapLocation);
-                        earthInititalTotalKarbonite += karboniteAtTempMapLocation;
+                        earthInitialTotalKarbonite += karboniteAtTempMapLocation;
                     }
                 }
             }
@@ -131,10 +151,21 @@ public class Globals
         }
         potentialLandingSites = new PriorityQueue<QueuePair<Long, MapLocation>>();
         updatedAppealSites = new ArrayList<QueuePair<Long, MapLocation>>();
+        findPotentialLandingSites();
 
         visited = new HashMap<MapLocation, Boolean>();
         waypointAdjacencyList = new HashMap<MapLocation, LinkedList<GraphPair<MapLocation, Long>>>();
         isReachable = new HashMap<MapLocation, HashMap<MapLocation, Boolean>>();
         shortestPathTrees = new HashMap<MapLocation, HashMap<MapLocation, MapLocation>>();
+        nearestUnobstructedWaypoints = new HashMap<MapLocation, MapLocation>();
+        nextBestWaypoint = new HashMap<Pair<MapLocation, MapLocation>, MapLocation>();
+        computeShortestPathTrees();
+
+        unfinishedBlueprints = new HashSet<Unit>();
+        typeSortedUnitLists = new HashMap<UnitType, ArrayList<Unit>>();
+        for (int i = 0; i < unitTypes.length; i++)
+        {
+            typeSortedUnitLists.put(unitTypes[i], new ArrayList<Unit>());
+        }
     }
 }

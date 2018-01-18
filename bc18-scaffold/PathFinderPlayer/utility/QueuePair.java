@@ -1,5 +1,7 @@
 package utility;
 
+import java.util.Objects;
+
 public class QueuePair<A extends Comparable<A>, B> implements Comparable<QueuePair<A, B>>
 {
     private final A first;
@@ -35,6 +37,12 @@ public class QueuePair<A extends Comparable<A>, B> implements Comparable<QueuePa
         QueuePair<A, B> other = getClass().cast(oth);
         return ((first == null) ? (other.first == null) : (first.equals(other.first)) &&
                 (second == null ? other.second == null : second.equals(other.second)));
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(first, second);
     }
 
     @Override

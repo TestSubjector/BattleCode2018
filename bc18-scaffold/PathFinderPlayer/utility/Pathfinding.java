@@ -48,7 +48,7 @@ public class Pathfinding
         {
             for (int y = 0; y < homeMapHeight; y++)
             {
-                MapLocation possibleCornerMapLocation = new MapLocation(gc.planet(), x, y);
+                MapLocation possibleCornerMapLocation = mapLocationAt[x][y];
                 for (int i = 1; i < directions.length - 1; i += 2)
                 {
                     MapLocation possibleObstacleMapLocation = possibleCornerMapLocation.add(directions[i]);
@@ -140,5 +140,26 @@ public class Pathfinding
                 }
             }
         }
+    }
+
+    public static MapLocation findNearestUnobstructedWaypoint(MapLocation mapLocation)
+    {
+        Set<MapLocation> waypoints = waypointAdjacencyList.keySet();
+        MapLocation nearest = null;
+        long distance = 100000L;
+        if (homeMap.isPassableTerrainAt(mapLocation) == 1)
+        {
+            for (MapLocation waypoint : waypoints)
+            {
+                long newDistance = diagonalDistanceBetween(mapLocation, waypoint);
+                if (newDistance < distance && isUninterruptedPathBetween(mapLocation, waypoint))
+                {
+                    nearest = waypoint;
+                    distance = newDistance;
+                }
+            }
+        }
+        nearestUnobstructedWaypoints.put(mapLocation, nearest);
+        return nearest;
     }
 }

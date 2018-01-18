@@ -2,12 +2,12 @@ package utility;
 
 import java.util.Objects;
 
-public class GraphPair<A, B extends Comparable<B>> implements Comparable<GraphPair<A, B>>
+public class Pair<A, B>
 {
     private final A first;
     private final B second;
 
-    public GraphPair(A first, B second)
+    public Pair(A first, B second)
     {
         this.first = first;
         this.second = second;
@@ -34,7 +34,7 @@ public class GraphPair<A, B extends Comparable<B>> implements Comparable<GraphPa
         {
             return false;
         }
-        GraphPair<A, B> other = getClass().cast(oth);
+        Pair<A, B> other = getClass().cast(oth);
         return ((first == null) ? (other.first == null) : (first.equals(other.first)) &&
                 (second == null ? other.second == null : second.equals(other.second)));
     }
@@ -43,17 +43,5 @@ public class GraphPair<A, B extends Comparable<B>> implements Comparable<GraphPa
     public int hashCode()
     {
         return Objects.hash(first, second);
-    }
-
-    @Override
-    public int compareTo(GraphPair<A, B> o)
-    {
-        return this.second.compareTo(o.second);
-    }
-
-    @Override
-    public String toString()
-    {
-        return this.first + ", Weight = " + this.second;
     }
 }
