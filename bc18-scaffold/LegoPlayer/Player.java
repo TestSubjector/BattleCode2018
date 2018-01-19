@@ -18,6 +18,7 @@ public class Player
     static long mapWidth;
     static long mapHeight;
     static long mapSize;
+    static long earthPassableTerrain;
     static short botIntelligenceLevel;
     static VecUnit initialWorkers;
     static long earthInitialTotalKarbonite = 0;
@@ -96,6 +97,9 @@ public class Player
         mapHeight = homeMap.getHeight();
         mapSize = mapHeight * mapHeight;
 
+        // Passable terrain count of earth
+        earthPassableTerrain = 0;
+
         // Get initial worker units
         initialWorkers = homeMap.getInitial_units();
 
@@ -109,8 +113,17 @@ public class Player
                 potentialFactorySpots.add(new ArrayList<Long>((int)mapHeight));
                 for (int y = 0; y < mapHeight; y++)
                 {
+                    long karboniteAtTempMapLocation;
                     MapLocation tempMapLocation = new MapLocation(homePlanet, x, y);
-                    long karboniteAtTempMapLocation = homeMap.initialKarboniteAt(tempMapLocation);
+                    if(homeMap.isPassableTerrainAt(tempMapLocation) == 0)
+                    {
+                        earthPassableTerrain++;
+                        karboniteAtTempMapLocation = 0;
+                    }
+                    else
+                    {
+                        karboniteAtTempMapLocation = homeMap.initialKarboniteAt(tempMapLocation);
+                    }
 
                     if (karboniteAtTempMapLocation > 0)
                     {
@@ -651,6 +664,11 @@ public class Player
         return timeLeft < 3920 + 25992* Math.tanh((currentRound - 375)/57);
     }
 
+    public static boolean makeRocketArmada(long unitSize)
+    {
+        return unitSize > 5 * earthPassableTerrain * (mapHeight + mapWidth) / (mapSize);
+    }
+
     public static void main(String[] args)
     {
         initializeGlobals();
@@ -712,6 +730,7 @@ public class Player
         while (true)
         {
             long currentRound = gc.round();
+            long currentKarbonite = gc.karbonite();
             if(currentRound % 25 == 1)
             {
                 int getTimeLeft = gc.getTimeLeftMs();
@@ -804,9 +823,10 @@ public class Player
                             MapLocation unitMapLocation = unitLocation.mapLocation();
                             if (unitTypes[i] == UnitType.Worker)
                             {
-                                boolean workerBuiltThisTurn = false;
+                                boolean workerBuiltOrRepairedThisTurn = false;
                                 boolean workerMinedThisTurn = false;
                                 boolean workerReplicatedThisTurn = false;
+
                                 // Build a structure if adjacent to one
                                 for (int j = 0; j < adjacentUnits.size(); j++)
                                 {
@@ -816,7 +836,13 @@ public class Player
                                         if (gc.canBuild(unit.id(), adjacentUnit.id()))
                                         {
                                             gc.build(unit.id(), adjacentUnit.id());
-                                            workerBuiltThisTurn = true;
+                                            workerBuiltOrRepairedThisTurn = true;
+                                            break;
+                                        }
+                                        else if(gc.canRepair(unit.id(), adjacentUnit.id()))
+                                        {
+                                            gc.repair(unit.id(), adjacentUnit.id());
+                                            workerBuiltOrRepairedThisTurn = true;
                                             break;
                                         }
                                     }
@@ -963,6 +989,11 @@ public class Player
                                     moveUnitInDirection(unit, unitLoc.directionTo(closestMineMapLocation));
                                 }
 
+                                if(currentRound > 300 && currentKarbonite <100 && makeRocketArmada(unitList.size()))
+                                {
+                                    continue;
+                                }
+
                                 // Replicate worker
                                 if (unitsOfType[UnitType.Worker.ordinal()] < maxWorkerLimitAtTurn(currentRound))
                                 {
@@ -992,56 +1023,7 @@ public class Player
 //                                    moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
 //                                }
                             }
-                            if (unit.unitType() == UnitType.Rocket)
-                            {
-                                // If it's a new blueprint, add to the set
-                                if (unit.structureIsBuilt() == 0 && !unfinishedBlueprints.contains(unit))
-                                {
-                                    unfinishedBlueprints.add(unit);
-                                }
-                                if (unit.structureIsBuilt() == 1)
-                                {
-                                    // Check all adjacent squares
-                                    VecUnit nearbyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 2, ourTeam);
-                                    for (int j = 0; j < nearbyUnits.size(); j++)
-                                    {
-                                        Unit nearbyUnit = nearbyUnits.get(j);
-                                        if (gc.canLoad(unit.id(), nearbyUnit.id()))
-                                        {
-                                            gc.load(unit.id(), nearbyUnit.id());
-                                        }
-                                    }
-                                    if (unit.structureGarrison().size() >= unit.structureMaxCapacity() / 2)
-                                    {
-                                        QueuePair<Long, MapLocation> destPair = potentialLandingSites.poll();
-                                        boolean isOutdated = true;
-                                        while (isOutdated)
-                                        {
-                                            isOutdated = false;
-                                            for (int j = 0; j < updatedAppealSites.size(); j++)
-                                            {
-                                                if (updatedAppealSites.get(j).getSecond().equals(destPair.getSecond())
-                                                        && !(updatedAppealSites.get(j).getFirst().equals(destPair.getFirst())))
-                                                {
-                                                    isOutdated = true;
-                                                    destPair = potentialLandingSites.poll();
-                                                    break;
-                                                }
-                                            }
-                                        }
 
-                                        MapLocation dest = destPair.getSecond();
-                                        // potentialLandingSites is supposed to have only those spots
-                                        // that are passable, and not already used as a destination.
-                                        // Hence, this check should always pass.
-                                        if (gc.canLaunchRocket(unit.id(), dest))
-                                        {
-                                            gc.launchRocket(unit.id(), dest);
-                                            updateSurroundingAppeal(destPair);
-                                        }
-                                    }
-                                }
-                            }
                             if (unit.unitType() == UnitType.Ranger)
                             {
                                 if (!unit.location().isInGarrison())
@@ -1104,6 +1086,7 @@ public class Player
                                         MapLocation targetEnemyMapLocation = unitMapLocation;
                                         for(HashMap.Entry<Integer, QueuePair<Long, MapLocation>> entry : visibleEnemyPriorities.entrySet())
                                         {
+                                            // So we really don't need UnitID here
                                             Integer enemyUnitID = entry.getKey();
                                             Long primitiveRank = entry.getValue().getFirst();
                                             MapLocation enemyUnitMapLocation = entry.getValue().getSecond();
@@ -1168,6 +1151,8 @@ public class Player
                                 {
                                     VecUnit nearbyFriendlyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
                                             50, ourTeam);
+                                    VecUnit nearbyEnemyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),
+                                            50, theirTeam);
                                     boolean hasHealedThisTurn = false;
                                     boolean hasMovedThisTurn = false;
 
@@ -1185,8 +1170,6 @@ public class Player
                                                 if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()) &&
                                                         nearbyFriendlyUnit.health() < nearbyFriendlyUnit.maxHealth())
                                                 {
-                                                    //System.out.println("Healer Healed: " + nearbyFriendlyUnit.unitType() +
-                                                    //        " With Health: " + nearbyFriendlyUnit.health());
                                                     gc.heal(unit.id(), nearbyFriendlyUnit.id());
                                                     hasHealedThisTurn = true;
                                                 }
@@ -1199,11 +1182,19 @@ public class Player
                                                 }
                                             }
                                         }
-
                                         if(hasMovedThisTurn && hasHealedThisTurn)
                                         {
                                             break;
                                         }
+                                    }
+                                    if(nearbyEnemyUnits.size() !=0)
+                                    {
+                                        moveUnitAwayFromMultipleUnits(nearbyEnemyUnits, unit);
+                                    }
+                                    else
+                                    {
+                                        moveUnitInRandomDirection(unit);
+                                    }
                                     }
                                     moveUnitInRandomDirection(unit);
                                 }
@@ -1255,6 +1246,12 @@ public class Player
                                     unfinishedBlueprints.add(unit);
                                 }
                                 tryToUnloadRobot(unit);
+
+                                if(currentRound > 300 && currentKarbonite <100 && makeRocketArmada(unitList.size()))
+                                {
+                                    continue;
+                                }
+
                                 if (unit.isFactoryProducing() == 0)
                                 {
                                     int workerCount = unitsOfType[UnitType.Worker.ordinal()]; // rarely produced
@@ -1272,8 +1269,7 @@ public class Player
                                             unitsOfType[UnitType.Worker.ordinal()]++;
                                         }
                                     }
-
-                                    if (rangerCount >= 7 * (healerCount))
+                                    else if (rangerCount >= 7 * (healerCount))
                                     {
                                         UnitType typeToBeProduced = UnitType.Healer;
                                         if (gc.canProduceRobot(unit.id(), typeToBeProduced))
@@ -1288,6 +1284,56 @@ public class Player
                                         {
                                             gc.produceRobot(unit.id(), UnitType.Ranger);
                                             unitsOfType[UnitType.Ranger.ordinal()]++;
+                                        }
+                                    }
+                                }
+                            }
+                            if (unit.unitType() == UnitType.Rocket)
+                            {
+                                // If it's a new blueprint, add to the set
+                                if (unit.structureIsBuilt() == 0 && !unfinishedBlueprints.contains(unit))
+                                {
+                                    unfinishedBlueprints.add(unit);
+                                }
+                                if (unit.structureIsBuilt() == 1)
+                                {
+                                    // Check all adjacent squares
+                                    VecUnit nearbyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 2, ourTeam);
+                                    for (int j = 0; j < nearbyUnits.size(); j++)
+                                    {
+                                        Unit nearbyUnit = nearbyUnits.get(j);
+                                        if (gc.canLoad(unit.id(), nearbyUnit.id()))
+                                        {
+                                            gc.load(unit.id(), nearbyUnit.id());
+                                        }
+                                    }
+                                    if (unit.structureGarrison().size() >= unit.structureMaxCapacity() / 2)
+                                    {
+                                        QueuePair<Long, MapLocation> destPair = potentialLandingSites.poll();
+                                        boolean isOutdated = true;
+                                        while (isOutdated)
+                                        {
+                                            isOutdated = false;
+                                            for (int j = 0; j < updatedAppealSites.size(); j++)
+                                            {
+                                                if (updatedAppealSites.get(j).getSecond().equals(destPair.getSecond())
+                                                        && !(updatedAppealSites.get(j).getFirst().equals(destPair.getFirst())))
+                                                {
+                                                    isOutdated = true;
+                                                    destPair = potentialLandingSites.poll();
+                                                    break;
+                                                }
+                                            }
+                                        }
+
+                                        MapLocation dest = destPair.getSecond();
+                                        // potentialLandingSites is supposed to have only those spots
+                                        // that are passable, and not already used as a destination.
+                                        // Hence, this check should always pass.
+                                        if (gc.canLaunchRocket(unit.id(), dest))
+                                        {
+                                            gc.launchRocket(unit.id(), dest);
+                                            updateSurroundingAppeal(destPair);
                                         }
                                     }
                                 }
@@ -1411,8 +1457,6 @@ public class Player
                                                 if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()) &&
                                                         nearbyFriendlyUnit.health() < nearbyFriendlyUnit.maxHealth())
                                                 {
-                                                    System.out.println("Healer Healed: " + nearbyFriendlyUnit.unitType() +
-                                                            " With Health: " + nearbyFriendlyUnit.health());
                                                     gc.heal(unit.id(), nearbyFriendlyUnit.id());
                                                     hasHealedThisTurn = true;
                                                 }
@@ -1456,45 +1500,61 @@ public class Player
                                             continue;
                                         }
 
-                                        if (gc.isAttackReady(unit.id()))
+                                        long desireToKill = -500;
+                                        long rememberUnit = -1;
+                                        for (int j = 0; j < nearbyEnemyUnits.size(); j++)
                                         {
-                                            long desireToKill = -500;
-                                            long rememberUnit = -1;
-                                            for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+                                            Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
+                                            // Check health of enemy unit ands see if you can win
+                                            // Make bounty rating for all sensed units and attack highest ranked unit
+                                            //if(nearbyEnemyUnit.unitType() != UnitType.Worker)
                                             {
-                                                Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
-                                                // Check health of enemy unit ands see if you can win
-                                                // Make bounty rating for all sensed units and attack highest ranked unit
-                                                //if(nearbyEnemyUnit.unitType() != UnitType.Worker)
+                                                if (gc.canAttack(unit.id(), nearbyEnemyUnit.id()))
                                                 {
-                                                    if (gc.canAttack(unit.id(), nearbyEnemyUnit.id()))
+                                                    long possibleDesireToKill = setBountyScore(unit, nearbyEnemyUnit);
+                                                    if (desireToKill < possibleDesireToKill)
                                                     {
-                                                        long possibleDesireToKill = setBountyScore(unit, nearbyEnemyUnit);
-                                                        if (desireToKill < possibleDesireToKill)
-                                                        {
-                                                            desireToKill = possibleDesireToKill;
-                                                            rememberUnit = j;
-                                                        }
+                                                        desireToKill = possibleDesireToKill;
+                                                        rememberUnit = j;
                                                     }
                                                 }
                                             }
-                                            if (rememberUnit != -1)
-                                            {
-                                                gc.attack(unit.id(), nearbyEnemyUnits.get(rememberUnit).id());
-                                                //moveUnitAwayFrom(unit, nearbyEnemyUnits.get(rememberUnit).location());
-                                            }
                                         }
-                                        /*
+                                        if (rememberUnit != -1)
+                                        {
+                                            gc.attack(unit.id(), nearbyEnemyUnits.get(rememberUnit).id());
+                                            //moveUnitAwayFrom(unit, nearbyEnemyUnits.get(rememberUnit).location());
+                                        }
                                         else
                                         {
-                                            moveUnitAwayFromMultipleUnits(nearbyEnemyUnits, unit);
+                                            moveUnitInRandomDirection(unit);
                                         }
-                                        */
                                     }
                                     else
                                     {
-                                        moveUnitInRandomDirection(unit);
+                                        // QueuePair<Long, Unit> enemyData;
+                                        Integer bestEnemyRank = 15;
+                                        // To fix uninitialisation warning
+                                        MapLocation targetEnemyMapLocation = unitMapLocation;
+                                        for(HashMap.Entry<Integer, QueuePair<Long, MapLocation>> entry : visibleEnemyPriorities.entrySet())
+                                        {
+                                            Integer enemyUnitID = entry.getKey();
+                                            Long primitiveRank = entry.getValue().getFirst();
+                                            MapLocation enemyUnitMapLocation = entry.getValue().getSecond();
+                                            primitiveRank *= (1 + (2 * unitMapLocation.distanceSquaredTo(enemyUnitMapLocation) -
+                                                    (70 + rangerTalentVision)/ (mapWidth + mapHeight)));
+                                            if(primitiveRank < bestEnemyRank)
+                                            {
+                                                targetEnemyMapLocation = enemyUnitMapLocation;
+                                            }
+                                        }
+                                        if(targetEnemyMapLocation == unitMapLocation ||
+                                                !moveUnitInDirection(unit, unitMapLocation.directionTo(targetEnemyMapLocation)));
+                                        {
+                                            moveUnitInRandomDirection(unit);
+                                        }
                                     }
+
                                 }
                             }
                         }
