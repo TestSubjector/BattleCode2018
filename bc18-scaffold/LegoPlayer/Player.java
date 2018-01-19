@@ -1341,7 +1341,6 @@ public class Player
                         }
                     }
                 }
-            }
             if (homePlanet == Planet.Mars)
             {
                 // Process unit
@@ -1413,7 +1412,7 @@ public class Player
                                 }
 
                                 // Replicate worker if enough Karbonite or Earth flooded
-                                if(currentRound > 749 || gc.karbonite() > 100)
+                                if( currentRound > 749 || gc.karbonite() > 100)
                                 {
                                     Collections.shuffle(randomDirections);
                                     for (int j = 0; j < randomDirections.size(); j++)
@@ -1500,34 +1499,37 @@ public class Player
                                             continue;
                                         }
 
-                                        long desireToKill = -500;
-                                        long rememberUnit = -1;
-                                        for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+                                        if(gc.isAttackReady(unit.id()))
                                         {
-                                            Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
-                                            // Check health of enemy unit ands see if you can win
-                                            // Make bounty rating for all sensed units and attack highest ranked unit
-                                            //if(nearbyEnemyUnit.unitType() != UnitType.Worker)
+                                            long desireToKill = -500;
+                                            long rememberUnit = -1;
+                                            for (int j = 0; j < nearbyEnemyUnits.size(); j++)
                                             {
-                                                if (gc.canAttack(unit.id(), nearbyEnemyUnit.id()))
+                                                Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
+                                                // Check health of enemy unit ands see if you can win
+                                                // Make bounty rating for all sensed units and attack highest ranked unit
+                                                //if(nearbyEnemyUnit.unitType() != UnitType.Worker)
                                                 {
-                                                    long possibleDesireToKill = setBountyScore(unit, nearbyEnemyUnit);
-                                                    if (desireToKill < possibleDesireToKill)
+                                                    if (gc.canAttack(unit.id(), nearbyEnemyUnit.id()))
                                                     {
-                                                        desireToKill = possibleDesireToKill;
-                                                        rememberUnit = j;
+                                                        long possibleDesireToKill = setBountyScore(unit, nearbyEnemyUnit);
+                                                        if (desireToKill < possibleDesireToKill)
+                                                        {
+                                                            desireToKill = possibleDesireToKill;
+                                                            rememberUnit = j;
+                                                        }
                                                     }
                                                 }
                                             }
-                                        }
-                                        if (rememberUnit != -1)
-                                        {
-                                            gc.attack(unit.id(), nearbyEnemyUnits.get(rememberUnit).id());
-                                            //moveUnitAwayFrom(unit, nearbyEnemyUnits.get(rememberUnit).location());
-                                        }
-                                        else
-                                        {
-                                            moveUnitInRandomDirection(unit);
+                                            if (rememberUnit != -1)
+                                            {
+                                                gc.attack(unit.id(), nearbyEnemyUnits.get(rememberUnit).id());
+                                                //moveUnitAwayFrom(unit, nearbyEnemyUnits.get(rememberUnit).location());
+                                            }
+                                            else
+                                            {
+                                                moveUnitInRandomDirection(unit);
+                                            }
                                         }
                                     }
                                     else
@@ -1561,7 +1563,6 @@ public class Player
                     }
                 }
             }
-
             // Submit the actions we've done, and wait for our next turn.
             gc.nextTurn();
         }
