@@ -664,9 +664,9 @@ public class Player
         return timeLeft < 3920 + 25992* Math.tanh((currentRound - 375)/57);
     }
 
-    public static boolean makeRocketArmada(long unitSize)
+    public static boolean makeRocketArmada(long totalUnits)
     {
-        return unitSize > 5 * earthPassableTerrain * (mapHeight + mapWidth) / (mapSize);
+        return totalUnits > 4 * earthPassableTerrain * (mapHeight + mapWidth) / (mapSize);
     }
 
     public static void main(String[] args)
@@ -789,6 +789,8 @@ public class Player
             // Maintain Total Number Of Fighting Units We Have
             long totalCombatUnitsOnTurn = unitsOfType[UnitType.Ranger.ordinal()] + unitsOfType[UnitType.Healer.ordinal()] +
                     unitsOfType[UnitType.Knight.ordinal()] + unitsOfType[UnitType.Mage.ordinal()];
+            long totalUnitsOnTurn = totalCombatUnitsOnTurn + unitsOfType[UnitType.Worker.ordinal()] +
+                    unitsOfType[UnitType.Factory.ordinal()] + unitsOfType[UnitType.Rocket.ordinal()];
 
             if (homePlanet == Planet.Earth)
             {
@@ -989,7 +991,7 @@ public class Player
                                     moveUnitInDirection(unit, unitLoc.directionTo(closestMineMapLocation));
                                 }
 
-                                if(currentRound > 300 && currentKarbonite <100 && makeRocketArmada(unitList.size()))
+                                if(currentRound > 250 && currentKarbonite <100 && makeRocketArmada(totalUnitsOnTurn))
                                 {
                                     continue;
                                 }
@@ -1247,7 +1249,7 @@ public class Player
                                 }
                                 tryToUnloadRobot(unit);
 
-                                if(currentRound > 300 && currentKarbonite <100 && makeRocketArmada(unitList.size()))
+                                if(currentRound > 250 && currentKarbonite <100 && makeRocketArmada(totalUnitsOnTurn))
                                 {
                                     continue;
                                 }
@@ -1382,7 +1384,7 @@ public class Player
                                 for (int j = 0; j < adjacentUnits.size(); j++)
                                 {
                                     Unit adjacentUnit = adjacentUnits.get(j);
-                                    if (adjacentUnit.unitType() == UnitType.Factory || adjacentUnit.unitType() == UnitType.Rocket)
+                                    if (adjacentUnit.unitType() == UnitType.Rocket)
                                     {
                                         if (gc.canRepair(unit.id(), adjacentUnit.id()))
                                         {
