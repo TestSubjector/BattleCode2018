@@ -20,7 +20,7 @@ public class RocketBot
             MapLocation adjacentMapLocation = destinationMapLocation.add(directions[i]);
             if (awayMap.onMap(adjacentMapLocation) && awayMap.isPassableTerrainAt(adjacentMapLocation) == 1)
             {
-                updatedAppealSites.add(0, new QueuePair<>(destinationPair.getFirst() - WEIGHT_ROCKET, destinationMapLocation));
+                updatedAppealSites.add(0, new QueuePair<>(destinationPair.getFirst() - WEIGHT_ROCKET_ON_MARS, destinationMapLocation));
             }
         }
     }

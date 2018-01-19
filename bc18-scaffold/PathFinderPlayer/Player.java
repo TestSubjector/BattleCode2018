@@ -39,9 +39,18 @@ public class Player
                 time += "Time taken in round " + (currentRound - 1) + " : " + (lastTime - timeLeftMs) + "\n";
             }
             lastTime = timeLeftMs + 50;
-            if (currentRound == 740)
+            if (currentRound % 250 == 2)
             {
                 System.out.println(time);
+                time = "";
+            }
+            if(switchToPrimitiveMind(currentRound, timeLeftMs) && currentRound < 700)
+            {
+                botIntelligenceLevel = 0;
+            }
+            else
+            {
+                botIntelligenceLevel = 1;
             }
             // Clear unit lists
             for (int i = 0; i < unitTypes.length; i++)

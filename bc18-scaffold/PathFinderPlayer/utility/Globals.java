@@ -27,8 +27,10 @@ public class Globals
     public static long awayMapHeight;
     public static long awayMapSize;
     public static long currentRound;
+    public static short botIntelligenceLevel;
     public static MapLocation[][] mapLocationAt;
     public static VecUnit initialWorkers;
+    public static long earthPassableTerrain;
     public static long earthInitialTotalKarbonite;
     public static Set<MapLocation> earthKarboniteLocations;
     public static Set<Unit> unfinishedBlueprints;
@@ -37,18 +39,20 @@ public class Globals
     public static HashSet<Integer> builderSet;
     public static double builderFraction;
 
-    // Terrain appeal constants
-    public final static long WEIGHT_IMPASSABLE = -1;
-    public final static long WEIGHT_ROCKET = -3;
-    public final static long WEIGHT_NONE = 0;
-
     // Rocket landing sites
     public static PriorityQueue<QueuePair<Long, MapLocation>> potentialLandingSites;
     public static long[][] marsMapAppeals;
     public static ArrayList<QueuePair<Long, MapLocation>> updatedAppealSites;
 
+    // Terrain appeal constants
+    public final static long WEIGHT_IMPASSABLE = -1;
+    public final static long WEIGHT_ROCKET_ON_MARS = -3;
+    public final static long WEIGHT_STRUCTURE = -1;
+    public final static long WEIGHT_NONE = 0;
+
     // Factory building sites
     public static ArrayList<ArrayList<Long>> potentialFactorySpots;
+    public static long[][] earthMapAppeals;
 
     // Pathfinding data structures
     public static HashMap<MapLocation, Boolean> visited;
@@ -58,7 +62,7 @@ public class Globals
     public static HashMap<MapLocation, MapLocation> nearestUnobstructedWaypoints;
     public static HashMap<Pair<MapLocation, MapLocation>, MapLocation> nextBestWaypoint;
 
-    // Combat variables
+    // Combat variables (convert to HashMap format)
     public final static int INITIAL_RANGER_ATTACK_DISTANCE = 7;  // Rounding For Now
     public final static int INITIAL_RANGER_MOVEMENT_COOLDOWN = 20;
     public final static int INITIAL_RANGER_ATTACK_COOLDOWN = 20;
@@ -126,6 +130,8 @@ public class Globals
         awayMapHeight = awayMap.getHeight();
         awayMapSize = awayMapHeight * awayMapHeight;
 
+        botIntelligenceLevel = 1;
+
         // Map MapLocations to x and y for constant object references
         mapLocationAt = new MapLocation[(int) homeMapWidth][(int) homeMapHeight];
         for (int x = 0; x < homeMapWidth; x++)
@@ -157,9 +163,14 @@ public class Globals
 
             potentialLandingSites = new PriorityQueue<QueuePair<Long, MapLocation>>();
             marsMapAppeals = new long[(int) awayMapWidth][(int) awayMapHeight];
-            findLocationAppeals();
+            findMarsLocationAppeals();
             updatedAppealSites = new ArrayList<QueuePair<Long, MapLocation>>();
             findPotentialLandingSites();
+
+            potentialFactorySpots = new ArrayList<ArrayList<Long>>();
+            earthMapAppeals = new long[(int) homeMapWidth][(int) homeMapHeight];
+            findEarthLocationAppeals();
+            findFactorySiteAppeals();
         }
         else
         {
@@ -216,7 +227,7 @@ public class Globals
 
     // Find the appeals of all map locations on Mars
     // Will only be called from Earth
-    private static void findLocationAppeals()
+    private static void findMarsLocationAppeals()
     {
         for (int i = 0; i < awayMapWidth; i++)
         {
@@ -231,6 +242,57 @@ public class Globals
                 {
                     marsMapAppeals[i][j] = WEIGHT_NONE;
                 }
+            }
+        }
+    }
+
+    // Find the appeals of all map locations on Earth
+    // Will only be called from Earth
+    private static void findEarthLocationAppeals()
+    {
+        for (int i = 0; i < homeMapWidth; i++)
+        {
+            for (int j = 0; j < homeMapHeight; j++)
+            {
+                MapLocation mapLocation = new MapLocation(homePlanet, i, j);
+                if (homeMap.isPassableTerrainAt(mapLocation) == 0)
+                {
+                    earthMapAppeals[i][j] = WEIGHT_IMPASSABLE;
+                }
+                else
+                {
+                    earthMapAppeals[i][j] = WEIGHT_NONE;
+                }
+            }
+        }
+    }
+
+    public static void findFactorySiteAppeals()
+    {
+        for (int x = 0; x < homeMapWidth; x++)
+        {
+            potentialFactorySpots.add(new ArrayList<Long>((int)homeMapHeight));
+            for (int y = 0; y < homeMapHeight; y++)
+            {
+                MapLocation mapLocation = new MapLocation(homePlanet, x, y);
+                if(homeMap.isPassableTerrainAt(mapLocation) == 0)
+                {
+                    earthPassableTerrain++;
+                }
+                else
+                {
+                    potentialFactorySpots.get(x).add(-1000L);
+                }
+                long appeal = WEIGHT_NONE;
+                for (int i = 0; i < directions.length - 1; i++)
+                {
+                    MapLocation adjacentMapLocation = mapLocation.add(directions[i]);
+                    if (homeMap.onMap(adjacentMapLocation) && homeMap.isPassableTerrainAt(adjacentMapLocation) == 1)
+                    {
+                        appeal += earthMapAppeals[adjacentMapLocation.getX()][adjacentMapLocation.getY()];
+                    }
+                }
+                potentialFactorySpots.get(x).add(appeal);
             }
         }
     }
@@ -256,5 +318,13 @@ public class Globals
                 potentialLandingSites.add(new QueuePair<>(appeal, mapLocation));
             }
         }
+    }
+
+    // Witch of Agnesi computation breaker
+    public static boolean switchToPrimitiveMind(long currentRound, int timeLeft)
+    {
+        // Give 5 secs to pathfinding
+        // Constant value by integrating (8*57^3)/(x^2 + 57^2) dx from x = -infinity to -375
+        return timeLeft < 3920 + 25992* Math.tanh((currentRound - 375)/57);
     }
 }

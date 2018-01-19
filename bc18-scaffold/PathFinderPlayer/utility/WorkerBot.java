@@ -218,4 +218,129 @@ public class WorkerBot
             processMarsWorker(unit, unitLocation);
         }
     }
+
+    public static long maxWorkerLimitAtTurn(long currentRound)
+    {
+        if(homeMapSize <=500)
+        {
+            if(currentRound < 75)
+            {
+                if(earthInitialTotalKarbonite > 1000)
+                {
+                    return 20;
+                }
+                else if(earthInitialTotalKarbonite > 750)
+                {
+                    return 15;
+                }
+                else if(earthInitialTotalKarbonite < 100)
+                {
+                    return 5;
+                }
+            }
+            else
+            {
+                return 10;
+            }
+        }
+        else if(homeMapSize <=900)
+        {
+            if(currentRound < 85)
+            {
+                if(earthInitialTotalKarbonite > 1000)
+                {
+                    return 20;
+                }
+                else if(earthInitialTotalKarbonite > 750)
+                {
+                    return 15;
+                }
+                else if(earthInitialTotalKarbonite < 100)
+                {
+                    return 5;
+                }
+            }
+            else
+            {
+                if(earthInitialTotalKarbonite < 500)
+                {
+                    return 12;
+                }
+                else if(earthInitialTotalKarbonite > 1000)
+                {
+                    return 20;
+                }
+                else
+                {
+                    return 15;
+                }
+            }
+        }
+        else
+        {
+            if(currentRound < 75)
+            {
+                if(earthInitialTotalKarbonite > 3000)
+                {
+                    return 30;
+                }
+                else if(earthInitialTotalKarbonite > 1000)
+                {
+                    return 20;
+                }
+                else
+                {
+                    return 10;
+                }
+            }
+            else
+            {
+                if(earthInitialTotalKarbonite < 500)
+                {
+                    return 10;
+                }
+                else if(earthInitialTotalKarbonite > 1500)
+                {
+                    return 25;
+                }
+                else
+                {
+                    return 15;
+                }
+            }
+        }
+        return 10;
+    }
+
+    public static long maxFactoryLimitAtTurn(long currentRound, long totalCombatUnits)
+    {
+        if (homeMapSize <= 625)
+        {
+            return 8;
+        }
+        else
+        {
+            return Math.round((double)homeMapSize / 100) + 1;
+        }
+    }
+
+    public static boolean makeRocketArmada(long totalUnits)
+    {
+        return totalUnits > 4 * earthPassableTerrain * ((double)homeMapHeight + homeMapWidth) / (homeMapSize);
+    }
+
+    // Called only from Earth
+    public static void modifyAdjacentFactoryAppeal(MapLocation mapLocation, long amount)
+    {
+        for (int i = 0; i < directions.length - 1; i++)
+        {
+            MapLocation adjacentMapLocation = mapLocation.add(directions[i]);
+            if (homeMap.onMap(adjacentMapLocation) && homeMap.isPassableTerrainAt(adjacentMapLocation) == 1)
+            {
+                int x = (int)adjacentMapLocation.getX();
+                int y = (int)adjacentMapLocation.getY();
+                long current = potentialFactorySpots.get(x).get(y);
+                potentialFactorySpots.get(x).set(y, current + amount);}
+        }
+    }
 }
