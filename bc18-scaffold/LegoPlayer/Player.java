@@ -18,6 +18,7 @@ public class Player
     static long mapWidth;
     static long mapHeight;
     static long mapSize;
+    static short botIntelligenceLevel;
     static VecUnit initialWorkers;
     static long earthInitialTotalKarbonite = 0;
     static Set<MapLocation> earthKarboniteLocations;
@@ -61,6 +62,9 @@ public class Player
 
         // Unit types
         unitTypes = UnitType.values();
+
+        // Set computation consumption leevel
+        botIntelligenceLevel = 1;
 
         // Get planets and initial map states
         homePlanet = gc.planet();
@@ -639,6 +643,14 @@ public class Player
         return enemyUnitPriority;
     }
 
+    // Witch of Agnesi computation breaker
+    public static boolean switchToPrimitiveMind(long currentRound, int timeLeft)
+    {
+        // Give 5 secs to pathfinding
+        // Constant value by integrating (8*57^3)/(x^2 + 57^2) dx from x = -infinity to -375
+        return timeLeft < 3920 + 25992* Math.tanh((currentRound - 375)/57);
+    }
+
     public static void main(String[] args)
     {
         initializeGlobals();
@@ -700,9 +712,18 @@ public class Player
         while (true)
         {
             long currentRound = gc.round();
-            if(currentRound % 50 == 1)
+            if(currentRound % 25 == 1)
             {
-                System.out.println("Time left at start of round " + currentRound + " : " + gc.getTimeLeftMs());
+                int getTimeLeft = gc.getTimeLeftMs();
+                System.out.println("Time left at start of round " + currentRound + " : " + getTimeLeft);
+                if(switchToPrimitiveMind(currentRound, getTimeLeft) && currentRound < 700)
+                {
+                    botIntelligenceLevel = 0;
+                }
+                else
+                {
+                    botIntelligenceLevel = 1;
+                }
             }
 
             if(currentRound == 150)
