@@ -8,10 +8,6 @@ import static utility.Globals.*;
 
 public class Pathfinding
 {
-    public static long diagonalDistanceBetween(MapLocation first, MapLocation second)
-    {
-        return Math.max(Math.abs(first.getX() - second.getX()), Math.abs(first.getY() - second.getY()));
-    }
 
     public static boolean isUninterruptedPathBetween(MapLocation from, MapLocation to)
     {
@@ -48,22 +44,27 @@ public class Pathfinding
         {
             for (int y = 0; y < homeMapHeight; y++)
             {
-                MapLocation possibleCornerMapLocation = mapLocationAt[x][y];
-                if (homeMap.isPassableTerrainAt(possibleCornerMapLocation) == 0)
+                MapLocation possibleWaypoint = mapLocationAt[x][y];
+                if (homeMap.isPassableTerrainAt(possibleWaypoint) == 0)
                 {
                     continue;
                 }
                 for (int i = 1; i < directions.length - 1; i += 2)
                 {
-                    MapLocation possibleObstacleMapLocation = possibleCornerMapLocation.add(directions[i]);
-                    MapLocation possibleFreeMapLocation1 = possibleCornerMapLocation.add(directions[i - 1]);
-                    MapLocation possibleFreeMapLocation2 = possibleCornerMapLocation.add(directions[(i + 1) % 8]);
-                    if (homeMap.onMap(possibleObstacleMapLocation) &&
-                            homeMap.isPassableTerrainAt(possibleObstacleMapLocation) == 0 &&
-                            homeMap.isPassableTerrainAt(possibleFreeMapLocation1) == 1 &&
-                            homeMap.isPassableTerrainAt(possibleFreeMapLocation2) == 1)
+                    MapLocation diagonalSquare = possibleWaypoint.add(directions[i]);
+                    MapLocation sideSquareOne = possibleWaypoint.add(directions[i - 1]);
+                    MapLocation sideSquareTwo = possibleWaypoint.add(directions[(i + 1) % 8]);
+                    boolean isExteriorCorner = homeMap.onMap(diagonalSquare) &&
+                            homeMap.isPassableTerrainAt(diagonalSquare) == 0 &&
+                            homeMap.isPassableTerrainAt(sideSquareOne) == 1 &&
+                            homeMap.isPassableTerrainAt(sideSquareTwo) == 1;
+                    boolean isInteriorCorner = homeMap.onMap(diagonalSquare) &&
+                            homeMap.isPassableTerrainAt(diagonalSquare) == 0 &&
+                            homeMap.isPassableTerrainAt(sideSquareOne) == 0 &&
+                            homeMap.isPassableTerrainAt(sideSquareTwo) == 0;
+                    if (isExteriorCorner || isInteriorCorner)
                     {
-                        waypointAdjacencyList.put(possibleCornerMapLocation, new LinkedList<GraphPair<MapLocation, Long>>());
+                        waypointAdjacencyList.put(possibleWaypoint, new LinkedList<GraphPair<MapLocation, Long>>());
                     }
                 }
             }
@@ -125,24 +126,35 @@ public class Pathfinding
                 else
                 {
                     distanceTo.put(waypoint, 100000L);
-                    edgeQueue.add(new GraphPair<MapLocation, Long>(waypoint, 100000L));
                 }
             }
+            HashSet<MapLocation> done = new HashSet<MapLocation>();
+            int repeats = 0;
             long connectedWaypoints = connectedComponentSize.get(sourceWaypoint);
-            for (int i = 0; i < connectedWaypoints; i++)
+            while (!edgeQueue.isEmpty())
             {
                 GraphPair<MapLocation, Long> topEdge = edgeQueue.remove();
+                if (done.contains(topEdge.getFirst()))
+                {
+                    repeats++;
+                    continue;
+                }
+                done.add(topEdge.getFirst());
                 for (GraphPair<MapLocation, Long> edge : waypointAdjacencyList.get(topEdge.getFirst()))
                 {
-                    long newDistance = distanceTo.get(topEdge.getFirst()) + edge.getSecond();
-                    if (newDistance < distanceTo.get(edge.getFirst()))
+                    if (!done.contains(edge.getFirst()))
                     {
-                        distanceTo.put(edge.getFirst(), newDistance);
-                        shortestPathTree.put(edge.getFirst(), topEdge.getFirst());
-                        edgeQueue.add(new GraphPair<MapLocation, Long>(edge.getFirst(), newDistance));
+                        long newDistance = distanceTo.get(topEdge.getFirst()) + edge.getSecond();
+                        if (newDistance < distanceTo.get(edge.getFirst()))
+                        {
+                            distanceTo.put(edge.getFirst(), newDistance);
+                            shortestPathTree.put(edge.getFirst(), topEdge.getFirst());
+                            edgeQueue.add(new GraphPair<MapLocation, Long>(edge.getFirst(), newDistance));
+                        }
                     }
                 }
             }
+            // System.out.println(repeats);
         }
     }
 
@@ -179,11 +191,27 @@ public class Pathfinding
         {
             HashMap<MapLocation, MapLocation> shortestPathTree = shortestPathTrees.get(startWaypoint);
             MapLocation son = endWaypoint;
-            while (!son.equals(startWaypoint))
+            Stack<MapLocation> tree = new Stack<MapLocation>();
+            try
             {
-                MapLocation parent = shortestPathTree.get(son);
-                nextBestWaypoint.put(new Pair<MapLocation, MapLocation>(parent, endWaypoint), son);
-                son = parent;
+                while (!son.equals(startWaypoint))
+                {
+                    MapLocation parent = shortestPathTree.get(son);
+                    tree.push(parent);
+                    nextBestWaypoint.put(new Pair<MapLocation, MapLocation>(parent, endWaypoint), son);
+                    son = parent;
+                }
+            }
+            catch (Exception e)
+            {
+                System.out.println(startWaypoint);
+                while (!tree.isEmpty())
+                {
+                    System.out.println(tree.pop());
+                }
+                System.out.println(endWaypoint);
+                System.out.println(son);
+                System.out.println("========================================");
             }
         }
     }

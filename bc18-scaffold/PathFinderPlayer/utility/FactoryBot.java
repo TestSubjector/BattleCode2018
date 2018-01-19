@@ -22,4 +22,9 @@ public class FactoryBot
         }
         return false;
     }
+
+    public static void processFactory(Unit unit, Location unitLocation)
+    {
+
+    }
 }

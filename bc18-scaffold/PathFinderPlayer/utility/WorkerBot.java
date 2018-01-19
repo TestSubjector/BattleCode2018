@@ -57,6 +57,91 @@ public class WorkerBot
         }
     }
 
+    private static void processBuilder(Unit unit, Location unitLocation, MapLocation unitMapLocation)
+    {
+        // Blueprint structures
+        if (unit.workerHasActed() == 0)
+        {
+            UnitType blueprintType = null;
+            if (typeSortedUnitLists.get(UnitType.Factory).size() < 8)
+            {
+                // Blueprint a factory
+                blueprintType = UnitType.Factory;
+            }
+            else if (typeSortedUnitLists.get(UnitType.Rocket).size() < 6)
+            {
+                // Blueprint a rocket
+                blueprintType = UnitType.Rocket;
+            }
+            if (blueprintType != null)
+            {
+                for (int j = 0; j < directions.length - 1; j++)
+                {
+                    Direction blueprintDirection = directions[j];
+                    if (gc.canBlueprint(unit.id(), blueprintType, blueprintDirection))
+                    {
+                        gc.blueprint(unit.id(), blueprintType, blueprintDirection);
+                        MapLocation blueprintMapLocation = unitMapLocation.add(blueprintDirection);
+                        Unit newBlueprint = gc.senseUnitAtLocation(blueprintMapLocation);
+                        unfinishedBlueprints.add(newBlueprint);
+                        typeSortedUnitLists.get(blueprintType).add(newBlueprint);
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (unit.movementHeat() < 10)
+        {
+            // Move towards nearest blueprint
+            Unit nearestStructure = null;
+            long minDiagonalDistance = 1000L;
+            for (Unit blueprint : unfinishedBlueprints)
+            {
+                long diagonalDistanceToStructure = diagonalDistanceBetween(blueprint.location().mapLocation(), unitMapLocation);
+                if (diagonalDistanceToStructure < minDiagonalDistance)
+                {
+                    nearestStructure = blueprint;
+                    minDiagonalDistance = diagonalDistanceToStructure;
+                }
+            }
+            if (nearestStructure != null)
+            {
+                moveUnitTo(unit, nearestStructure.location().mapLocation());
+            }
+        }
+    }
+
+    private static void processMiner(Unit unit, Location unitLocation, MapLocation unitMapLocation)
+    {
+        if (unit.movementHeat() < 10)
+        {
+            // Move towards nearest mine
+            if (gc.karboniteAt(unitMapLocation) == 0)
+            {
+                MapLocation nearestMineMapLocation = null;
+                long minDiagonalDistance = 1000L;
+                for (MapLocation karboniteMapLocation : earthKarboniteLocations)
+                {
+                    long diagonalDistanceToMine = diagonalDistanceBetween(karboniteMapLocation, unitMapLocation);
+                    if (diagonalDistanceToMine < minDiagonalDistance)
+                    {
+                        nearestMineMapLocation = karboniteMapLocation;
+                        minDiagonalDistance = diagonalDistanceToMine;
+                        if (minDiagonalDistance <= 1)
+                        {
+                            break;
+                        }
+                    }
+                }
+                if (nearestMineMapLocation != null)
+                {
+                    moveUnitTo(unit, nearestMineMapLocation);
+                }
+            }
+        }
+    }
+
     public static void processEarthWorker(Unit unit, Location unitLocation)
     {
         MapLocation unitMapLocation = unitLocation.mapLocation();
@@ -87,7 +172,7 @@ public class WorkerBot
         }
 
         // Replicate worker
-        if (unitList.size() < Math.sqrt(currentRound) * 2)
+        if (unitList.size() < Math.sqrt(currentRound) * 5)
         {
             for (int j = 0; j < directions.length - 1; j++)
             {
@@ -98,72 +183,22 @@ public class WorkerBot
                     MapLocation replicateMapLocation = unitMapLocation.add(replicateDirection);
                     Unit newWorker = gc.senseUnitAtLocation(replicateMapLocation);
                     unitList.add(newWorker);
+                    if (unitList.size() * builderFraction > builderSet.size())
+                    {
+                        builderSet.add(newWorker.id());
+                    }
                     break;
                 }
             }
         }
 
-        // Blueprint structures
-        UnitType blueprintType = null;
-        if (typeSortedUnitLists.get(UnitType.Factory).size() < 8)
+        if (builderSet.contains(unit.id()))
         {
-            // Blueprint a factory
-            blueprintType = UnitType.Factory;
+            processBuilder(unit, unitLocation, unitMapLocation);
         }
-        else if (typeSortedUnitLists.get(UnitType.Rocket).size() < 6)
+        else
         {
-            // Blueprint a rocket
-            blueprintType = UnitType.Rocket;
-        }
-        if (blueprintType != null)
-        {
-            for (int j = 0; j < directions.length - 1; j++)
-            {
-                Direction blueprintDirection = directions[j];
-                if (gc.canBlueprint(unit.id(), blueprintType, blueprintDirection))
-                {
-                    gc.blueprint(unit.id(), blueprintType, blueprintDirection);
-                    MapLocation blueprintMapLocation = unitMapLocation.add(blueprintDirection);
-                    Unit newBlueprint = gc.senseUnitAtLocation(blueprintMapLocation);
-                    unfinishedBlueprints.add(newBlueprint);
-                    typeSortedUnitLists.get(blueprintType).add(newBlueprint);
-                    break;
-                }
-            }
-        }
-
-        // Move towards nearest blueprint
-        Unit nearestStructure = null;
-        long minDistanceSquared = 100000L;
-        for (Unit blueprint : unfinishedBlueprints)
-        {
-            long distanceSquaredToStructure = blueprint.location().mapLocation().distanceSquaredTo(unitMapLocation);
-            if (distanceSquaredToStructure < minDistanceSquared)
-            {
-                nearestStructure = blueprint;
-                minDistanceSquared = distanceSquaredToStructure;
-            }
-        }
-        if (nearestStructure != null)
-        {
-            moveUnitTo(unit, nearestStructure.location().mapLocation());
-        }
-
-        // Move towards nearest mine
-        MapLocation nearestMineMapLocation = null;
-        minDistanceSquared = 100000L;
-        for (MapLocation karboniteMapLocation : earthKarboniteLocations)
-        {
-            long distanceSquaredToMine = karboniteMapLocation.distanceSquaredTo(unitMapLocation);
-            if (distanceSquaredToMine < minDistanceSquared)
-            {
-                nearestMineMapLocation = karboniteMapLocation;
-                minDistanceSquared = distanceSquaredToMine;
-            }
-        }
-        if (nearestMineMapLocation != null)
-        {
-            moveUnitTo(unit, nearestMineMapLocation);
+            processMiner(unit, unitLocation, unitMapLocation);
         }
     }
 

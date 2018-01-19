@@ -5,11 +5,11 @@ import java.util.*;
 import bc.*;
 
 import static utility.Pathfinding.*;
-import static utility.RocketLandingAlgos.*;
+import static utility.RocketBot.*;
 
 public class Globals
 {
-    // Variables
+    // General purpose variables
     public static Random random;
     public static GameController gc;
     public static Direction[] directions;
@@ -23,24 +23,42 @@ public class Globals
     public static long homeMapWidth;
     public static long homeMapHeight;
     public static long homeMapSize;
+    public static long awayMapWidth;
+    public static long awayMapHeight;
+    public static long awayMapSize;
+    public static long currentRound;
     public static MapLocation[][] mapLocationAt;
     public static VecUnit initialWorkers;
     public static long earthInitialTotalKarbonite;
     public static Set<MapLocation> earthKarboniteLocations;
+    public static Set<Unit> unfinishedBlueprints;
+    public static HashMap<UnitType, ArrayList<Unit>> typeSortedUnitLists;
+    public static ArrayList<Unit> unitList;
+    public static HashSet<Integer> builderSet;
+    public static double builderFraction;
+
+    // Terrain appeal constants
+    public final static long WEIGHT_IMPASSABLE = -1;
+    public final static long WEIGHT_ROCKET = -3;
+    public final static long WEIGHT_NONE = 0;
+
+    // Rocket landing sites
     public static PriorityQueue<QueuePair<Long, MapLocation>> potentialLandingSites;
+    public static long[][] marsMapAppeals;
     public static ArrayList<QueuePair<Long, MapLocation>> updatedAppealSites;
+
+    // Factory building sites
+    public static ArrayList<ArrayList<Long>> potentialFactorySpots;
+
+    // Pathfinding data structures
     public static HashMap<MapLocation, Boolean> visited;
     public static HashMap<MapLocation, LinkedList<GraphPair<MapLocation, Long>>> waypointAdjacencyList;
     public static HashMap<MapLocation, HashMap<MapLocation, Boolean>> isReachable;
     public static HashMap<MapLocation, HashMap<MapLocation, MapLocation>> shortestPathTrees;
     public static HashMap<MapLocation, MapLocation> nearestUnobstructedWaypoints;
     public static HashMap<Pair<MapLocation, MapLocation>, MapLocation> nextBestWaypoint;
-    public static long currentRound;
-    public static Set<Unit> unfinishedBlueprints;
-    public static HashMap<UnitType, ArrayList<Unit>> typeSortedUnitLists;
-    public static ArrayList<Unit> unitList;
 
-    // Combat constants
+    // Combat variables
     public final static int INITIAL_RANGER_ATTACK_DISTANCE = 7;  // Rounding For Now
     public final static int INITIAL_RANGER_MOVEMENT_COOLDOWN = 20;
     public final static int INITIAL_RANGER_ATTACK_COOLDOWN = 20;
@@ -50,16 +68,7 @@ public class Globals
     public final static int INITIAL_KNIGHT_ATTACK_DISTANCE = 1;
     public final static int INITIAL_KNIGHT_MOVEMENT_COOLDOWN = 15;
     public final static int INITIAL_KNIGHT_ATTACK_COOLDOWN = 20;
-
-    // Unit deltas (more to be added)
-    public static int rangerTalentVision = 0;
-
-    // Terrain appeal constants
-    public final static long WEIGHT_IMPASSABLE = -2;
-    //    public final static long WEIGHT_KARBONITE_CENTER = -1; // central tile is Karb; undesirable
-    public final static long WEIGHT_ROCKET = -1;
-    //    public final static long WEIGHT_KARBONITE_SIDE = +1; // Karb to the side; desirable
-    public final static long WEIGHT_NONE = 0;
+    public static int rangerTalentVision;
 
     // Research queue
     // 25+25+100+100+100+25+75+100+25+75+100+25+75+100+25+75
@@ -113,6 +122,9 @@ public class Globals
         homeMapWidth = homeMap.getWidth();
         homeMapHeight = homeMap.getHeight();
         homeMapSize = homeMapHeight * homeMapHeight;
+        awayMapWidth = awayMap.getWidth();
+        awayMapHeight = awayMap.getHeight();
+        awayMapSize = awayMapHeight * awayMapHeight;
 
         // Map MapLocations to x and y for constant object references
         mapLocationAt = new MapLocation[(int) homeMapWidth][(int) homeMapHeight];
@@ -124,34 +136,45 @@ public class Globals
             }
         }
 
-        // Get initial worker units
         initialWorkers = homeMap.getInitial_units();
+
+        builderSet = new HashSet<Integer>();
+        builderFraction = 0.1;
+
+        // All initial workers are builders
+        for (int i = 0; i < initialWorkers.size(); i++)
+        {
+            Unit worker = initialWorkers.get(i);
+            builderSet.add(worker.id());
+        }
 
         if (homePlanet == Planet.Earth)
         {
-            // Get initial karbonite locations
             earthKarboniteLocations = new HashSet<MapLocation>();
-            for (int x = 0; x < homeMapWidth; x++)
-            {
-                for (int y = 0; y < homeMapHeight; y++)
-                {
-                    MapLocation tempMapLocation = mapLocationAt[x][y];
-                    long karboniteAtTempMapLocation = homeMap.initialKarboniteAt(tempMapLocation);
-                    if (karboniteAtTempMapLocation > 0)
-                    {
-                        earthKarboniteLocations.add(tempMapLocation);
-                        earthInitialTotalKarbonite += karboniteAtTempMapLocation;
-                    }
-                }
-            }
+            getInitialKarboniteLocations();
+
+            unfinishedBlueprints = new HashSet<Unit>();
+
+            potentialLandingSites = new PriorityQueue<QueuePair<Long, MapLocation>>();
+            marsMapAppeals = new long[(int) awayMapWidth][(int) awayMapHeight];
+            findLocationAppeals();
+            updatedAppealSites = new ArrayList<QueuePair<Long, MapLocation>>();
+            findPotentialLandingSites();
         }
         else
         {
             earthKarboniteLocations = null;
+            unfinishedBlueprints = null;
+            potentialLandingSites = null;
+            marsMapAppeals = null;
+            updatedAppealSites = null;
         }
-        potentialLandingSites = new PriorityQueue<QueuePair<Long, MapLocation>>();
-        updatedAppealSites = new ArrayList<QueuePair<Long, MapLocation>>();
-        findPotentialLandingSites();
+
+        typeSortedUnitLists = new HashMap<UnitType, ArrayList<Unit>>();
+        for (int i = 0; i < unitTypes.length; i++)
+        {
+            typeSortedUnitLists.put(unitTypes[i], new ArrayList<Unit>());
+        }
 
         visited = new HashMap<MapLocation, Boolean>();
         waypointAdjacencyList = new HashMap<MapLocation, LinkedList<GraphPair<MapLocation, Long>>>();
@@ -161,16 +184,77 @@ public class Globals
         nextBestWaypoint = new HashMap<Pair<MapLocation, MapLocation>, MapLocation>();
         computeShortestPathTrees();
 
-        unfinishedBlueprints = new HashSet<Unit>();
-        typeSortedUnitLists = new HashMap<UnitType, ArrayList<Unit>>();
-        for (int i = 0; i < unitTypes.length; i++)
-        {
-            typeSortedUnitLists.put(unitTypes[i], new ArrayList<Unit>());
-        }
+        rangerTalentVision = 0;
+    }
+
+    public static long diagonalDistanceBetween(MapLocation first, MapLocation second)
+    {
+        return Math.max(Math.abs(first.getX() - second.getX()), Math.abs(first.getY() - second.getY()));
     }
 
     public static MapLocation getConstantMapLocationRepresentation(MapLocation newRepresentation)
     {
         return mapLocationAt[newRepresentation.getX()][newRepresentation.getY()];
+    }
+
+    private static void getInitialKarboniteLocations()
+    {
+        for (int x = 0; x < homeMapWidth; x++)
+        {
+            for (int y = 0; y < homeMapHeight; y++)
+            {
+                MapLocation tempMapLocation = mapLocationAt[x][y];
+                long karboniteAtTempMapLocation = homeMap.initialKarboniteAt(tempMapLocation);
+                if (karboniteAtTempMapLocation > 0)
+                {
+                    earthKarboniteLocations.add(tempMapLocation);
+                    earthInitialTotalKarbonite += karboniteAtTempMapLocation;
+                }
+            }
+        }
+    }
+
+    // Find the appeals of all map locations on Mars
+    // Will only be called from Earth
+    private static void findLocationAppeals()
+    {
+        for (int i = 0; i < awayMapWidth; i++)
+        {
+            for (int j = 0; j < awayMapHeight; j++)
+            {
+                MapLocation mapLocation = new MapLocation(awayPlanet, i, j);
+                if (awayMap.isPassableTerrainAt(mapLocation) == 0)
+                {
+                    marsMapAppeals[i][j] = WEIGHT_IMPASSABLE;
+                }
+                else
+                {
+                    marsMapAppeals[i][j] = WEIGHT_NONE;
+                }
+            }
+        }
+    }
+
+    // Find potential landing spots and store in a priority queue
+    // Will only be called from Earth
+    private static void findPotentialLandingSites()
+    {
+        for (int x = 0; x < awayMapWidth; x++)
+        {
+            for (int y = 0; y < awayMapHeight; y++)
+            {
+                MapLocation mapLocation = new MapLocation(awayPlanet, x, y);
+                long appeal = WEIGHT_NONE;
+                for (int i = 0; i < directions.length - 1; i++)
+                {
+                    MapLocation adjacentMapLocation = mapLocation.add(directions[i]);
+                    if (awayMap.onMap(adjacentMapLocation) && awayMap.isPassableTerrainAt(adjacentMapLocation) == 1)
+                    {
+                        appeal += marsMapAppeals[adjacentMapLocation.getX()][adjacentMapLocation.getY()];
+                    }
+                }
+                potentialLandingSites.add(new QueuePair<>(appeal, mapLocation));
+            }
+        }
     }
 }

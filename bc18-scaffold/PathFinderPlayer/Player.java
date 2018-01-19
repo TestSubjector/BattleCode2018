@@ -5,10 +5,13 @@ import bc.*;
 import utility.QueuePair;
 
 import static utility.Globals.*;
-import static utility.Movement.*;
-import static utility.Pathfinding.*;
-import static utility.RocketLandingAlgos.*;
 import static utility.WorkerBot.*;
+import static utility.KnightBot.*;
+import static utility.RangerBot.*;
+import static utility.MageBot.*;
+import static utility.HealerBot.*;
+import static utility.FactoryBot.*;
+import static utility.RocketBot.*;
 
 public class Player
 {
@@ -24,15 +27,22 @@ public class Player
                 gc.queueResearch(RESEARCH_QUEUE_HARD[i]);
             }
         }
+        String time = "";
+        int lastTime = gc.getTimeLeftMs();
 
         while (true)
         {
             currentRound = gc.round();
-            if (currentRound % 10 == 2)
+            int timeLeftMs = gc.getTimeLeftMs();
+            if (currentRound > 1)
             {
-                System.out.println("Time left at start of round " + currentRound + " : " + gc.getTimeLeftMs());
+                time += "Time taken in round " + (currentRound - 1) + " : " + (lastTime - timeLeftMs) + "\n";
             }
-
+            lastTime = timeLeftMs + 50;
+            if (currentRound == 740)
+            {
+                System.out.println(time);
+            }
             // Clear unit lists
             for (int i = 0; i < unitTypes.length; i++)
             {
@@ -68,30 +78,30 @@ public class Player
                         {
                             processWorker(unit, unitLocation);
                         }
-//                        if (unitTypes[i] == UnitType.Knight)
-//                        {
-//                            processKnight(unit, unitLocation);
-//                        }
-//                        if (unitTypes[i] == UnitType.Ranger)
-//                        {
-//                            processRanger(unit, unitLocation);
-//                        }
-//                        if (unitTypes[i] == UnitType.Mage)
-//                        {
-//                            processMage(unit, unitLocation);
-//                        }
-//                        if (unitTypes[i] == UnitType.Healer)
-//                        {
-//                            processHealer(unit, unitLocation);
-//                        }
-//                        if (unitTypes[i] == UnitType.Factory)
-//                        {
-//                            processFactory(unit, unitLocation);
-//                        }
-//                        if (unitTypes[i] == UnitType.Rocket)
-//                        {
-//                            processRocket(unit, unitLocation);
-//                        }
+                        if (unitTypes[i] == UnitType.Knight)
+                        {
+                            processKnight(unit, unitLocation);
+                        }
+                        if (unitTypes[i] == UnitType.Ranger)
+                        {
+                            processRanger(unit, unitLocation);
+                        }
+                        if (unitTypes[i] == UnitType.Mage)
+                        {
+                            processMage(unit, unitLocation);
+                        }
+                        if (unitTypes[i] == UnitType.Healer)
+                        {
+                            processHealer(unit, unitLocation);
+                        }
+                        if (unitTypes[i] == UnitType.Factory)
+                        {
+                            processFactory(unit, unitLocation);
+                        }
+                        if (unitTypes[i] == UnitType.Rocket)
+                        {
+                            processRocket(unit, unitLocation);
+                        }
                     }
                 }
             }

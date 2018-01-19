@@ -35,8 +35,17 @@ public class Movement
 
     public static boolean moveUnitTowards(Unit unit, MapLocation targetMapLocation)
     {
-        Direction targetDirection = unit.location().mapLocation().directionTo(targetMapLocation);
-        return moveUnitInDirection(unit, targetDirection);
+        try
+        {
+            Direction targetDirection = unit.location().mapLocation().directionTo(targetMapLocation);
+            return moveUnitInDirection(unit, targetDirection);
+        }
+        catch (Exception e)
+        {
+            System.out.println(unit.location().mapLocation());
+            System.out.println(targetMapLocation);
+        }
+        return false;
     }
 
     public static boolean moveUnitAwayFrom(Unit unit, MapLocation targetLocation)
@@ -54,6 +63,10 @@ public class Movement
 
     public static boolean moveUnitTo(Unit unit, MapLocation targetMapLocation)
     {
+        if (waypointAdjacencyList.isEmpty())
+        {
+            return moveUnitTowards(unit ,targetMapLocation);
+        }
         MapLocation unitMapLocation = getConstantMapLocationRepresentation(unit.location().mapLocation());
         targetMapLocation = getConstantMapLocationRepresentation(targetMapLocation);
 //        System.out.println(unitMapLocation);
@@ -69,6 +82,8 @@ public class Movement
         }
         constructPathBetween(startWaypoint, endWaypoint);
         MapLocation nextWaypoint = nextBestWaypoint.get(new Pair<MapLocation, MapLocation>(startWaypoint, endWaypoint));
+//        System.out.println(nextWaypoint);
+//        System.out.println("================================");
         return moveUnitTowards(unit, nextWaypoint);
     }
 }
