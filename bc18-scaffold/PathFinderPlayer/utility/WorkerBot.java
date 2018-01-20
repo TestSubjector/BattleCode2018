@@ -5,6 +5,7 @@ import java.util.*;
 import bc.*;
 
 import static utility.Globals.*;
+import static utility.DecisionTree.*;
 import static utility.Movement.*;
 
 public class WorkerBot
@@ -60,6 +61,7 @@ public class WorkerBot
     private static void processBuilder(Unit unit, Location unitLocation, MapLocation unitMapLocation)
     {
         // Blueprint structures
+        // TODO - Use Akhil's Appeals
         if (unit.workerHasActed() == 0)
         {
             UnitType blueprintType = null;
@@ -91,6 +93,7 @@ public class WorkerBot
             }
         }
 
+        // TODO - Remember previous target
         if (unit.movementHeat() < 10)
         {
             // Move towards nearest blueprint
@@ -117,6 +120,8 @@ public class WorkerBot
         if (unit.movementHeat() < 10)
         {
             // Move towards nearest mine
+            // TODO - Priority for good mines
+            // TODO - Remember previous target
             if (gc.karboniteAt(unitMapLocation) == 0)
             {
                 MapLocation nearestMineMapLocation = null;
@@ -142,6 +147,7 @@ public class WorkerBot
         }
     }
 
+    // TODO - Add repair
     public static void processEarthWorker(Unit unit, Location unitLocation)
     {
         MapLocation unitMapLocation = unitLocation.mapLocation();
@@ -161,13 +167,16 @@ public class WorkerBot
             }
         }
 
-        // Mine karbonite if adjacent to or standing on a mine
-        for (int j = 0; j < directions.length; j++)
+        if (unit.workerHasActed() == 0)
         {
-            if (gc.canHarvest(unit.id(), directions[j]))
+            // Mine karbonite if adjacent to or standing on a mine
+            for (int j = 0; j < directions.length; j++)
             {
-                gc.harvest(unit.id(), directions[j]);
-                break;
+                if (gc.canHarvest(unit.id(), directions[j]))
+                {
+                    gc.harvest(unit.id(), directions[j]);
+                    break;
+                }
             }
         }
 
@@ -183,6 +192,7 @@ public class WorkerBot
                     MapLocation replicateMapLocation = unitMapLocation.add(replicateDirection);
                     Unit newWorker = gc.senseUnitAtLocation(replicateMapLocation);
                     unitList.add(newWorker);
+                    // TODO - Remove builders when dead
                     if (unitList.size() * builderFraction > builderSet.size())
                     {
                         builderSet.add(newWorker.id());
@@ -202,6 +212,8 @@ public class WorkerBot
         }
     }
 
+    // TODO - Worker replication code
+    // TODO - Inform Mars about the state
     public static void processMarsWorker(Unit unit, Location unitLocation)
     {
 
@@ -219,116 +231,6 @@ public class WorkerBot
         }
     }
 
-    public static long maxWorkerLimitAtTurn(long currentRound)
-    {
-        if(homeMapSize <=500)
-        {
-            if(currentRound < 75)
-            {
-                if(earthInitialTotalKarbonite > 1000)
-                {
-                    return 20;
-                }
-                else if(earthInitialTotalKarbonite > 750)
-                {
-                    return 15;
-                }
-                else if(earthInitialTotalKarbonite < 100)
-                {
-                    return 5;
-                }
-            }
-            else
-            {
-                return 10;
-            }
-        }
-        else if(homeMapSize <=900)
-        {
-            if(currentRound < 85)
-            {
-                if(earthInitialTotalKarbonite > 1000)
-                {
-                    return 20;
-                }
-                else if(earthInitialTotalKarbonite > 750)
-                {
-                    return 15;
-                }
-                else if(earthInitialTotalKarbonite < 100)
-                {
-                    return 5;
-                }
-            }
-            else
-            {
-                if(earthInitialTotalKarbonite < 500)
-                {
-                    return 12;
-                }
-                else if(earthInitialTotalKarbonite > 1000)
-                {
-                    return 20;
-                }
-                else
-                {
-                    return 15;
-                }
-            }
-        }
-        else
-        {
-            if(currentRound < 75)
-            {
-                if(earthInitialTotalKarbonite > 3000)
-                {
-                    return 30;
-                }
-                else if(earthInitialTotalKarbonite > 1000)
-                {
-                    return 20;
-                }
-                else
-                {
-                    return 10;
-                }
-            }
-            else
-            {
-                if(earthInitialTotalKarbonite < 500)
-                {
-                    return 10;
-                }
-                else if(earthInitialTotalKarbonite > 1500)
-                {
-                    return 25;
-                }
-                else
-                {
-                    return 15;
-                }
-            }
-        }
-        return 10;
-    }
-
-    public static long maxFactoryLimitAtTurn(long currentRound, long totalCombatUnits)
-    {
-        if (homeMapSize <= 625)
-        {
-            return 8;
-        }
-        else
-        {
-            return Math.round((double)homeMapSize / 100) + 1;
-        }
-    }
-
-    public static boolean makeRocketArmada(long totalUnits)
-    {
-        return totalUnits > 4 * earthPassableTerrain * ((double)homeMapHeight + homeMapWidth) / (homeMapSize);
-    }
-
     // Called only from Earth
     public static void modifyAdjacentFactoryAppeal(MapLocation mapLocation, long amount)
     {
@@ -337,8 +239,8 @@ public class WorkerBot
             MapLocation adjacentMapLocation = mapLocation.add(directions[i]);
             if (homeMap.onMap(adjacentMapLocation) && homeMap.isPassableTerrainAt(adjacentMapLocation) == 1)
             {
-                int x = (int)adjacentMapLocation.getX();
-                int y = (int)adjacentMapLocation.getY();
+                int x = adjacentMapLocation.getX();
+                int y = adjacentMapLocation.getY();
                 long current = potentialFactorySpots.get(x).get(y);
                 potentialFactorySpots.get(x).set(y, current + amount);}
         }

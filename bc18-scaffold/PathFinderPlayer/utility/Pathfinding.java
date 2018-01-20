@@ -51,6 +51,7 @@ public class Pathfinding
                 }
                 for (int i = 1; i < directions.length - 1; i += 2)
                 {
+                    // TODO - Add more waypoints for edge case maps
                     MapLocation diagonalSquare = possibleWaypoint.add(directions[i]);
                     MapLocation sideSquareOne = possibleWaypoint.add(directions[i - 1]);
                     MapLocation sideSquareTwo = possibleWaypoint.add(directions[(i + 1) % 8]);
@@ -184,6 +185,7 @@ public class Pathfinding
         return nearest;
     }
 
+     // TODO - Fix unreachable locations
     public static void constructPathBetween(MapLocation startWaypoint, MapLocation endWaypoint)
     {
         Pair<MapLocation, MapLocation> key = new Pair<>(startWaypoint, endWaypoint);

@@ -27,7 +27,6 @@ public class Globals
     public static long awayMapHeight;
     public static long awayMapSize;
     public static long currentRound;
-    public static short botIntelligenceLevel;
     public static MapLocation[][] mapLocationAt;
     public static VecUnit initialWorkers;
     public static long earthPassableTerrain;
@@ -37,6 +36,9 @@ public class Globals
     public static HashMap<UnitType, ArrayList<Unit>> typeSortedUnitLists;
     public static ArrayList<Unit> unitList;
     public static HashSet<Integer> builderSet;
+
+
+    public static short botIntelligenceLevel;
     public static double builderFraction;
 
     // Rocket landing sites
@@ -62,17 +64,13 @@ public class Globals
     public static HashMap<MapLocation, MapLocation> nearestUnobstructedWaypoints;
     public static HashMap<Pair<MapLocation, MapLocation>, MapLocation> nextBestWaypoint;
 
-    // Combat variables (convert to HashMap format)
-    public final static int INITIAL_RANGER_ATTACK_DISTANCE = 7;  // Rounding For Now
-    public final static int INITIAL_RANGER_MOVEMENT_COOLDOWN = 20;
-    public final static int INITIAL_RANGER_ATTACK_COOLDOWN = 20;
-    public final static int INITIAL_MAGE_ATTACK_DISTANCE = 5; // Rounding For Now
-    public final static int INITIAL_MAGE_MOVEMENT_COOLDOWN = 20;
-    public final static int INITIAL_MAGE_ATTACK_COOLDOWN = 20;
-    public final static int INITIAL_KNIGHT_ATTACK_DISTANCE = 1;
-    public final static int INITIAL_KNIGHT_MOVEMENT_COOLDOWN = 15;
-    public final static int INITIAL_KNIGHT_ATTACK_COOLDOWN = 20;
-    public static int rangerTalentVision;
+    // Combat variables
+    public static HashMap<UnitType, Long> attackRange;
+    public static HashMap<UnitType, Long> abilityRange;
+    public static HashMap<UnitType, Long> attackCooldown;
+    public static HashMap<UnitType, Long> movementCooldown;
+    public static HashMap<UnitType, Long> abilityCooldown;
+    public static HashMap<UnitType, Long> visionRange;
 
     // Research queue
     // 25+25+100+100+100+25+75+100+25+75+100+25+75+100+25+75
@@ -195,7 +193,32 @@ public class Globals
         nextBestWaypoint = new HashMap<Pair<MapLocation, MapLocation>, MapLocation>();
         computeShortestPathTrees();
 
-        rangerTalentVision = 0;
+        attackRange = new HashMap<UnitType, Long>();
+        abilityRange = new HashMap<UnitType, Long>();
+        attackCooldown = new HashMap<UnitType, Long>();
+        movementCooldown = new HashMap<UnitType, Long>();
+        abilityCooldown = new HashMap<UnitType, Long>();
+        visionRange = new HashMap<UnitType, Long>();
+        attackRange.put(UnitType.Knight, 2L);
+        attackRange.put(UnitType.Ranger, 50L);
+        attackRange.put(UnitType.Mage, 30L);
+        attackRange.put(UnitType.Healer, 30L);
+        abilityRange.put(UnitType.Knight, 10L);
+        abilityRange.put(UnitType.Ranger, 5000L);
+        abilityRange.put(UnitType.Mage, 8L);
+        abilityRange.put(UnitType.Healer, 30L);
+        attackCooldown.put(UnitType.Knight, 20L);
+        attackCooldown.put(UnitType.Ranger, 20L);
+        attackCooldown.put(UnitType.Mage, 20L);
+        attackCooldown.put(UnitType.Healer, 10L);
+        movementCooldown.put(UnitType.Knight, 15L);
+        movementCooldown.put(UnitType.Ranger, 30L);
+        movementCooldown.put(UnitType.Mage, 20L);
+        movementCooldown.put(UnitType.Healer, 25L);
+        visionRange.put(UnitType.Knight, 50L);
+        visionRange.put(UnitType.Ranger, 70L);
+        visionRange.put(UnitType.Mage, 30L);
+        visionRange.put(UnitType.Healer, 50L);
     }
 
     public static long diagonalDistanceBetween(MapLocation first, MapLocation second)
@@ -318,13 +341,5 @@ public class Globals
                 potentialLandingSites.add(new QueuePair<>(appeal, mapLocation));
             }
         }
-    }
-
-    // Witch of Agnesi computation breaker
-    public static boolean switchToPrimitiveMind(long currentRound, int timeLeft)
-    {
-        // Give 5 secs to pathfinding
-        // Constant value by integrating (8*57^3)/(x^2 + 57^2) dx from x = -infinity to -375
-        return timeLeft < 3920 + 25992* Math.tanh((currentRound - 375)/57);
     }
 }

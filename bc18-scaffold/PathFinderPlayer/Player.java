@@ -2,8 +2,6 @@ import java.util.*;
 
 import bc.*;
 
-import utility.QueuePair;
-
 import static utility.Globals.*;
 import static utility.WorkerBot.*;
 import static utility.KnightBot.*;
@@ -12,6 +10,7 @@ import static utility.MageBot.*;
 import static utility.HealerBot.*;
 import static utility.FactoryBot.*;
 import static utility.RocketBot.*;
+import static utility.DecisionTree.*;
 
 public class Player
 {

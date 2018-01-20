@@ -12,7 +12,7 @@ public class Combat
     // TODO - Add Ability Cooldown Later
     public static boolean unitFrozenByHeat(Unit unit)
     {
-        if(unit.unitType() == UnitType.Healer)
+        if (unit.unitType() == UnitType.Healer)
         {
             return !(gc.isHealReady(unit.id()) || gc.isMoveReady(unit.id()));
         }
@@ -60,7 +60,7 @@ public class Combat
             {
                 //Match steps with Mage
                 //(Is infinite, if we don't consider non-perfect movement)
-                incentiveToHunt += 20 * Math.floor((double)unitHealth * 2 / 60) + (distanceBetweenUnitsSquared - 3) * 40;
+                incentiveToHunt += 20 * Math.floor((double) unitHealth * 2 / 60) + (distanceBetweenUnitsSquared - 3) * 40;
             }
             else
             {
@@ -110,36 +110,36 @@ public class Combat
     public static long getEnemyUnitRank(Unit enemyUnit)
     {
         long enemyUnitPriority = 10;
-        if(enemyUnit.unitType() == UnitType.Worker)
+        if (enemyUnit.unitType() == UnitType.Worker)
         {
             enemyUnitPriority = 14;
         }
-        else if(enemyUnit.unitType() == UnitType.Factory)
+        else if (enemyUnit.unitType() == UnitType.Factory)
         {
             enemyUnitPriority = 12;
         }
-        else if(enemyUnit.unitType() == UnitType.Rocket)
+        else if (enemyUnit.unitType() == UnitType.Rocket)
         {
             enemyUnitPriority = 10;
         }
-        else if(enemyUnit.unitType() == UnitType.Knight)
+        else if (enemyUnit.unitType() == UnitType.Knight)
         {
             enemyUnitPriority = 8;
         }
-        else if(enemyUnit.unitType() == UnitType.Healer)
+        else if (enemyUnit.unitType() == UnitType.Healer)
         {
             enemyUnitPriority = 6;
         }
-        else if(enemyUnit.unitType() == UnitType.Mage)
+        else if (enemyUnit.unitType() == UnitType.Mage)
         {
             enemyUnitPriority = 4;
         }
-        else if(enemyUnit.unitType() == UnitType.Ranger)
+        else if (enemyUnit.unitType() == UnitType.Ranger)
         {
             enemyUnitPriority = 2;
         }
         // One-shot kill
-        if(enemyUnit.health() <=40)
+        if (enemyUnit.health() <= 40)
         {
             enemyUnitPriority /= 2;
         }
