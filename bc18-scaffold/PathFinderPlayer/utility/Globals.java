@@ -35,7 +35,8 @@ public class Globals
     public static Set<MapLocation> earthKarboniteLocations;
     public static Set<Unit> unfinishedBlueprints;
     public static HashMap<UnitType, ArrayList<Unit>> typeSortedUnitLists;
-    public static HashMap<Integer, QueuePair<Long, MapLocation>> visibleEnemyPriorities;
+    public static HashMap<Integer, VecUnit> enemyVecUnits;
+    public static HashSet<MapLocation> enemyLocationAverages;
     public static long totalCombatUnits;
     public static long totalUnits;
     public static ArrayList<Unit> unitList;
@@ -188,7 +189,8 @@ public class Globals
         {
             typeSortedUnitLists.put(unitTypes[i], new ArrayList<Unit>());
         }
-        visibleEnemyPriorities = new HashMap<Integer, QueuePair<Long, MapLocation>>();
+        enemyVecUnits = new HashMap<Integer, VecUnit>();
+        enemyLocationAverages = new HashSet<MapLocation>();
 
         visited = new HashMap<MapLocation, Boolean>();
         waypointAdjacencyList = new HashMap<MapLocation, LinkedList<GraphPair<MapLocation, Long>>>();

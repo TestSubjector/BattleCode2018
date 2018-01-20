@@ -75,15 +75,19 @@ public class Player
                 typeSortedUnitLists.get(unit.unitType()).add(unit);
                 if (!unitLocation.isInGarrison() && !unitLocation.isInSpace())
                 {
-                    VecUnit visibleEnemyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), unit.visionRange(), theirTeam);
+                    VecUnit visibleEnemyUnits = gc.senseNearbyUnitsByTeam(unitLocation.mapLocation(), unit.visionRange(), theirTeam);
+                    enemyVecUnits.put(unit.id(), visibleEnemyUnits);
+                    double xAverage = 0;
+                    double yAverage = 0;
                     for (int j = 0; j < visibleEnemyUnits.size(); j++)
                     {
-                        // Global micro-fighting priority decider
                         Unit visibleEnemyUnit = visibleEnemyUnits.get(j);
-                        long enemyUnitRank = getEnemyUnitRank(visibleEnemyUnit);
-
-                        visibleEnemyPriorities.put(visibleEnemyUnit.id(), new QueuePair<Long, MapLocation>(enemyUnitRank, visibleEnemyUnit.location().mapLocation()));
+                        xAverage += visibleEnemyUnit.location().mapLocation().getX();
+                        yAverage += visibleEnemyUnit.location().mapLocation().getY();
                     }
+                    xAverage /= visibleEnemyUnits.size();
+                    yAverage /= visibleEnemyUnits.size();
+                    enemyLocationAverages.add(mapLocationAt[(int)xAverage][(int)yAverage]);
                 }
             }
 
