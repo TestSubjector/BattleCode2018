@@ -49,7 +49,7 @@ public class Player
             }
             if (currentRound % 250 == 2)
             {
-                System.out.println(time);
+                // System.out.println(time);
                 time = "";
             }
             if (switchToPrimitiveMind(currentRound, timeLeftMs) && currentRound < 700)
@@ -117,6 +117,10 @@ public class Player
                     {
                         if (unitTypes[i] == UnitType.Worker)
                         {
+                            if (unit.unitType() == UnitType.Factory)
+                            {
+                                System.out.println(unitLocation.mapLocation());
+                            }
                             processWorker(unit, unitLocation);
                         }
                         if (unitTypes[i] == UnitType.Knight)

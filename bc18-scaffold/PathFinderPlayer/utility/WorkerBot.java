@@ -192,17 +192,25 @@ public class WorkerBot
             }
         }
 
-        if (unit.workerHasActed() == 0)
+        try
         {
-            // Mine karbonite if adjacent to or standing on a mine
-            for (int j = 0; j < directions.length; j++)
+            if (unit.workerHasActed() == 0)
             {
-                if (gc.canHarvest(unit.id(), directions[j]))
+                // Mine karbonite if adjacent to or standing on a mine
+                for (int j = 0; j < directions.length; j++)
                 {
-                    gc.harvest(unit.id(), directions[j]);
-                    break;
+                    if (gc.canHarvest(unit.id(), directions[j]))
+                    {
+                        gc.harvest(unit.id(), directions[j]);
+                        break;
+                    }
                 }
             }
+        }
+        catch (Exception e)
+        {
+            System.out.println(unit.unitType());
+            System.out.println(unitMapLocation);
         }
 
         if (builderSet.contains(unit.id()))
@@ -229,12 +237,18 @@ public class WorkerBot
                 {
                     gc.replicate(unit.id(), replicateDirection);
                     MapLocation replicateMapLocation = unitMapLocation.add(replicateDirection);
-                    Unit newWorker = gc.senseUnitAtLocation(replicateMapLocation);
-                    unitList.add(newWorker);
-                    // TODO - Remove builders when dead
-                    if (unitList.size() * builderFraction > builderSet.size())
+                    if (gc.canSenseLocation(replicateMapLocation))
                     {
-                        builderSet.add(newWorker.id());
+                        if (gc.hasUnitAtLocation(replicateMapLocation))
+                        {
+                            Unit newWorker = gc.senseUnitAtLocation(replicateMapLocation);
+                            unitList.add(newWorker);
+                            // TODO - Remove builders when dead
+                            if (unitList.size() * builderFraction > builderSet.size())
+                            {
+                                builderSet.add(newWorker.id());
+                            }
+                        }
                     }
                     break;
                 }

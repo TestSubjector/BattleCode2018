@@ -5,6 +5,7 @@ import java.util.*;
 import bc.*;
 
 import static utility.Globals.*;
+import static utility.FactoryBot.*;
 
 public class RocketBot
 {
@@ -47,8 +48,78 @@ public class RocketBot
         return destinationPair;
     }
 
+    public static void processEarthRocket(Unit unit, Location unitLocation)
+    {
+        if (unit.structureIsBuilt() == 1)
+        {
+            // Check all adjacent squares
+            VecUnit nearbyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 2, ourTeam);
+            for (int j = 0; j < nearbyUnits.size(); j++)
+            {
+                Unit nearbyUnit = nearbyUnits.get(j);
+                if (gc.canLoad(unit.id(), nearbyUnit.id()))
+                {
+                    gc.load(unit.id(), nearbyUnit.id());
+                }
+            }
+            if (unit.structureGarrison().size() >= unit.structureMaxCapacity() / 2)
+            {
+                QueuePair<Long, MapLocation> destPair = potentialLandingSites.poll();
+                boolean isOutdated = true;
+                while (isOutdated)
+                {
+                    isOutdated = false;
+                    for (int j = 0; j < updatedAppealSites.size(); j++)
+                    {
+                        if (updatedAppealSites.get(j).getSecond().equals(destPair.getSecond())
+                                && !(updatedAppealSites.get(j).getFirst().equals(destPair.getFirst())))
+                        {
+                            isOutdated = true;
+                            destPair = potentialLandingSites.poll();
+                            break;
+                        }
+                    }
+                }
+
+                MapLocation dest = destPair.getSecond();
+                // potentialLandingSites is supposed to have only those spots
+                // that are passable, and not already used as a destination.
+                // Hence, this check should always pass.
+                if (gc.canLaunchRocket(unit.id(), dest))
+                {
+                    gc.launchRocket(unit.id(), dest);
+                    updateSurroundingAppeal(destPair);
+                }
+            }
+        }
+    }
+
+    public static void processMarsRocket(Unit unit, Location unitLocation)
+    {
+        for (int j = 0; j < directions.length; j++)
+        {
+            Direction unloadDirection = directions[j];
+            if (unloadDirection == Direction.Center)
+            {
+                continue;
+            }
+            if (gc.canUnload(unit.id(), unloadDirection))
+            {
+                gc.unload(unit.id(), unloadDirection);
+                break;
+            }
+        }
+    }
+
     public static void processRocket(Unit unit, Location unitLocation)
     {
-
+        if (homePlanet == Planet.Earth)
+        {
+            processEarthRocket(unit, unitLocation);
+        }
+        else
+        {
+            processMarsRocket(unit, unitLocation);
+        }
     }
 }

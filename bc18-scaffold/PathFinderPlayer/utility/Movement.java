@@ -69,16 +69,30 @@ public class Movement
         }
         MapLocation unitMapLocation = getConstantMapLocationRepresentation(unit.location().mapLocation());
         targetMapLocation = getConstantMapLocationRepresentation(targetMapLocation);
-//        System.out.println(unitMapLocation);
-//        System.out.println(targetMapLocation);
         MapLocation startWaypoint = findNearestUnobstructedWaypoint(unitMapLocation);
         MapLocation endWaypoint = findNearestUnobstructedWaypoint(targetMapLocation);
-//        System.out.println(startWaypoint);
-//        System.out.println(endWaypoint);
-//        System.out.println("================================");
-        if (startWaypoint.equals(endWaypoint))
+        if (startWaypoint == null)
         {
-            return moveUnitTowards(unit, targetMapLocation);
+            System.out.println(unitMapLocation);
+            System.out.println(targetMapLocation);
+            System.out.println(startWaypoint);
+            System.out.println(endWaypoint);
+            System.out.println("================================");
+        }
+        try
+        {
+            if (startWaypoint.equals(endWaypoint))
+            {
+                return moveUnitTowards(unit, targetMapLocation);
+            }
+        }
+        catch (Exception e)
+        {
+            System.out.println(unitMapLocation);
+            System.out.println(targetMapLocation);
+            System.out.println(startWaypoint);
+            System.out.println(endWaypoint);
+            System.out.println("================================");
         }
         constructPathBetween(startWaypoint, endWaypoint);
         MapLocation nextWaypoint = nextBestWaypoint.get(new Pair<MapLocation, MapLocation>(startWaypoint, endWaypoint));
