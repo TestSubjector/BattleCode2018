@@ -2,6 +2,8 @@ import java.util.*;
 
 import bc.*;
 
+import utility.QueuePair;
+
 import static utility.Globals.*;
 import static utility.WorkerBot.*;
 import static utility.KnightBot.*;
@@ -11,6 +13,8 @@ import static utility.HealerBot.*;
 import static utility.FactoryBot.*;
 import static utility.RocketBot.*;
 import static utility.DecisionTree.*;
+import static utility.Combat.*;
+
 
 public class Player
 {
@@ -32,18 +36,23 @@ public class Player
         while (true)
         {
             currentRound = gc.round();
+            currentKarbonite = gc.karbonite();
             int timeLeftMs = gc.getTimeLeftMs();
             if (currentRound > 1)
             {
                 time += "Time taken in round " + (currentRound - 1) + " : " + (lastTime - timeLeftMs) + "\n";
             }
             lastTime = timeLeftMs + 50;
+            if (currentRound % 50 == 0)
+            {
+                System.gc();
+            }
             if (currentRound % 250 == 2)
             {
                 System.out.println(time);
                 time = "";
             }
-            if(switchToPrimitiveMind(currentRound, timeLeftMs) && currentRound < 700)
+            if (switchToPrimitiveMind(currentRound, timeLeftMs) && currentRound < 700)
             {
                 botIntelligenceLevel = 0;
             }
@@ -62,8 +71,28 @@ public class Player
             for (int i = 0; i < units.size(); i++)
             {
                 Unit unit = units.get(i);
+                Location unitLocation = unit.location();
                 typeSortedUnitLists.get(unit.unitType()).add(unit);
+                if (!unitLocation.isInGarrison() && !unitLocation.isInSpace())
+                {
+                    VecUnit visibleEnemyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), unit.visionRange(), theirTeam);
+                    for (int j = 0; j < visibleEnemyUnits.size(); j++)
+                    {
+                        // Global micro-fighting priority decider
+                        Unit visibleEnemyUnit = visibleEnemyUnits.get(j);
+                        long enemyUnitRank = getEnemyUnitRank(visibleEnemyUnit);
+
+                        visibleEnemyPriorities.put(visibleEnemyUnit.id(), new QueuePair<Long, MapLocation>(enemyUnitRank, visibleEnemyUnit.location().mapLocation()));
+                    }
+                }
             }
+
+            // Maintain a total of the number of combat/non-combat units we have
+            totalCombatUnits = typeSortedUnitLists.get(UnitType.Ranger).size() + typeSortedUnitLists.get(UnitType.Healer).size() +
+                    typeSortedUnitLists.get(UnitType.Knight).size() + typeSortedUnitLists.get(UnitType.Mage).size();
+            totalUnits = totalCombatUnits + typeSortedUnitLists.get(UnitType.Worker).size() +
+                    typeSortedUnitLists.get(UnitType.Factory).size() + typeSortedUnitLists.get(UnitType.Rocket).size();
+
 
             if (homePlanet == Planet.Earth)
             {

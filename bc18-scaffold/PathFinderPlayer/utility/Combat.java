@@ -21,7 +21,39 @@ public class Combat
             return !(gc.isAttackReady(unit.id()) || gc.isMoveReady(unit.id()));
         }
     }
-
+/* We are not going to use this function it is not very good
+    public static void moveUnitAwayFromMultipleUnits(VecUnit nearbyUnits, Unit unit)
+    {
+        long[] directionArray = {1,1,1,1,1,1,1,1,1};
+        long numberOfNearbyUnits = nearbyUnits.size();
+        long count = 8;
+        MapLocation unitLocation = unit.location().mapLocation();
+        for(int i = 0; i< numberOfNearbyUnits; i++)
+        {
+            // Gives Direction Between Units
+            Direction directionToOtherUnit = unitLocation.directionTo(nearbyUnits.get(i).location().mapLocation());
+            directionArray[directionToOtherUnit.ordinal()] = 0;
+        }
+        for(int j = 0; j < 8; j++)
+        {
+            if(directionArray[j] != 0)
+            {
+                if(moveUnitInDirection(unit, Direction.values()[j]))
+                {
+                    break;
+                }
+            }
+            else
+            {
+                count--;
+            }
+        }
+        if(count == 0)
+        {
+            moveUnitInRandomDirection(unit);
+        }
+    }
+*/
     // Decides the incentive to attack an unit by Rangers
     // TODO - Make it live rather fixed static values, if computation allows
     public static long setBountyScore(Unit unit, Unit enemyUnit)

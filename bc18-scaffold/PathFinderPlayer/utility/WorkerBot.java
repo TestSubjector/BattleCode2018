@@ -39,15 +39,24 @@ public class WorkerBot
                 if (!gc.hasUnitAtLocation(blueprintMapLocation))
                 {
                     obsoleteBlueprints.add(blueprint);
+                    // increase appeal
+                    modifyAdjacentFactoryAppeal(blueprintMapLocation, -WEIGHT_STRUCTURE);
                 }
                 else
                 {
                     Unit unitAtLocation = gc.senseUnitAtLocation(blueprintMapLocation);
-                    if ((unitAtLocation.unitType() == UnitType.Factory ||
-                            unitAtLocation.unitType() == UnitType.Rocket) &&
-                            unitAtLocation.structureIsBuilt() == 1)
+                    if (unitAtLocation.unitType() == UnitType.Factory ||
+                            unitAtLocation.unitType() == UnitType.Rocket)
                     {
-                        obsoleteBlueprints.add(blueprint);
+                        if (unitAtLocation.structureIsBuilt() == 1)
+                        {
+                            obsoleteBlueprints.add(blueprint);
+                        }
+                    }
+                    else
+                    {
+                        // increase appeal
+                        modifyAdjacentFactoryAppeal(blueprintMapLocation, -WEIGHT_STRUCTURE);
                     }
                 }
             }
@@ -58,10 +67,10 @@ public class WorkerBot
         }
     }
 
+    // TODO - Make building locally optimized instead of globally
     private static void processBuilder(Unit unit, Location unitLocation, MapLocation unitMapLocation)
     {
         // Blueprint structures
-        // TODO - Use Akhil's Appeals
         if (unit.workerHasActed() == 0)
         {
             UnitType blueprintType = null;
@@ -77,18 +86,29 @@ public class WorkerBot
             }
             if (blueprintType != null)
             {
+                Direction blueprintDirection = directions[0];
                 for (int j = 0; j < directions.length - 1; j++)
                 {
-                    Direction blueprintDirection = directions[j];
-                    if (gc.canBlueprint(unit.id(), blueprintType, blueprintDirection))
+                    Direction candidateDirection = directions[j];
+                    MapLocation candidateMapLocation = unitMapLocation.add(candidateDirection);
+                    long maxAppeal = -1000L;
+                    if (homeMap.onMap(candidateMapLocation) && homeMap.isPassableTerrainAt(candidateMapLocation) != 0)
                     {
-                        gc.blueprint(unit.id(), blueprintType, blueprintDirection);
-                        MapLocation blueprintMapLocation = unitMapLocation.add(blueprintDirection);
-                        Unit newBlueprint = gc.senseUnitAtLocation(blueprintMapLocation);
-                        unfinishedBlueprints.add(newBlueprint);
-                        typeSortedUnitLists.get(blueprintType).add(newBlueprint);
-                        break;
+                        long appeal = potentialFactorySpots.get(candidateMapLocation.getX()).get(candidateMapLocation.getY());
+                        if (appeal > maxAppeal)
+                        {
+                            blueprintDirection = candidateDirection;
+                            maxAppeal = appeal;
+                        }
                     }
+                }
+                if (gc.canBlueprint(unit.id(), blueprintType, blueprintDirection))
+                {
+                    MapLocation blueprintMapLocation = unitMapLocation.add(blueprintDirection);
+                    gc.blueprint(unit.id(), blueprintType, blueprintDirection);
+                    Unit newBlueprint = gc.senseUnitAtLocation(blueprintMapLocation);
+                    unfinishedBlueprints.add(newBlueprint);
+                    typeSortedUnitLists.get(blueprintType).add(newBlueprint);
                 }
             }
         }
@@ -162,6 +182,11 @@ public class WorkerBot
                 if (gc.canBuild(unit.id(), adjacentUnit.id()))
                 {
                     gc.build(unit.id(), adjacentUnit.id());
+                    break;
+                }
+                else if(adjacentUnit.health() < adjacentUnit.maxHealth() && gc.canRepair(unit.id(), adjacentUnit.id()))
+                {
+                    gc.repair(unit.id(), adjacentUnit.id());
                     break;
                 }
             }
