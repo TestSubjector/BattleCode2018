@@ -205,7 +205,21 @@ public class WorkerBot
             }
         }
 
+        if (builderSet.contains(unit.id()))
+        {
+            processBuilder(unit, unitLocation, unitMapLocation);
+        }
+        else
+        {
+            processMiner(unit, unitLocation, unitMapLocation);
+        }
+
         // Replicate worker
+        // TODO - To stop worker Replication when required
+        if(currentRound > 250 && currentKarbonite <100 && makeRocketArmada(totalUnits))
+        {
+            return;
+        }
         if (unitList.size() < Math.sqrt(currentRound) * 5)
         {
             for (int j = 0; j < directions.length - 1; j++)
@@ -225,15 +239,6 @@ public class WorkerBot
                     break;
                 }
             }
-        }
-
-        if (builderSet.contains(unit.id()))
-        {
-            processBuilder(unit, unitLocation, unitMapLocation);
-        }
-        else
-        {
-            processMiner(unit, unitLocation, unitMapLocation);
         }
     }
 
