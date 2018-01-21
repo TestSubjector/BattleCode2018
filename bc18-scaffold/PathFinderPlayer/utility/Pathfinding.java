@@ -49,6 +49,7 @@ public class Pathfinding
                 {
                     continue;
                 }
+
                 for (int i = 1; i < directions.length - 1; i += 2)
                 {
                     // TODO - Add more waypoints for edge case maps
