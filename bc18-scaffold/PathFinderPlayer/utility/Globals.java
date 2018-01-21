@@ -61,10 +61,6 @@ public class Globals
     public final static long WEIGHT_STRUCTURE = -1;
     public final static long WEIGHT_NONE = 0;
 
-    // Factory building sites
-    public static ArrayList<ArrayList<Long>> potentialFactorySpots;
-    public static long[][] earthMapAppeals;
-
     // Pathfinding data structures
     public static HashMap<MapLocation, Boolean> visited;
     public static HashMap<MapLocation, LinkedList<GraphPair<MapLocation, Long>>> waypointAdjacencyList;
@@ -178,11 +174,6 @@ public class Globals
             findMarsLocationAppeals();
             updatedAppealSites = new ArrayList<QueuePair<Long, MapLocation>>();
             findPotentialLandingSites();
-
-            potentialFactorySpots = new ArrayList<ArrayList<Long>>();
-            earthMapAppeals = new long[(int) homeMapWidth][(int) homeMapHeight];
-            findEarthLocationAppeals();
-            findFactorySiteAppeals();
         }
         else
         {
@@ -256,11 +247,14 @@ public class Globals
             {
                 MapLocation tempMapLocation = mapLocationAt[x][y];
                 long karboniteAtTempMapLocation = homeMap.initialKarboniteAt(tempMapLocation);
+                // karbonite amount check
                 if (karboniteAtTempMapLocation > 0)
                 {
                     earthKarboniteLocations.add(tempMapLocation);
                     earthInitialTotalKarbonite += karboniteAtTempMapLocation;
                 }
+
+                if (homeMap.isPassableTerrainAt(tempMapLocation) == 1) earthPassableTerrain++;
             }
         }
         factoryLimit = maxFactoryLimit(earthInitialTotalKarbonite);
@@ -284,54 +278,6 @@ public class Globals
                 {
                     marsMapAppeals[i][j] = WEIGHT_NONE;
                 }
-            }
-        }
-    }
-
-    // Find the appeals of all map locations on Earth
-    // Will only be called from Earth
-    private static void findEarthLocationAppeals()
-    {
-        for (int i = 0; i < homeMapWidth; i++)
-        {
-            for (int j = 0; j < homeMapHeight; j++)
-            {
-                MapLocation mapLocation = new MapLocation(homePlanet, i, j);
-                if (homeMap.isPassableTerrainAt(mapLocation) == 0)
-                {
-                    earthMapAppeals[i][j] = WEIGHT_IMPASSABLE;
-                }
-                else
-                {
-                    earthMapAppeals[i][j] = WEIGHT_NONE;
-                }
-            }
-        }
-    }
-
-    public static void findFactorySiteAppeals()
-    {
-        for (int x = 0; x < homeMapWidth; x++)
-        {
-            potentialFactorySpots.add(new ArrayList<Long>((int)homeMapHeight));
-            for (int y = 0; y < homeMapHeight; y++)
-            {
-                MapLocation mapLocation = new MapLocation(homePlanet, x, y);
-                if(homeMap.isPassableTerrainAt(mapLocation) == 1)
-                {
-                    earthPassableTerrain++;
-                    potentialFactorySpots.get(x).add(-1000L);
-                }
-                long appeal = WEIGHT_NONE;
-                for (int i = 0; i < directions.length - 1; i++)
-                {
-                    MapLocation adjacentMapLocation = mapLocation.add(directions[i]);
-                    if (homeMap.onMap(adjacentMapLocation) && homeMap.isPassableTerrainAt(adjacentMapLocation) == 1)
-                    {
-                        appeal += earthMapAppeals[adjacentMapLocation.getX()][adjacentMapLocation.getY()];
-                    }
-                }
-                potentialFactorySpots.get(x).add(appeal);
             }
         }
     }

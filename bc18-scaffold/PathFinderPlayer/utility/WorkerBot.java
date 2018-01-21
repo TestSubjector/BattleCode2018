@@ -39,24 +39,14 @@ public class WorkerBot
                 if (!gc.hasUnitAtLocation(blueprintMapLocation))
                 {
                     obsoleteBlueprints.add(blueprint);
-                    // increase appeal
-                    modifyAdjacentFactoryAppeal(blueprintMapLocation, -WEIGHT_STRUCTURE);
                 }
                 else
                 {
                     Unit unitAtLocation = gc.senseUnitAtLocation(blueprintMapLocation);
                     if (unitAtLocation.unitType() == UnitType.Factory ||
-                            unitAtLocation.unitType() == UnitType.Rocket)
+                            unitAtLocation.unitType() == UnitType.Rocket && (unitAtLocation.structureIsBuilt() == 1))
                     {
-                        if (unitAtLocation.structureIsBuilt() == 1)
-                        {
-                            obsoleteBlueprints.add(blueprint);
-                        }
-                    }
-                    else
-                    {
-                        // increase appeal
-                        modifyAdjacentFactoryAppeal(blueprintMapLocation, -WEIGHT_STRUCTURE);
+                        obsoleteBlueprints.add(blueprint);
                     }
                 }
             }
@@ -70,8 +60,7 @@ public class WorkerBot
             unfinishedBlueprints.remove(obsoleteBlueprint);
         }
     }
-
-    // TODO - Make building locally optimized instead of globally
+    
     private static void processBuilder(Unit unit, Location unitLocation, MapLocation unitMapLocation, VecUnit adjacentUnits)
     {
         // Blueprint structures
@@ -92,28 +81,39 @@ public class WorkerBot
             if (blueprintType != null)
             {
                 Direction blueprintDirection = directions[0];
+                boolean isMovementNeeded = true; // to check if all points are choked
+                long maxAppeal = -1000L; // tracking the candidateAppeal
                 for (int j = 0; j < directions.length - 1; j++)
                 {
                     Direction candidateDirection = directions[j];
                     MapLocation candidateMapLocation = unitMapLocation.add(candidateDirection);
-                    long maxAppeal = -1000L;
                     if (homeMap.onMap(candidateMapLocation) && homeMap.isPassableTerrainAt(candidateMapLocation) != 0)
                     {
-                        long appeal = potentialFactorySpots.get(candidateMapLocation.getX()).get(candidateMapLocation.getY());
-                        if (appeal > maxAppeal)
+                        long locAppeal = getLocationAppeal(candidateMapLocation);
+                        if (locAppeal != -1002L)
                         {
-                            blueprintDirection = candidateDirection;
-                            maxAppeal = appeal;
+                            isMovementNeeded = false; // found a viable point
+                            if (locAppeal > maxAppeal)
+                            {
+                                blueprintDirection = candidateDirection;
+                                maxAppeal = locAppeal;
+                            }
                         }
                     }
                 }
-                if (gc.canBlueprint(unit.id(), blueprintType, blueprintDirection))
+
+                // all points choked, move out
+                if (isMovementNeeded) moveUnitInRandomDirection(unit); // TODO better direction decision
+                else
                 {
-                    MapLocation blueprintMapLocation = unitMapLocation.add(blueprintDirection);
-                    gc.blueprint(unit.id(), blueprintType, blueprintDirection);
-                    Unit newBlueprint = gc.senseUnitAtLocation(blueprintMapLocation);
-                    unfinishedBlueprints.add(newBlueprint);
-                    typeSortedUnitLists.get(blueprintType).add(newBlueprint);
+                    if (gc.canBlueprint(unit.id(), blueprintType, blueprintDirection))
+                    {
+                        MapLocation blueprintMapLocation = unitMapLocation.add(blueprintDirection);
+                        gc.blueprint(unit.id(), blueprintType, blueprintDirection);
+                        Unit newBlueprint = gc.senseUnitAtLocation(blueprintMapLocation);
+                        unfinishedBlueprints.add(newBlueprint);
+                        typeSortedUnitLists.get(blueprintType).add(newBlueprint);
+                    }
                 }
             }
         }
@@ -348,18 +348,30 @@ public class WorkerBot
         }
     }
 
-    // Called only from Earth
-    public static void modifyAdjacentFactoryAppeal(MapLocation mapLocation, long amount)
+    // Returns a long value that is either the appeal of the tile, or -1002L if the location is a choke point
+    public static long getLocationAppeal(MapLocation mapLocation)
     {
+        int blockages = 0;
+        long appeal = WEIGHT_NONE;
         for (int i = 0; i < directions.length - 1; i++)
         {
             MapLocation adjacentMapLocation = mapLocation.add(directions[i]);
-            if (homeMap.onMap(adjacentMapLocation) && homeMap.isPassableTerrainAt(adjacentMapLocation) == 1)
+            if (!homeMap.onMap(adjacentMapLocation) || (homeMap.isPassableTerrainAt(adjacentMapLocation) == 0))
             {
-                int x = adjacentMapLocation.getX();
-                int y = adjacentMapLocation.getY();
-                long current = potentialFactorySpots.get(x).get(y);
-                potentialFactorySpots.get(x).set(y, current + amount);}
+                blockages++;
+                appeal += WEIGHT_IMPASSABLE;
+            }
+            // not checking canSense because it should always be in vision range (max sq dist 8)
+            UnitType type = gc.senseUnitAtLocation(adjacentMapLocation).unitType();
+            if (type == UnitType.Factory || type == UnitType.Rocket)
+            {
+                blockages++;
+                appeal += WEIGHT_STRUCTURE;
+            }
         }
+
+        // more than 2 (incl) in an 8 x 8 sq block the movement
+        if (blockages >= 2) return -1002L;
+        else return appeal;
     }
 }
