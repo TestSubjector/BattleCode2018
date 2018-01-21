@@ -119,12 +119,6 @@ public class Player
                     {
                         if (unitTypes[i] == UnitType.Worker)
                         {
-                            /*
-                            if (unit.unitType() == UnitType.Factory)
-                            {
-                                System.out.println(unitLocation.mapLocation());
-                            }
-                            */
                             processWorker(unit, unitLocation);
                         }
                         if (unitTypes[i] == UnitType.Knight)

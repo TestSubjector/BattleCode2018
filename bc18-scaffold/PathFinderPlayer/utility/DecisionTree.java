@@ -104,11 +104,6 @@ public class DecisionTree
         return 10;
     }
 
-    public static long maxFactoryLimit(long earthInitialTotalKarbonite)
-    {
-        return Math.round(3 + ((double) homeMapHeight + homeMapWidth)/10) + earthInitialTotalKarbonite/1000;
-    }
-
     public static boolean makeRocketArmada(long totalUnits)
     {
         if(enemyVecUnits.size() == 0 && currentRound > 500)
