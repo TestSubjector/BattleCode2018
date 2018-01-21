@@ -13,6 +13,7 @@ import static utility.HealerBot.*;
 import static utility.FactoryBot.*;
 import static utility.RocketBot.*;
 import static utility.DecisionTree.*;
+import static utility.Combat.*;
 
 
 public class Player
@@ -48,15 +49,9 @@ public class Player
             }
             if (currentRound % 250 == 2)
             {
-                System.out.println(time);
+                // System.out.println(time);
                 time = "";
             }
-
-            if(currentRound % 5 == 0 || currentRound < 181)
-            {
-                currentBuilderFraction();
-            }
-
             if (switchToPrimitiveMind(currentRound, timeLeftMs) && currentRound < 700)
             {
                 botIntelligenceLevel = 0;
@@ -70,15 +65,6 @@ public class Player
             {
                 typeSortedUnitLists.get(unitTypes[i]).clear();
             }
-
-            if( currentRound > 200 && rocketProductionCooldown % 35 == 0)
-            {
-                findRocketProductionCooldown();
-            }
-            prepareRocketArmada = currentRound > 250 && currentKarbonite < 150 && makeRocketArmada(totalUnits);
-
-            // Clear enemy hashmap
-            enemyVecUnits.clear();
 
             // Fetch current units and sort by type
             VecUnit units = gc.myUnits();
@@ -131,6 +117,12 @@ public class Player
                     {
                         if (unitTypes[i] == UnitType.Worker)
                         {
+                            /*
+                            if (unit.unitType() == UnitType.Factory)
+                            {
+                                System.out.println(unitLocation.mapLocation());
+                            }
+                            */
                             processWorker(unit, unitLocation);
                         }
                         if (unitTypes[i] == UnitType.Knight)
