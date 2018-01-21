@@ -63,11 +63,7 @@ public class Movement
 
     public static boolean moveUnitTo(Unit unit, MapLocation targetMapLocation)
     {
-        if(homeMap.isPassableTerrainAt(targetMapLocation) == 0)
-        {
-            return moveUnitInRandomDirection(unit);
-        }
-        if (waypointAdjacencyList.isEmpty())
+        if (homeMap.isPassableTerrainAt(targetMapLocation) == 0 || waypointAdjacencyList.isEmpty())
         {
             return moveUnitTowards(unit ,targetMapLocation);
         }
@@ -75,28 +71,9 @@ public class Movement
         targetMapLocation = getConstantMapLocationRepresentation(targetMapLocation);
         MapLocation startWaypoint = findNearestUnobstructedWaypoint(unitMapLocation);
         MapLocation endWaypoint = findNearestUnobstructedWaypoint(targetMapLocation);
-        if (startWaypoint == null || endWaypoint == null)
+        if (startWaypoint.equals(endWaypoint))
         {
-            System.out.println(unitMapLocation);
-            System.out.println(targetMapLocation);
-            System.out.println(startWaypoint);
-            System.out.println(endWaypoint);
-            System.out.println("================================");
-        }
-        try
-        {
-            if (startWaypoint.equals(endWaypoint))
-            {
-                return moveUnitTowards(unit, targetMapLocation);
-            }
-        }
-        catch (Exception e)
-        {
-            System.out.println(unitMapLocation);
-            System.out.println(targetMapLocation);
-            System.out.println(startWaypoint);
-            System.out.println(endWaypoint);
-            System.out.println("================================");
+            return moveUnitTowards(unit, targetMapLocation);
         }
         constructPathBetween(startWaypoint, endWaypoint);
         MapLocation nextWaypoint = nextBestWaypoint.get(new Pair<MapLocation, MapLocation>(startWaypoint, endWaypoint));

@@ -111,6 +111,8 @@ public class Pathfinding
             }
         }
 
+        // TODO - Make Dijkstra on demand to save computation
+        // TODO - Probably even switch out in favour of distributed A*
         // Run Dijkstra's Algorithm for each waypoint to generate shortest path trees
         for (MapLocation sourceWaypoint : waypoints)
         {
