@@ -256,65 +256,7 @@ public class WorkerBot
     // TODO - Inform Mars about the state
     public static void processMarsWorker(Unit unit, Location unitLocation)
     {
-        MapLocation unitMapLocation = unitLocation.mapLocation();
-        VecUnit adjacentUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 2, ourTeam);
 
-        // Build a structure if adjacent to one
-        for (int j = 0; j < adjacentUnits.size(); j++)
-        {
-            Unit adjacentUnit = adjacentUnits.get(j);
-            if(adjacentUnit.health() < adjacentUnit.maxHealth() && gc.canRepair(unit.id(), adjacentUnit.id()))
-            {
-                gc.repair(unit.id(), adjacentUnit.id());
-                break;
-            }
-        }
-
-        if (unit.workerHasActed() == 0)
-        {
-            // Mine karbonite if adjacent to or standing on a mine
-            for (int j = 0; j < directions.length; j++)
-            {
-                if (gc.canHarvest(unit.id(), directions[j]))
-                {
-                    gc.harvest(unit.id(), directions[j]);
-                    break;
-                }
-            }
-        }
-
-        /*
-        if(unit.workerHasActed() == 0)
-        {
-            moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
-        }
-        */
-
-        // Replicate worker if enough Karbonite or Earth flooded
-        if( currentRound > 749 || gc.karbonite() > 100)
-        {
-            for (int j = 0; j < directions.length - 1; j++)
-            {
-                Direction replicateDirection = directions[j];
-                if (gc.canReplicate(unit.id(), replicateDirection))
-                {
-                    gc.replicate(unit.id(), replicateDirection);
-                    MapLocation replicateMapLocation = unitMapLocation.add(replicateDirection);
-                    if (gc.canSenseLocation(replicateMapLocation))
-                    {
-                        if (gc.hasUnitAtLocation(replicateMapLocation))
-                        {
-                            Unit newWorker = gc.senseUnitAtLocation(replicateMapLocation);
-                            if(newWorker.unitType() == UnitType.Worker)
-                            {
-                                unitList.add(newWorker);
-                            }
-                        }
-                    }
-                    break;
-                }
-            }
-        }
     }
 
     public static void processWorker(Unit unit, Location unitLocation)
