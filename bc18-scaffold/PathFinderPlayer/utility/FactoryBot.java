@@ -36,11 +36,12 @@ public class FactoryBot
     public static void processFactory(Unit unit, Location unitLocation)
     {
         tryToUnloadRobot(unit);
-        if(currentRound > 250 && currentKarbonite <100 && makeRocketArmada(totalUnits))
+        if(prepareRocketArmada)
         {
+            System.out.println("Breaking Production");
             return;
         }
-        if (unit.isFactoryProducing() == 0)
+        else if (unit.isFactoryProducing() == 0)
         {
             int workerCount = typeSortedUnitLists.get(UnitType.Worker).size(); // rarely produced
             int knightCount = typeSortedUnitLists.get(UnitType.Knight).size(); // not being produced

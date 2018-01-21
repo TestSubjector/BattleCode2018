@@ -104,15 +104,24 @@ public class DecisionTree
         return 10;
     }
 
+    public static long maxFactoryLimit(long earthInitialTotalKarbonite)
+    {
+        return Math.round(4 + 2 *((double) homeMapHeight + homeMapWidth)/10) + earthInitialTotalKarbonite/1000;
+    }
+
     public static boolean makeRocketArmada(long totalUnits)
     {
-        if(enemyVecUnits.size() == 0 && currentRound > 500)
+        if(rocketProductionCooldown > 0)
+        {
+            return false;
+        }
+        else if(enemyVecUnits.size() == 0 && currentRound > 500)
         {
             return true;
         }
         else
         {
-            return totalUnits > earthPassableTerrain * ((double)homeMapHeight + homeMapWidth) / 2 * (homeMapSize);
+            return totalUnits > earthPassableTerrain * ((double)homeMapHeight + homeMapWidth) / (2 * (homeMapSize));
         }
     }
 
@@ -124,7 +133,25 @@ public class DecisionTree
         }
         else
         {
-            return Math.round((double)totalUnits/ 16);
+            // TODO  - Add area available on Mars and compare
+            return Math.round((double)totalUnits / 30);
+        }
+    }
+
+    public static void currentBuilderFraction()
+    {
+        long remainingKarbonite = earthInitialTotalKarbonite / (earthInitialTotalKarbonite - (10 * currentRound));
+        if(currentRound > 180 || earthInitialTotalKarbonite < 100)
+        {
+            builderFraction = 1;
+        }
+        else if(remainingKarbonite > 0)
+        {
+            builderFraction =  0.35 + 0.65 * (1 / remainingKarbonite);
+        }
+        else
+        {
+            builderFraction = 1;
         }
     }
 
@@ -136,4 +163,16 @@ public class DecisionTree
         return timeLeft < 3920 + 25992* Math.tanh((currentRound - 375)/57);
     }
 
+    // Cooldown till you can again make a Rocket
+    public  static void findRocketProductionCooldown()
+    {
+        if(currentRound > 700)
+        {
+            rocketProductionCooldown = 0;
+        }
+        else
+        {
+            rocketProductionCooldown --;
+        }
+    }
 }

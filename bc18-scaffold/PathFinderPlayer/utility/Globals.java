@@ -47,6 +47,8 @@ public class Globals
 
     public static short botIntelligenceLevel;
     public static double builderFraction;
+    public static boolean prepareRocketArmada;
+    public static int rocketProductionCooldown;
 
     // Rocket landing sites
     public static PriorityQueue<QueuePair<Long, MapLocation>> potentialLandingSites;
@@ -151,7 +153,10 @@ public class Globals
 
         builderSet = new HashSet<Integer>();
         // TODO - Shift To Decision Tree
-        builderFraction = 0.7;
+        builderFraction = 0.45;
+
+        prepareRocketArmada = false;
+        rocketProductionCooldown = 0;
 
         // All initial workers are builders
         for (int i = 0; i < initialWorkers.size(); i++)
@@ -310,12 +315,9 @@ public class Globals
             for (int y = 0; y < homeMapHeight; y++)
             {
                 MapLocation mapLocation = new MapLocation(homePlanet, x, y);
-                if(homeMap.isPassableTerrainAt(mapLocation) == 0)
+                if(homeMap.isPassableTerrainAt(mapLocation) == 1)
                 {
                     earthPassableTerrain++;
-                }
-                else
-                {
                     potentialFactorySpots.get(x).add(-1000L);
                 }
                 long appeal = WEIGHT_NONE;

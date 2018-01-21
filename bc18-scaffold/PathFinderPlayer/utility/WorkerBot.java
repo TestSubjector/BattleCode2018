@@ -74,15 +74,16 @@ public class WorkerBot
         if (unit.workerHasActed() == 0)
         {
             UnitType blueprintType = null;
-            if (typeSortedUnitLists.get(UnitType.Rocket).size() < maxRocketLimitAtTurn(totalUnits))
-            {
-            // Blueprint a rocket
-            blueprintType = UnitType.Rocket;
-            }
-            else if (typeSortedUnitLists.get(UnitType.Factory).size() < factoryLimit)
+            if (typeSortedUnitLists.get(UnitType.Factory).size() < factoryLimit && !prepareRocketArmada)
             {
                 // Blueprint a factory
                 blueprintType = UnitType.Factory;
+            }
+            else if (typeSortedUnitLists.get(UnitType.Rocket).size() < maxRocketLimitAtTurn(totalUnits))
+            {
+                // Blueprint a rocket
+                rocketProductionCooldown++;
+                blueprintType = UnitType.Rocket;
             }
 
             if (blueprintType != null)
@@ -178,7 +179,7 @@ public class WorkerBot
         for (int j = 0; j < adjacentUnits.size(); j++)
         {
             Unit adjacentUnit = adjacentUnits.get(j);
-            if (adjacentUnit.unitType() == UnitType.Rocket || adjacentUnit.unitType() == UnitType.Factory)
+            if (adjacentUnit.unitType() == UnitType.Factory || adjacentUnit.unitType() == UnitType.Rocket)
             {
                 if (gc.canBuild(unit.id(), adjacentUnit.id()))
                 {
@@ -215,12 +216,14 @@ public class WorkerBot
             processMiner(unit, unitLocation, unitMapLocation);
         }
 
-        // Replicate worker
-        // TODO - To stop worker Replication when required
-        if(currentRound > 250 && currentKarbonite <100 && makeRocketArmada(totalUnits))
+        if(prepareRocketArmada)
         {
+            System.out.println("Breaking Replication");
             return;
         }
+
+        // Replicate worker
+        // TODO - To stop worker Replication when required
         if (unitList.size() < maxWorkerLimitAtTurn(currentRound))
         {
             for (int j = 0; j < directions.length - 1; j++)

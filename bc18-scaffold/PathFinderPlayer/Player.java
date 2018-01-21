@@ -51,6 +51,12 @@ public class Player
                 System.out.println(time);
                 time = "";
             }
+
+            if(currentRound % 5 == 0 || currentRound < 181)
+            {
+                currentBuilderFraction();
+            }
+
             if (switchToPrimitiveMind(currentRound, timeLeftMs) && currentRound < 700)
             {
                 botIntelligenceLevel = 0;
@@ -64,6 +70,12 @@ public class Player
             {
                 typeSortedUnitLists.get(unitTypes[i]).clear();
             }
+
+            if( currentRound > 200 && rocketProductionCooldown % 40 == 0)
+            {
+                findRocketProductionCooldown();
+            }
+            prepareRocketArmada = currentRound > 250 && currentKarbonite < 150 && makeRocketArmada(totalUnits);
 
             // Clear enemy hashmap
             enemyVecUnits.clear();
