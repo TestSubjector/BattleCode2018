@@ -74,7 +74,7 @@ public class WorkerBot
         if (unit.workerHasActed() == 0)
         {
             UnitType blueprintType = null;
-            if (typeSortedUnitLists.get(UnitType.Factory).size() < 8)
+            if (typeSortedUnitLists.get(UnitType.Factory).size() < maxFactoryLimitAtTurn(currentRound, totalCombatUnits))
             {
                 // Blueprint a factory
                 blueprintType = UnitType.Factory;

@@ -148,7 +148,8 @@ public class Globals
         initialWorkers = homeMap.getInitial_units();
 
         builderSet = new HashSet<Integer>();
-        builderFraction = 0.1;
+        // TODO - Shift To Decision Tree
+        builderFraction = 0.7;
 
         // All initial workers are builders
         for (int i = 0; i < initialWorkers.size(); i++)

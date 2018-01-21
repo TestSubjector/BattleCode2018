@@ -37,6 +37,7 @@ public class HealerBot
                         hasHealedThisTurn = true;
                     }
                 }
+                // TODO - Implement function so as to not get too close
                 if (nearbyFriendlyUnit.health() < nearbyFriendlyUnit.maxHealth())
                 {
                     if (moveUnitTo(unit, nearbyFriendlyUnit.location().mapLocation()))
@@ -50,6 +51,7 @@ public class HealerBot
                 break;
             }
         }
+        // TODO - Implement Running/Retreating Function
         if (nearbyEnemyUnits.size() != 0)
         {
             // moveUnitAwayFromMultipleUnits(nearbyEnemyUnits, unit);
