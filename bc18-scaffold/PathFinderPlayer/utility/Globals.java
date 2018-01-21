@@ -72,6 +72,7 @@ public class Globals
     public static HashMap<MapLocation, HashMap<MapLocation, MapLocation>> shortestPathTrees;
     public static HashMap<MapLocation, MapLocation> nearestUnobstructedWaypoints;
     public static HashMap<Pair<MapLocation, MapLocation>, MapLocation> nextBestWaypoint;
+    public static HashMap<Integer, MapLocation> lastVisited;
 
     // Combat variables
     public static HashMap<UnitType, Long> attackRange;
@@ -159,11 +160,11 @@ public class Globals
         rocketProductionCooldown = 0;
 
         // All initial workers are builders
-        for (int i = 0; i < initialWorkers.size(); i++)
-        {
-            Unit worker = initialWorkers.get(i);
-            builderSet.add(worker.id());
-        }
+//        for (int i = 0; i < initialWorkers.size(); i++)
+//        {
+//            Unit worker = initialWorkers.get(i);
+//            builderSet.add(worker.id());
+//        }
 
         if (homePlanet == Planet.Earth)
         {
@@ -206,6 +207,7 @@ public class Globals
         shortestPathTrees = new HashMap<MapLocation, HashMap<MapLocation, MapLocation>>();
         nearestUnobstructedWaypoints = new HashMap<MapLocation, MapLocation>();
         nextBestWaypoint = new HashMap<Pair<MapLocation, MapLocation>, MapLocation>();
+        lastVisited = new HashMap<Integer, MapLocation>();
         computeShortestPathTrees();
 
         attackRange = new HashMap<UnitType, Long>();

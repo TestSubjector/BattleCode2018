@@ -72,7 +72,7 @@ public class WorkerBot
     }
 
     // TODO - Make building locally optimized instead of globally
-    private static void processBuilder(Unit unit, Location unitLocation, MapLocation unitMapLocation)
+    private static void processBuilder(Unit unit, Location unitLocation, MapLocation unitMapLocation, VecUnit adjacentUnits)
     {
         // Blueprint structures
         if (unit.workerHasActed() == 0)
@@ -118,8 +118,21 @@ public class WorkerBot
             }
         }
 
+        boolean shouldMove = true;
+        for (int j = 0; j < adjacentUnits.size(); j++)
+        {
+            Unit adjacentUnit = adjacentUnits.get(j);
+            if (adjacentUnit.unitType() == UnitType.Rocket || adjacentUnit.unitType() == UnitType.Factory)
+            {
+                if(adjacentUnit.health() < adjacentUnit.maxHealth())
+                {
+                    shouldMove = false;
+                    break;
+                }
+            }
+        }
         // TODO - Remember previous target
-        if (unit.movementHeat() < 10)
+        if (shouldMove && unit.movementHeat() < 10)
         {
             // Move towards nearest blueprint
             Unit nearestStructure = null;
@@ -166,7 +179,10 @@ public class WorkerBot
                 }
                 if (nearestMineMapLocation != null)
                 {
-                    moveUnitTo(unit, nearestMineMapLocation);
+                    if (!moveUnitTo(unit, nearestMineMapLocation))
+                    {
+                        earthKarboniteLocations.remove(nearestMineMapLocation);
+                    }
                 }
             }
         }
@@ -212,7 +228,7 @@ public class WorkerBot
 
         if (builderSet.contains(unit.id()))
         {
-            processBuilder(unit, unitLocation, unitMapLocation);
+            processBuilder(unit, unitLocation, unitMapLocation, adjacentUnits);
         }
         else
         {

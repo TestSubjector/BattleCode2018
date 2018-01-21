@@ -14,7 +14,7 @@ public class Pathfinding
         MapLocation temp = from;
         while (!temp.equals(to))
         {
-            if (homeMap.isPassableTerrainAt(temp) != 1)
+            if (homeMap.isPassableTerrainAt(temp) == 0)
             {
                 return false;
             }
@@ -52,21 +52,26 @@ public class Pathfinding
 
                 for (int i = 1; i < directions.length - 1; i += 2)
                 {
-                    // TODO - Add more waypoints for edge case maps
-                    MapLocation diagonalSquare = possibleWaypoint.add(directions[i]);
+                    MapLocation diagonalSquareOne = possibleWaypoint.add(directions[i]);
+                    MapLocation diagonalSquareTwo = possibleWaypoint.add(directions[(i + 2) % 8]);
                     MapLocation sideSquareOne = possibleWaypoint.add(directions[i - 1]);
                     MapLocation sideSquareTwo = possibleWaypoint.add(directions[(i + 1) % 8]);
-                    boolean isExteriorCorner = homeMap.onMap(diagonalSquare) &&
-                            homeMap.isPassableTerrainAt(diagonalSquare) == 0 &&
+                    MapLocation sideSquareThree = possibleWaypoint.add(directions[(i + 3) % 8]);
+                    boolean isExteriorCorner = homeMap.onMap(diagonalSquareOne) &&
+                            homeMap.isPassableTerrainAt(diagonalSquareOne) == 0 &&
                             homeMap.isPassableTerrainAt(sideSquareOne) == 1 &&
                             homeMap.isPassableTerrainAt(sideSquareTwo) == 1;
-                    boolean isInteriorCorner = homeMap.onMap(diagonalSquare) &&
-                            homeMap.isPassableTerrainAt(diagonalSquare) == 0 &&
+                    boolean isDiagonalTurningPoint = homeMap.onMap(diagonalSquareOne) &&
+                            homeMap.onMap(diagonalSquareTwo) &&
+                            homeMap.isPassableTerrainAt(diagonalSquareOne) == 1 &&
+                            homeMap.isPassableTerrainAt(diagonalSquareTwo) == 1 &&
                             homeMap.isPassableTerrainAt(sideSquareOne) == 0 &&
-                            homeMap.isPassableTerrainAt(sideSquareTwo) == 0;
-                    if (isExteriorCorner || isInteriorCorner)
+                            homeMap.isPassableTerrainAt(sideSquareTwo) == 0 &&
+                            homeMap.isPassableTerrainAt(sideSquareThree) == 0;
+                    if (isExteriorCorner || isDiagonalTurningPoint)
                     {
                         waypointAdjacencyList.put(possibleWaypoint, new LinkedList<GraphPair<MapLocation, Long>>());
+                        nearestUnobstructedWaypoints.put(possibleWaypoint, possibleWaypoint);
                     }
                 }
             }
@@ -84,6 +89,9 @@ public class Pathfinding
                 {
                     fromWaypointList.add(new GraphPair<MapLocation, Long>(toWaypoint, diagonalDistanceBetween(fromWaypoint, toWaypoint)));
                     edges++;
+//                    System.out.println(fromWaypoint);
+//                    System.out.println(toWaypoint);
+//                    System.out.println("===========================");
                 }
             }
         }
@@ -178,7 +186,7 @@ public class Pathfinding
             {
                 nearest = waypoint;
                 distance = newDistance;
-                if (distance <= 1)
+                if (distance == 1)
                 {
                     break;
                 }
@@ -197,26 +205,11 @@ public class Pathfinding
             HashMap<MapLocation, MapLocation> shortestPathTree = shortestPathTrees.get(startWaypoint);
             MapLocation son = endWaypoint;
             Stack<MapLocation> tree = new Stack<MapLocation>();
-            try
+            while (son != null && !son.equals(startWaypoint))
             {
-                while (!son.equals(startWaypoint))
-                {
-                    MapLocation parent = shortestPathTree.get(son);
-                    tree.push(parent);
-                    nextBestWaypoint.put(new Pair<MapLocation, MapLocation>(parent, endWaypoint), son);
-                    son = parent;
-                }
-            }
-            catch (Exception e)
-            {
-                System.out.println(startWaypoint);
-                while (!tree.isEmpty())
-                {
-                    System.out.println(tree.pop());
-                }
-                System.out.println(endWaypoint);
-                System.out.println(son);
-                System.out.println("========================================");
+                MapLocation parent = shortestPathTree.get(son);
+                nextBestWaypoint.put(new Pair<MapLocation, MapLocation>(parent, endWaypoint), son);
+                son = parent;
             }
         }
     }
