@@ -37,7 +37,7 @@ public class RangerBot
                     {
                         if (gc.canAttack(unit.id(), nearbyEnemyUnit.id()))
                         {
-                            long possibleDesireToKill = nearbyEnemyUnit.health() * -1;
+                            long possibleDesireToKill = setBountyScore(unit, nearbyEnemyUnit);
                             if (desireToKill < possibleDesireToKill)
                             {
                                 desireToKill = possibleDesireToKill;
