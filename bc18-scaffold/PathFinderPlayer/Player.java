@@ -101,7 +101,15 @@ public class Player
                     }
                     xAverage /= visibleEnemyUnits.size();
                     yAverage /= visibleEnemyUnits.size();
-                    enemyLocationAverages.add(mapLocationAt[(int)xAverage][(int)yAverage]);
+                    MapLocation enemyLocationAverage = mapLocationAt[(int)xAverage][(int)yAverage];
+                    if(homeMap.isPassableTerrainAt(enemyLocationAverage) == 1)
+                    {
+                        enemyLocationAverages.add(mapLocationAt[(int)xAverage][(int)yAverage]);
+                    }
+                    else if(visibleEnemyUnits.size() !=0)
+                    {
+                        enemyLocationAverages.add(mapLocationAt[visibleEnemyUnits.get(1).location().mapLocation().getX()][visibleEnemyUnits.get(1).location().mapLocation().getY()]);
+                    }
                 }
             }
 
