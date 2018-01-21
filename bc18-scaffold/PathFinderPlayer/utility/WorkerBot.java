@@ -351,27 +351,68 @@ public class WorkerBot
     // Returns a long value that is either the appeal of the tile, or -1002L if the location is a choke point
     public static long getLocationAppeal(MapLocation mapLocation)
     {
-        int blockages = 0;
+        int left_blockages = 0;
+        int right_blockages = 0;
+        int up_block = 0;
+        int down_block = 0;
+
         long appeal = WEIGHT_NONE;
         for (int i = 0; i < directions.length - 1; i++)
         {
             MapLocation adjacentMapLocation = mapLocation.add(directions[i]);
             if (!homeMap.onMap(adjacentMapLocation) || (homeMap.isPassableTerrainAt(adjacentMapLocation) == 0))
             {
-                blockages++;
+                switch (i) {
+                    case 0: up_block++; break;
+
+                    case 1:
+                    case 2:
+                    case 3: right_blockages++; break;
+
+                    case 4: down_block++; break;
+
+                    case 5:
+                    case 6:
+                    case 7: left_blockages++; break;
+                    default: break; //center; will never have a blockage
+                }
+
                 appeal += WEIGHT_IMPASSABLE;
             }
             // not checking canSense because it should always be in vision range (max sq dist 8)
-            UnitType type = gc.senseUnitAtLocation(adjacentMapLocation).unitType();
-            if (type == UnitType.Factory || type == UnitType.Rocket)
+            if (gc.hasUnitAtLocation(adjacentMapLocation))
             {
-                blockages++;
-                appeal += WEIGHT_STRUCTURE;
+                UnitType type = gc.senseUnitAtLocation(adjacentMapLocation).unitType();
+                if (type == UnitType.Factory || type == UnitType.Rocket)
+                {
+                    switch (i) {
+                        case 0: up_block++; break;
+
+                        case 1:
+                        case 2:
+                        case 3: right_blockages++; break;
+
+                        case 4: down_block++; break;
+
+                        case 5:
+                        case 6:
+                        case 7: left_blockages++; break;
+                        default: break; //center; will never have a blockage
+                    }
+
+                    appeal += WEIGHT_STRUCTURE;
+                }
             }
         }
 
-        // more than 2 (incl) in an 8 x 8 sq block the movement
-        if (blockages >= 2) return -1002L;
+        int blocksum = 0;
+        if (left_blockages != 0) blocksum++;
+        if (right_blockages != 0) blocksum++;
+        if (up_block != 0) blocksum++;
+        if (down_block!= 0) blocksum++;
+
+        // blockage on single side only is fine
+        if (blocksum > 1) return -1002L;
         else return appeal;
     }
 }
