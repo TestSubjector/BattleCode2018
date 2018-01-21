@@ -192,25 +192,17 @@ public class WorkerBot
             }
         }
 
-        try
+        if (unit.workerHasActed() == 0)
         {
-            if (unit.workerHasActed() == 0)
+            // Mine karbonite if adjacent to or standing on a mine
+            for (int j = 0; j < directions.length; j++)
             {
-                // Mine karbonite if adjacent to or standing on a mine
-                for (int j = 0; j < directions.length; j++)
+                if (gc.canHarvest(unit.id(), directions[j]))
                 {
-                    if (gc.canHarvest(unit.id(), directions[j]))
-                    {
-                        gc.harvest(unit.id(), directions[j]);
-                        break;
-                    }
+                    gc.harvest(unit.id(), directions[j]);
+                    break;
                 }
             }
-        }
-        catch (Exception e)
-        {
-            System.out.println(unit.unitType());
-            System.out.println(unitMapLocation);
         }
 
         if (builderSet.contains(unit.id()))
@@ -228,7 +220,7 @@ public class WorkerBot
         {
             return;
         }
-        if (unitList.size() < Math.sqrt(currentRound) * 5)
+        if (unitList.size() < maxWorkerLimitAtTurn(currentRound))
         {
             for (int j = 0; j < directions.length - 1; j++)
             {
@@ -242,11 +234,14 @@ public class WorkerBot
                         if (gc.hasUnitAtLocation(replicateMapLocation))
                         {
                             Unit newWorker = gc.senseUnitAtLocation(replicateMapLocation);
-                            unitList.add(newWorker);
-                            // TODO - Remove builders when dead
-                            if (unitList.size() * builderFraction > builderSet.size())
+                            if(newWorker.unitType() == UnitType.Worker)
                             {
-                                builderSet.add(newWorker.id());
+                                unitList.add(newWorker);
+                                // TODO - Remove builders when dead
+                                if (unitList.size() * builderFraction > builderSet.size())
+                                {
+                                    builderSet.add(newWorker.id());
+                                }
                             }
                         }
                     }
