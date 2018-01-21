@@ -49,7 +49,7 @@ public class Player
             }
             if (currentRound % 250 == 2)
             {
-                // System.out.println(time);
+                System.out.println(time);
                 time = "";
             }
             if (switchToPrimitiveMind(currentRound, timeLeftMs) && currentRound < 700)
@@ -65,6 +65,9 @@ public class Player
             {
                 typeSortedUnitLists.get(unitTypes[i]).clear();
             }
+
+            // Clear enemy hashmap
+            enemyVecUnits.clear();
 
             // Fetch current units and sort by type
             VecUnit units = gc.myUnits();

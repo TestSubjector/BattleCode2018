@@ -111,12 +111,26 @@ public class DecisionTree
 
     public static boolean makeRocketArmada(long totalUnits)
     {
-        return totalUnits > earthPassableTerrain * ((double)homeMapHeight + homeMapWidth) / 2 * (homeMapSize);
+        if(enemyVecUnits.size() == 0 && currentRound > 500)
+        {
+            return true;
+        }
+        else
+        {
+            return totalUnits > earthPassableTerrain * ((double)homeMapHeight + homeMapWidth) / 2 * (homeMapSize);
+        }
     }
 
     public static long maxRocketLimitAtTurn(long totalUnits)
     {
-        return Math.round((double)totalUnits/ 16);
+        if(enemyVecUnits.size() == 0 && currentRound > 500)
+        {
+            return 100;
+        }
+        else
+        {
+            return Math.round((double)totalUnits/ 16);
+        }
     }
 
     // Witch of Agnesi computation breaker
