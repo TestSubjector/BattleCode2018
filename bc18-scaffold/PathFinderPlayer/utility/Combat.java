@@ -199,8 +199,9 @@ public class Combat
     public static boolean tryMoveToEngageEnemyAtLocationInOneTurnWithMaxEnemyExposure(Unit unit, MapLocation targetLocation, int maxEnemyExposure, VecUnit nearbyEnemyUnits)
     {
         Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
-        Direction[] tryDirection = new Direction[]{toTargetLocation, Direction.swigToEnum(toTargetLocation.swigValue()-1), Direction.swigToEnum(toTargetLocation.swigValue()+1)};
-        for (Direction directionToMoveTo : tryDirection) {
+        Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
+        for (Direction directionToMoveTo : tryDirection)
+        {
             if (!gc.canMove(unit.id(), directionToMoveTo))
             {
                 continue;
@@ -214,8 +215,40 @@ public class Combat
             int enemyExposure = numberEnemyUnitsAimingAtLocation(moveLocation, nearbyEnemyUnits);
             if (enemyExposure <= maxEnemyExposure)
             {
-                gc.moveRobot(unit.id(), directionToMoveTo);
-                return true;
+                if(gc.isMoveReady(unit.id()))
+                {
+                    if(gc.canMove(unit.id(), directionToMoveTo))
+                    {
+                        gc.moveRobot(unit.id(), directionToMoveTo);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean tryMoveToEngageEnemyAtLocationWithMaxEnemyExposure(Unit unit, MapLocation targetLocation, int maxEnemyExposure, VecUnit nearbyEnemyUnits)
+    {
+        Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
+        Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
+        for (Direction directionToMoveTo : tryDirection) {
+            if (!gc.canMove(unit.id(), directionToMoveTo))
+            {
+                continue;
+            }
+            MapLocation moveLocation = unit.location().mapLocation().add(directionToMoveTo);
+            int enemyExposure = numberEnemyUnitsAimingAtLocation(moveLocation, nearbyEnemyUnits);
+            if (enemyExposure <= maxEnemyExposure)
+            {
+                if(gc.isMoveReady(unit.id()))
+                {
+                    if(gc.canMove(unit.id(), directionToMoveTo))
+                    {
+                        gc.moveRobot(unit.id(), directionToMoveTo);
+                        return true;
+                    }
+                }
             }
         }
         return false;
@@ -224,7 +257,7 @@ public class Combat
     public static boolean tryMoveToEngageEnemyAtWithMaxEnemyExposure(Unit unit, MapLocation targetLocation, int maxEnemyExposure, VecUnit nearbyEnemyUnits)
     {
         Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
-        Direction[] tryDirection = new Direction[]{toTargetLocation, Direction.swigToEnum(toTargetLocation.swigValue()-1), Direction.swigToEnum(toTargetLocation.swigValue()+1)};
+        Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
         for (Direction directionToMoveTo : tryDirection) {
             if (!gc.canMove(unit.id(), directionToMoveTo))
             {
@@ -362,38 +395,102 @@ public class Combat
                             moveUnitTo(unit, loneEnemyUnit.location().mapLocation());
                         }
                     }
+                    // Multiple Units
                     else
                     {
-                        long desireToKill = -500;
-                        long rememberUnit = -1;
+                        Unit bestTarget = null;
+                        double bestTargetingMetric = 0;
+                        double maxAllyUnitsAttackingAnEnemy = 0;
                         for (int j = 0; j < nearbyEnemyUnits.size(); j++)
                         {
                             Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
-                            // Check health of enemy unit ands see if you can win
-                            // Make bounty rating for all sensed units and attack highest ranked unit
-                            //if(nearbyEnemyUnit.unitType() != UnitType.Worker)
+                            UnitType enemyUnitType = nearbyEnemyUnit.unitType();
                             {
-                                if (gc.canAttack(unit.id(), nearbyEnemyUnit.id()))
+                                int numberOfAllyUnitsAttackingEnemy = 1 + numberOfOtherAlliesInAttackRange(unit, nearbyEnemyUnit.location().mapLocation());
+                                if (numberOfAllyUnitsAttackingEnemy >= maxAllyUnitsAttackingAnEnemy)
                                 {
-                                    long possibleDesireToKill = nearbyEnemyUnit.health() * -1;
-                                    if (desireToKill < possibleDesireToKill)
+                                    maxAllyUnitsAttackingAnEnemy = numberOfAllyUnitsAttackingEnemy;
+                                    System.out.print("Max: " + maxAllyUnitsAttackingAnEnemy);
+                                }
+                                if(unit.attackRange() >= unit.location().mapLocation().distanceSquaredTo(nearbyEnemyUnit.location().mapLocation()))
+                                {
+                                    double targetingMetric = numberOfAllyUnitsAttackingEnemy / nearbyEnemyUnit.health();
+                                    if(targetingMetric > bestTargetingMetric)
                                     {
-                                        desireToKill = possibleDesireToKill;
-                                        rememberUnit = j;
+                                        bestTargetingMetric = targetingMetric;
+                                        bestTarget = nearbyEnemyUnit;
                                     }
                                 }
                             }
                         }
-                        if (rememberUnit != -1)
+                        if(bestTarget != null)
                         {
-                            gc.attack(unit.id(), nearbyEnemyUnits.get(rememberUnit).id());
-                            //moveUnitAwayFrom(unit, nearbyEnemyUnits.get(rememberUnit).location());
-                        }
-                        else
-                        {
-                            moveUnitInRandomDirection(unit);
+
+                            if(gc.canAttack(unit.id(), bestTarget.id()))
+                            {
+                                gc.attack(unit.id(), bestTarget.id());
+                                return;
+                            }
+                            else if(unit.movementHeat() <10)
+                            {
+
+                                // TODO - Retreat function here
+                                if(moveUnitAwayFrom(unit, bestTarget.location().mapLocation()))
+                                {
+                                    return;
+                                }
+                                else
+                                {
+                                    // Desperate attack
+                                    gc.attack(unit.id(), bestTarget.id());
+                                    return;
+                                }
+                            }
+                            else
+                            {
+                                long desireToKill = -500;
+                                long rememberUnit = -1;
+                                for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+                                {
+                                    Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
+                                    // Check health of enemy unit ands see if you can win
+                                    // Make bounty rating for all sensed units and attack highest ranked unit
+                                    //if(nearbyEnemyUnit.unitType() != UnitType.Worker)
+                                    {
+                                        if (gc.canAttack(unit.id(), nearbyEnemyUnit.id()))
+                                        {
+                                            long possibleDesireToKill = nearbyEnemyUnit.health() * -1;
+                                            if (desireToKill < possibleDesireToKill)
+                                            {
+                                                desireToKill = possibleDesireToKill;
+                                                rememberUnit = j;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
+                }
+            }
+            // Can't attack so just move
+            if(unit.movementHeat() <10)
+            {
+                int numberOfAllyUnitsFightingEnemy = 0;
+                int index = 0;
+                for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+                {
+                    Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
+                    numberOfAllyUnitsFightingEnemy = numberOfOtherAlliesInAttackRange(nearbyEnemyUnit, nearbyEnemyUnit.location().mapLocation());
+                    if(numberOfAllyUnitsFightingEnemy > 0)
+                    {
+                        index = j;
+                        break;
+                    }
+                }
+                if(tryMoveToEngageEnemyAtLocationWithMaxEnemyExposure(unit, nearbyEnemyUnits.get(index).location().mapLocation(), numberOfAllyUnitsFightingEnemy, nearbyEnemyUnits))
+                {
+
                 }
             }
         }
