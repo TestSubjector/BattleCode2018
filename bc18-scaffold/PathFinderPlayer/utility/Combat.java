@@ -246,19 +246,23 @@ public class Combat
     {
         int allyAssistNumber = 0;
         VecUnit nearbyFriendlyUnits = friendlyVecUnits.get(unit.id());
+        Unit nearbyFriendlyUnit;
+        UnitType friendlyUnitType;
+        long distanceToLocation;
         for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
         {
-            Unit nearbyFriendlyUnit  = nearbyFriendlyUnits.get(j);
-            UnitType friendlyUnitType = nearbyFriendlyUnit.unitType();
+            nearbyFriendlyUnit  = nearbyFriendlyUnits.get(j);
+            friendlyUnitType = nearbyFriendlyUnit.unitType();
+            distanceToLocation = nearbyFriendlyUnit.location().mapLocation().distanceSquaredTo(targetLocation);
             if(friendlyUnitType != UnitType.Ranger && friendlyUnitType != UnitType.Knight && friendlyUnitType != UnitType.Mage)
             {
                 continue;
             }
-            else if(nearbyFriendlyUnit.attackRange() >= nearbyFriendlyUnit.location().mapLocation().distanceSquaredTo(targetLocation))
+            else if(nearbyFriendlyUnit.attackRange() >= distanceToLocation)
             {
                 if(friendlyUnitType == UnitType.Ranger)
                 {
-                    if(10 <= nearbyFriendlyUnit.location().mapLocation().distanceSquaredTo(targetLocation))
+                    if(distanceToLocation >= 10)
                     {
                         allyAssistNumber++;
                     }
@@ -306,11 +310,12 @@ public class Combat
                             else
                             {
                                 boolean haveSupport = false;
+                                /*
                                 if(numberOfOtherAlliesInAttackRange(unit, loneEnemyUnit.location().mapLocation()) > 0)
                                 {
                                     haveSupport = true;
                                 }
-
+                                */
                                 // Have ally help
                                 if(haveSupport)
                                 {

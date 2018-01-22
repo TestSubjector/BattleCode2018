@@ -48,61 +48,7 @@ private static boolean doMicro(RobotInfo[] nearbyEnemies, boolean shadowEnemyHar
         // we are in combat
         if (numEnemiesAttackingUs == 1) {
         // we are in a 1v1
-        RobotInfo loneAttacker = enemiesAttackingUs[0];
-        if (rc.getType().attackRadiusSquared >= here.distanceSquaredTo(loneAttacker.location)) {
-        // we can actually shoot at the enemy we are 1v1ing
-        if (canWin1v1(loneAttacker)) {
-        // we can beat the other guy 1v1. fire away!
-        // Debug.indicate("micro", 0, "winning 1v1");
-        attackIfReady(loneAttacker.location);
-        return true;
-        } else {
-        // check if we actually have some allied support. if so we can keep fighting
-        boolean haveSupport = false;
-        for (int i = 0; i < numEnemiesAttackingUs; i++) {
-        if (numOtherAlliesInAttackRange(enemiesAttackingUs[i].location) > 0) {
-        haveSupport = true;
-        break;
-        }
-        }
-        if (haveSupport) {
-        // an ally is helping us, so keep fighting the lone enemy
-        // Debug.indicate("micro", 0, "losing 1v1 but we have support");
-        attackIfReady(loneAttacker.location);
-        return true;
-        } else {
-        // we can't win the 1v1.
-        if (rc.getSupplyLevel() > 0 && rc.getType().cooldownDelay <= 1 && loneAttacker.weaponDelay >= 2
-        && rc.getWeaponDelay() <= loneAttacker.weaponDelay - 1) {
-        // we can get a shot off and retreat before the enemy can fire at us again, so do that
-        // Debug.indicate("micro", 0, "firing one last shot before leaving losing 1v1");
-        attackIfReady(loneAttacker.location);
-        return true;
-        } else {
-        // we can't get another shot off. run away!
-        if (rc.isCoreReady()) {
-        // we can move this turn
-        if (tryToRetreat(nearbyEnemies)) {
-        // we moved away
-        // Debug.indicate("micro", 0, "retreated");
-        return true;
-        } else {
-        // we couldn't find anywhere to retreat to. fire a desperate shot if possible
-        // Debug.indicate("micro", 0, "couldn't find anywhere to retreat! trying to shoot");
-        attackIfReady(loneAttacker.location);
-        return true;
-        }
-        } else {
-        // we can't move this turn. if it won't delay retreating, shoot instead
-        // Debug.indicate("micro", 0, "want to retreat but core isn't ready; trying to shoot if cooldown <= 1");
-        if (rc.getType().cooldownDelay <= 1) {
-        attackIfReady(loneAttacker.location);
-        }
-        return true;
-        }
-        }
-        }
-        }
+
         } else {
         // we are getting shot by someone who outranges us. run away!
         // Debug.indicate("micro", 0, "trying to retreat from a 1v1 where we are outranged");

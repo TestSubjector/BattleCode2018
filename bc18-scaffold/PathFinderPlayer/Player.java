@@ -83,7 +83,7 @@ public class Player
             enemyVecUnits.clear();
 
             // Clear friendly units hashing
-            friendlyVecUnits.clear();
+            //friendlyVecUnits.clear();
 
             // Fetch current units and sort by type
             VecUnit units = gc.myUnits();
@@ -96,8 +96,8 @@ public class Player
                 {
                     VecUnit visibleEnemyUnits = gc.senseNearbyUnitsByTeam(unitLocation.mapLocation(), unit.visionRange(), theirTeam);
                     enemyVecUnits.put(unit.id(), visibleEnemyUnits);
-                    VecUnit visibleFriendlyUnits = gc.senseNearbyUnitsByTeam(unitLocation.mapLocation(), unit.visionRange(), ourTeam);
-                    friendlyVecUnits.put(unit.id(), visibleFriendlyUnits);
+                    // VecUnit visibleFriendlyUnits = gc.senseNearbyUnitsByTeam(unitLocation.mapLocation(), unit.visionRange(), ourTeam);
+                    // friendlyVecUnits.put(unit.id(), visibleFriendlyUnits);
                     double xAverage = 0;
                     double yAverage = 0;
                     for (int j = 0; j < visibleEnemyUnits.size(); j++)

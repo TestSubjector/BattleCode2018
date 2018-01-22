@@ -13,7 +13,7 @@ public class HealerBot
     public static void processEarthHealer(Unit unit, Location unitLocation)
     {
         MapLocation unitMapLocation = unitLocation.mapLocation();
-        VecUnit nearbyFriendlyUnits = friendlyVecUnits.get(unit.id());
+        VecUnit nearbyFriendlyUnits = gc.senseNearbyUnitsByTeam(unitLocation.mapLocation(), unit.visionRange(), ourTeam);
         VecUnit nearbyEnemyUnits = enemyVecUnits.get(unit.id());
         boolean hasHealedThisTurn = false;
         boolean hasMovedThisTurn = false;
