@@ -309,6 +309,41 @@ public class Combat
         return allyAssistNumber;
     }
 
+    public static double getEnemyUnitPriority(UnitType enemyUnit)
+    {
+        double enemyUnitPriority = 1;
+        if (enemyUnit == UnitType.Worker)
+        {
+            enemyUnitPriority = 0.5;
+        }
+        else if (enemyUnit == UnitType.Factory)
+        {
+            enemyUnitPriority = 0.8;
+        }
+        else if (enemyUnit == UnitType.Rocket)
+        {
+            enemyUnitPriority = 1.1;
+        }
+        else if (enemyUnit == UnitType.Knight)
+        {
+            enemyUnitPriority = 0.9;
+        }
+        else if (enemyUnit == UnitType.Healer)
+        {
+            enemyUnitPriority = 1.3;
+        }
+        else if (enemyUnit == UnitType.Mage)
+        {
+            enemyUnitPriority = 1.5;
+        }
+        else if (enemyUnit == UnitType.Ranger)
+        {
+            enemyUnitPriority = 1.2;
+        }
+        // One-shot kill
+        return enemyUnitPriority;
+    }
+
     // Multiple Units
     public static void doMicro(Unit unit, MapLocation unitMapLocation, VecUnit nearbyEnemyUnits)
     {
@@ -405,21 +440,15 @@ public class Combat
                         {
                             Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
                             UnitType enemyUnitType = nearbyEnemyUnit.unitType();
+                            int attackNumber = numberOfOtherAlliesInAttackRange(unit, nearbyEnemyUnit.location().mapLocation());
+                            if(attackNumber > maxAllyUnitsAttackingAnEnemy)
                             {
-                                int numberOfAllyUnitsAttackingEnemy = 1 + numberOfOtherAlliesInAttackRange(unit, nearbyEnemyUnit.location().mapLocation());
-                                if (numberOfAllyUnitsAttackingEnemy >= maxAllyUnitsAttackingAnEnemy)
+                                maxAllyUnitsAttackingAnEnemy = attackNumber;
+                                double targetingMetric = getEnemyUnitPriority(enemyUnitType) * attackNumber/ nearbyEnemyUnit.health();
+                                if(targetingMetric > bestTargetingMetric)
                                 {
-                                    maxAllyUnitsAttackingAnEnemy = numberOfAllyUnitsAttackingEnemy;
-                                    System.out.print("Max: " + maxAllyUnitsAttackingAnEnemy);
-                                }
-                                if(unit.attackRange() >= unit.location().mapLocation().distanceSquaredTo(nearbyEnemyUnit.location().mapLocation()))
-                                {
-                                    double targetingMetric = numberOfAllyUnitsAttackingEnemy / nearbyEnemyUnit.health();
-                                    if(targetingMetric > bestTargetingMetric)
-                                    {
-                                        bestTargetingMetric = targetingMetric;
-                                        bestTarget = nearbyEnemyUnit;
-                                    }
+                                    bestTargetingMetric = targetingMetric;
+                                    bestTarget = nearbyEnemyUnit;
                                 }
                             }
                         }
@@ -431,11 +460,10 @@ public class Combat
                                 gc.attack(unit.id(), bestTarget.id());
                                 return;
                             }
-                            else if(unit.movementHeat() <10)
+                            else if(unit.attackRange() < unit.location().mapLocation().distanceSquaredTo(bestTarget.location().mapLocation()))
                             {
-
                                 // TODO - Retreat function here
-                                if(moveUnitAwayFrom(unit, bestTarget.location().mapLocation()))
+                                if(moveUnitTo(unit, bestTarget.location().mapLocation()))
                                 {
                                     return;
                                 }
@@ -446,35 +474,12 @@ public class Combat
                                     return;
                                 }
                             }
-                            else
-                            {
-                                long desireToKill = -500;
-                                long rememberUnit = -1;
-                                for (int j = 0; j < nearbyEnemyUnits.size(); j++)
-                                {
-                                    Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
-                                    // Check health of enemy unit ands see if you can win
-                                    // Make bounty rating for all sensed units and attack highest ranked unit
-                                    //if(nearbyEnemyUnit.unitType() != UnitType.Worker)
-                                    {
-                                        if (gc.canAttack(unit.id(), nearbyEnemyUnit.id()))
-                                        {
-                                            long possibleDesireToKill = nearbyEnemyUnit.health() * -1;
-                                            if (desireToKill < possibleDesireToKill)
-                                            {
-                                                desireToKill = possibleDesireToKill;
-                                                rememberUnit = j;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
                         }
                     }
                 }
             }
             // Can't attack so just move
-            if(unit.movementHeat() <10)
+            if(unit.movementHeat() < 10)
             {
                 int numberOfAllyUnitsFightingEnemy = 0;
                 int index = 0;
@@ -490,7 +495,7 @@ public class Combat
                 }
                 if(tryMoveToEngageEnemyAtLocationWithMaxEnemyExposure(unit, nearbyEnemyUnits.get(index).location().mapLocation(), numberOfAllyUnitsFightingEnemy, nearbyEnemyUnits))
                 {
-
+                    return;
                 }
             }
         }
@@ -508,8 +513,7 @@ public class Combat
                     nearestEnemyGridDistance = enemyGridDistance;
                 }
             }
-            if(nearestEnemyMapLocation == null ||
-                    !moveUnitTo(unit, nearestEnemyMapLocation));
+            if(nearestEnemyMapLocation == null || !moveUnitTo(unit, nearestEnemyMapLocation));
             {
                 moveUnitInRandomDirection(unit);
             }
