@@ -44,6 +44,7 @@ public class Player
             lastTime = timeLeftMs + 50;
             if (currentRound % 50 == 0)
             {
+                System.runFinalization();
                 System.gc();
             }
             if (currentRound % 250 == 2)
@@ -108,7 +109,7 @@ public class Player
                     }
                     else if(visibleEnemyUnits.size() !=0)
                     {
-                        enemyLocationAverages.add(mapLocationAt[visibleEnemyUnits.get(1).location().mapLocation().getX()][visibleEnemyUnits.get(1).location().mapLocation().getY()]);
+                        enemyLocationAverages.add(mapLocationAt[visibleEnemyUnits.get(0).location().mapLocation().getX()][visibleEnemyUnits.get(0).location().mapLocation().getY()]);
                     }
                 }
             }
