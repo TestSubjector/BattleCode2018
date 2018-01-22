@@ -188,15 +188,15 @@ public class Pathfinding
         }
         Set<MapLocation> waypoints = waypointAdjacencyList.keySet();
         MapLocation nearest = null;
-        long distance = 100000L;
+        long minSquaredDistance = 100000L;
         for (MapLocation waypoint : waypoints)
         {
-            long newDistance = diagonalDistanceBetween(mapLocation, waypoint);
-            if (newDistance < distance && isUninterruptedPathBetween(mapLocation, waypoint))
+            long newSquaredDistance = mapLocation.distanceSquaredTo(waypoint);
+            if (newSquaredDistance < minSquaredDistance && isUninterruptedPathBetween(mapLocation, waypoint))
             {
                 nearest = waypoint;
-                distance = newDistance;
-                if (distance == 1)
+                minSquaredDistance = newSquaredDistance;
+                if (minSquaredDistance == 1)
                 {
                     break;
                 }

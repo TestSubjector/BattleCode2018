@@ -85,7 +85,7 @@ public class Movement
             // Target unreachable
             return false;
         }
-        if (unitMapLocation.distanceSquaredTo(startWaypoint) <= 1)
+        if (unitMapLocation.distanceSquaredTo(startWaypoint) <= 2)
         {
             lastVisited.put(unit.id(), startWaypoint);
         }

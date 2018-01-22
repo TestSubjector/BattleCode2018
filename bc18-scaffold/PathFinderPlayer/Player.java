@@ -137,44 +137,47 @@ public class Player
             while (shouldQueueWorker())
             {
                 addUnitToQueue(UnitType.Worker);
-                System.out.println("Worker");
+                // System.out.println("Worker");
             }
             setFactoriesRequired();
             while (shouldQueueFactory())
             {
                 addUnitToQueue(UnitType.Factory);
-                System.out.println("Fac");
+                // System.out.println("Fac");
             }
             setRocketsRequired();
             while (shouldQueueRocket())
             {
                 addUnitToQueue(UnitType.Rocket);
-                System.out.println("Roc");
+                // System.out.println("Roc");
             }
             setKnightsRequired();
             while (shouldQueueKnight())
             {
                 addUnitToQueue(UnitType.Knight);
-                System.out.println("Kni");
+                // System.out.println("Kni");
             }
             setRangersRequired();
             while (shouldQueueRanger())
             {
                 addUnitToQueue(UnitType.Ranger);
-                System.out.println("Ran");
+                // System.out.println("Ran");
             }
             setMagesRequired();
             while (shouldQueueMage())
             {
                 addUnitToQueue(UnitType.Mage);
-                System.out.println("Mag");
+                // System.out.println("Mag");
             }
             setHealersRequired();
             while (shouldQueueHealer())
             {
                 addUnitToQueue(UnitType.Healer);
-                System.out.println("Heal");
+                // System.out.println("Heal");
             }
+            System.out.println(currentRound);
+            System.out.println(buildQueue.peekFirst());
+            System.out.println();
 //            System.out.println(workersRequired);
 //            System.out.println(unitsInQueue[UnitType.Worker.ordinal()]);
 //            System.out.println(factoriesRequired);

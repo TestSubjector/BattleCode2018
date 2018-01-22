@@ -39,7 +39,7 @@ public class FactoryBot
         if (unit.isFactoryProducing() == 0)
         {
             if (!buildQueue.isEmpty() &&
-                    buildQueue.peekFirst() != UnitType.Worker &&
+                    (buildQueue.peekFirst() != UnitType.Worker || typeSortedUnitLists.get(UnitType.Worker).size() < 4) &&
                     buildQueue.peekFirst() != UnitType.Factory &&
                     buildQueue.peekFirst() != UnitType.Rocket)
             {

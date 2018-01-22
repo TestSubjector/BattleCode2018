@@ -183,15 +183,15 @@ public class WorkerBot
             if (gc.karboniteAt(unitMapLocation) == 0)
             {
                 MapLocation nearestMineMapLocation = null;
-                long minDiagonalDistance = 1000L;
+                long minSquaredDistance = 1000000L;
                 for (MapLocation karboniteMapLocation : karboniteLocations)
                 {
-                    long diagonalDistanceToMine = diagonalDistanceBetween(karboniteMapLocation, unitMapLocation);
-                    if (diagonalDistanceToMine < minDiagonalDistance)
+                    long squaredDistanceToMine = karboniteMapLocation.distanceSquaredTo(unitMapLocation);
+                    if (squaredDistanceToMine < minSquaredDistance)
                     {
                         nearestMineMapLocation = karboniteMapLocation;
-                        minDiagonalDistance = diagonalDistanceToMine;
-                        if (minDiagonalDistance <= 1)
+                        minSquaredDistance = squaredDistanceToMine;
+                        if (minSquaredDistance <= 1)
                         {
                             break;
                         }
@@ -203,6 +203,7 @@ public class WorkerBot
                     {
                         if (unitList.size() * builderFraction > builderSet.size())
                         {
+                            System.out.println("Became builder at " + unitMapLocation);
                             builderSet.add(unit.id());
                         }
                     }
