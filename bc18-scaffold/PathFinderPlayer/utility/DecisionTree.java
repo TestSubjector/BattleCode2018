@@ -30,17 +30,19 @@ public class DecisionTree
         return typeSortedUnitLists.get(UnitType.Worker).size() + unitsInQueue[UnitType.Worker.ordinal()] < workersRequired;
     }
 
+    public static boolean shouldQueueFactory()
+    {
+        return typeSortedUnitLists.get(UnitType.Factory).size() + unitsInQueue[UnitType.Factory.ordinal()] < factoriesRequired;
+    }
+
+    public static boolean shouldQueueRocket()
+    {
+        return gc.researchInfo().getLevel(UnitType.Rocket) != 0 && typeSortedUnitLists.get(UnitType.Rocket).size() + unitsInQueue[UnitType.Rocket.ordinal()] < rocketsRequired;
+    }
     // Implement the following and the setXRequired() functions
     //
-    //    public static boolean shouldQueueFactory()
-    //    {
-    //        return typeSortedUnitLists.get(UnitType.Worker).size() + unitsInQueue[UnitType.Worker.ordinal()] < workersRequired;
-    //    }
     //
-    //    public static boolean shouldQueueRocket()
-    //    {
-    //        return typeSortedUnitLists.get(UnitType.Worker).size() + unitsInQueue[UnitType.Worker.ordinal()] < workersRequired;
-    //    }
+
     //
     //    public static boolean shouldQueueRanger()
     //    {
@@ -156,23 +158,23 @@ public class DecisionTree
         workersRequired = 10;
     }
 
-    // Replace with setFactoriesRequired
-    public static long maxFactoryLimit(long earthInitialTotalKarbonite)
+    public static void setFactoriesRequired()
     {
-        return Math.round(4 + ((double) homeMapHeight + homeMapWidth) / 10) + earthInitialTotalKarbonite / 1000;
+        factoriesRequired = (int) ((Math.min(1, (double) currentRound / 400)) *
+                Math.round(4 + ((double) homeMapHeight + homeMapWidth) / 10) +
+                (double) initialTotalKarbonite / 1000);
     }
 
-    // Replace with setRocketsRequired
-    public static long maxRocketLimitAtTurn(long totalUnits)
+    // These metrics are horrid as of now
+    public static void setRocketsRequired()
     {
         if (enemyVecUnits.size() == 0 && currentRound > 500)
         {
-            return 100;
+            rocketsRequired = 10;
         }
         else
         {
-            // TODO  - Add area available on Mars and compare
-            return Math.round((double) totalUnits / 30);
+            rocketsRequired = (int) ((Math.min(1, (double) currentRound - 120 / 400)) * Math.round((double) totalUnits / 30));
         }
     }
 

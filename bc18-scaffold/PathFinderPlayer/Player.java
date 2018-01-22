@@ -59,12 +59,6 @@ public class Player
                 typeSortedUnitLists.get(unitTypes[i]).clear();
             }
 
-            if (currentRound > 200 && rocketProductionCooldown % 35 == 0)
-            {
-                findRocketProductionCooldown();
-            }
-            prepareRocketArmada = currentRound > 250 && currentKarbonite < 150 && makeRocketArmada(totalUnits);
-
             // Clear enemy hashmap
             enemyVecUnits.clear();
 
@@ -144,6 +138,24 @@ public class Player
             {
                 addUnitToQueue(UnitType.Worker);
             }
+            setFactoriesRequired();
+            while (shouldQueueFactory())
+            {
+                addUnitToQueue(UnitType.Factory);
+            }
+            setRocketsRequired();
+            while (shouldQueueRocket())
+            {
+                addUnitToQueue(UnitType.Rocket);
+            }
+//            System.out.println(workersRequired);
+//            System.out.println(unitsInQueue[UnitType.Worker.ordinal()]);
+//            System.out.println(factoriesRequired);
+//            System.out.println(unitsInQueue[UnitType.Factory.ordinal()]);
+//            System.out.println(rocketsRequired);
+//            System.out.println(typeSortedUnitLists.get(UnitType.Rocket).size());
+//            System.out.println(unitsInQueue[UnitType.Rocket.ordinal()]);
+//            System.out.println();
 
             // Process units
             for (int i = 0; i < unitTypes.length; i++)

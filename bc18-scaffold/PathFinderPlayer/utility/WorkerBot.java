@@ -83,15 +83,16 @@ public class WorkerBot
         if (unit.workerHasActed() == 0)
         {
             UnitType blueprintType = null;
-            if (typeSortedUnitLists.get(UnitType.Factory).size() < factoryLimit && !prepareRocketArmada)
+            if (!buildQueue.isEmpty() && buildQueue.peekFirst() == UnitType.Factory && gc.karbonite() >= 100)
             {
                 // Blueprint a factory
                 blueprintType = UnitType.Factory;
             }
-            else if (typeSortedUnitLists.get(UnitType.Rocket).size() < maxRocketLimitAtTurn(totalUnits))
+            if (!buildQueue.isEmpty() && buildQueue.peekFirst() == UnitType.Rocket && gc.karbonite() >= 75)
             {
                 // Blueprint a rocket
                 blueprintType = UnitType.Rocket;
+                System.out.println("Imma build a rocket on round " + currentRound);
             }
 
             if (blueprintType != null)
@@ -118,10 +119,9 @@ public class WorkerBot
                     }
                 }
 
-                // all points choked, move out
                 if (isMovementNeeded)
                 {
-                    // moveUnitInRandomDirection(unit); // TODO better direction decision
+                    moveUnitInRandomDirection(unit);
                 }
                 else
                 {
@@ -132,6 +132,7 @@ public class WorkerBot
                         Unit newBlueprint = gc.senseUnitAtLocation(blueprintMapLocation);
                         unfinishedBlueprints.add(newBlueprint);
                         typeSortedUnitLists.get(blueprintType).add(newBlueprint);
+                        removeUnitFromQueue();
                     }
                 }
             }

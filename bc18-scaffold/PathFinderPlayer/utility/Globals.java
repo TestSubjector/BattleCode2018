@@ -29,7 +29,6 @@ public class Globals
     public static long awayMapSize;
     public static long currentRound;
     public static long currentKarbonite;
-    public static long factoryLimit;
     public static MapLocation[][] mapLocationAt;
     public static VecUnit initialWorkers;
     public static long passableTerrain;
@@ -46,17 +45,6 @@ public class Globals
     public static long totalUnits;
     public static ArrayList<Unit> unitList;
     public static HashSet<Integer> builderSet;
-    public static Deque<UnitType> buildQueue;
-    public static int[] unitsInQueue;
-
-    // Build requirement variables
-    public static int workersRequired;
-    public static int knightsRequired;
-    public static int rangersRequired;
-    public static int magesRequired;
-    public static int healersRequired;
-    public static int factoriesRequired;
-    public static int rocketsRequired;
 
     public static short botIntelligenceLevel;
     public static double builderFraction;
@@ -90,6 +78,17 @@ public class Globals
     public static HashMap<UnitType, Long> movementCooldown;
     public static HashMap<UnitType, Long> abilityCooldown;
     public static HashMap<UnitType, Long> visionRange;
+
+    // Build requirement variables
+    public static Deque<UnitType> buildQueue;
+    public static int[] unitsInQueue;
+    public static int workersRequired;
+    public static int knightsRequired;
+    public static int rangersRequired;
+    public static int magesRequired;
+    public static int healersRequired;
+    public static int factoriesRequired;
+    public static int rocketsRequired;
 
     // Research queue
     // 25+25+100+100+100+25+75+100+25+75+100+25+75+100+25+75
@@ -199,17 +198,6 @@ public class Globals
             typeSortedUnitLists.put(unitTypes[i], new ArrayList<Unit>());
         }
 
-        buildQueue = new ArrayDeque<UnitType>();
-        unitsInQueue = new int[unitTypes.length];
-        setWorkersRequired();
-        // Uncomment after implementing
-//        setKnightsRequired();
-//        setRangersRequired();
-//        setMagesRequired();
-//        setHealersRequired();
-//        setFactoriesRequired();
-//        setRocketsRequired();
-
         friendlyVecUnits = new HashMap<Integer, VecUnit>();
         enemyVecUnits = new HashMap<Integer, VecUnit>();
         enemyLocationAverages = new HashSet<MapLocation>();
@@ -249,6 +237,17 @@ public class Globals
         visionRange.put(UnitType.Ranger, 70L);
         visionRange.put(UnitType.Mage, 30L);
         visionRange.put(UnitType.Healer, 50L);
+
+        buildQueue = new ArrayDeque<UnitType>();
+        unitsInQueue = new int[unitTypes.length];
+        setWorkersRequired();
+        // Uncomment after implementing
+//        setKnightsRequired();
+//        setRangersRequired();
+//        setMagesRequired();
+//        setHealersRequired();
+        setFactoriesRequired();
+        setRocketsRequired();
     }
 
     public static long diagonalDistanceBetween(MapLocation first, MapLocation second)
@@ -282,7 +281,6 @@ public class Globals
                 }
             }
         }
-        factoryLimit = maxFactoryLimit(initialTotalKarbonite);
         initialKarboniteLocationSize = karboniteLocations.size();
     }
 
