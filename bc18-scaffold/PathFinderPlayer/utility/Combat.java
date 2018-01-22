@@ -27,8 +27,10 @@ public class Combat
     {
         if(gc.isAttackReady(unit.id()))
         {
-            for (int j = 0; j < nearbyEnemyUnits.size(); j++) {
-                if (gc.canAttack(unit.id(), nearbyEnemyUnits.get(j).id())) {
+            for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+            {
+                if (gc.canAttack(unit.id(), nearbyEnemyUnits.get(j).id()))
+                {
                     gc.attack(unit.id(), nearbyEnemyUnits.get(j).id());
                     break;
                 }
@@ -60,8 +62,8 @@ public class Combat
             numberOfAttacksAfterFirstToKillEnemyUnit = (long) ((enemyUnit.health() - 0.001) / unit.damage());
         }
 
-        long turnsTillUnitCanAttack = (long) unit.attackHeat()/ 10;
-        long effectiveAttackDelay = (long) unit.attackCooldown()/10;
+        long turnsTillUnitCanAttack = unit.attackHeat() / 10;
+        long effectiveAttackDelay = unit.attackCooldown() / 10;
         long turnsToKillEnemyUnit = turnsTillUnitCanAttack + effectiveAttackDelay * numberOfAttacksAfterFirstToKillEnemyUnit;
 
         // Enemy Unit Calculation
@@ -258,7 +260,8 @@ public class Combat
     {
         Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
         Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
-        for (Direction directionToMoveTo : tryDirection) {
+        for (Direction directionToMoveTo : tryDirection)
+        {
             if (!gc.canMove(unit.id(), directionToMoveTo))
             {
                 continue;

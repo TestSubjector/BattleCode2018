@@ -37,21 +37,21 @@ public class Player
             currentRound = gc.round();
             currentKarbonite = gc.karbonite();
             int timeLeftMs = gc.getTimeLeftMs();
-            if (currentRound > 1)
-            {
-                time += "Time taken in round " + (currentRound - 1) + " : " + (lastTime - timeLeftMs) + "\n";
-            }
+//            if (currentRound > 1)
+//            {
+//                time += "Time taken in round " + (currentRound - 1) + " : " + (lastTime - timeLeftMs) + "\n";
+//            }
             lastTime = timeLeftMs + 50;
             if (currentRound % 50 == 0)
             {
                 System.runFinalization();
                 System.gc();
             }
-            if (currentRound % 250 == 2)
-            {
-                System.out.println(time);
-                time = "";
-            }
+//            if (currentRound % 250 == 2)
+//            {
+//                System.out.println(time);
+//                time = "";
+//            }
 
             if(currentRound % 5 == 0 || currentRound < 181)
             {
