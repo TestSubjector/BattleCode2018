@@ -150,7 +150,7 @@ public class Globals
 
         builderSet = new HashSet<Integer>();
         // TODO - Shift To Decision Tree
-        builderFraction = 0.0;
+        builderFraction = 0.2;
 
         prepareRocketArmada = false;
         rocketProductionCooldown = 0;

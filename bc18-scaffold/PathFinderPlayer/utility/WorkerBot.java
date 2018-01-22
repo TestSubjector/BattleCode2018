@@ -229,15 +229,14 @@ public class WorkerBot
             }
         }
 
-        processMiner(unit, unitLocation, unitMapLocation);
-//        if (builderSet.contains(unit.id()))
-//        {
-//            processBuilder(unit, unitLocation, unitMapLocation, adjacentUnits);
-//        }
-//        else
-//        {
-//            processMiner(unit, unitLocation, unitMapLocation);
-//        }
+        if (builderSet.contains(unit.id()))
+        {
+            processBuilder(unit, unitLocation, unitMapLocation, adjacentUnits);
+        }
+        else
+        {
+            processMiner(unit, unitLocation, unitMapLocation);
+        }
 
         if (prepareRocketArmada)
         {

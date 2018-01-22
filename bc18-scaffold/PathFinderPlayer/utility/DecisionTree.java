@@ -141,19 +141,19 @@ public class DecisionTree
     public static void currentBuilderFraction()
     {
         // +0.1 to stop Arithmetic Exception
-        double remainingKarbonite = earthInitialTotalKarbonite / (earthInitialTotalKarbonite - (10 * currentRound) + 0.1);
-        if(currentRound > 180 || earthInitialTotalKarbonite < 100)
-        {
-            builderFraction = 1;
-        }
-        else if(remainingKarbonite > 0)
-        {
-            builderFraction =  0.35 + 0.65 * (1 / remainingKarbonite);
-        }
-        else
-        {
-            builderFraction = 1;
-        }
+//        double remainingKarbonite = earthInitialTotalKarbonite / (earthInitialTotalKarbonite - (10 * currentRound) + 0.1);
+//        if(currentRound > 180 || earthInitialTotalKarbonite < 100)
+//        {
+//            builderFraction = 1;
+//        }
+//        else if(remainingKarbonite > 0)
+//        {
+//            builderFraction =  0.35 + 0.65 * (1 / remainingKarbonite);
+//        }
+//        else
+//        {
+//            builderFraction = 1;
+//        }
     }
 
     // Witch of Agnesi computation breaker
