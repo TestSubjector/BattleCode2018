@@ -198,8 +198,16 @@ public class WorkerBot
                 }
                 if (nearestMineMapLocation != null)
                 {
+                    if (diagonalDistanceBetween(unitMapLocation, nearestMineMapLocation) > 0.5 * (homeMapHeight + homeMapWidth) / 2)
+                    {
+                        if (unitList.size() * builderFraction > builderSet.size())
+                        {
+                            builderSet.add(unit.id());
+                        }
+                    }
                     if (!moveUnitTo(unit, nearestMineMapLocation))
                     {
+                        initialKarboniteLocationSize--;
                         karboniteLocations.remove(nearestMineMapLocation);
                     }
                 }

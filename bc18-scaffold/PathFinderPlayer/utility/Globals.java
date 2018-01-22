@@ -46,6 +46,7 @@ public class Globals
     public static long totalUnits;
     public static ArrayList<Unit> unitList;
     public static HashSet<Integer> builderSet;
+    public static Queue<UnitType> buildQueue;
 
 
     public static short botIntelligenceLevel;
@@ -149,24 +150,24 @@ public class Globals
             }
         }
 
+        karboniteLocations = new HashSet<MapLocation>();
+        getInitialKarboniteLocations();
+
         initialWorkers = homeMap.getInitial_units();
 
-        // TODO - Shift To Decision Tree
         builderSet = new HashSet<Integer>();
-        builderFraction = 0.3;
+        setBuilderFraction();
+        buildQueue = new ArrayDeque<UnitType>();
 
         prepareRocketArmada = false;
         rocketProductionCooldown = 0;
 
         // All initial workers are builders
-//        for (int i = 0; i < initialWorkers.size(); i++)
-//        {
-//            Unit worker = initialWorkers.get(i);
-//            builderSet.add(worker.id());
-//        }
-
-        karboniteLocations = new HashSet<MapLocation>();
-        getInitialKarboniteLocations();
+        for (int i = 0; i < initialWorkers.size(); i++)
+        {
+            Unit worker = initialWorkers.get(i);
+            builderSet.add(worker.id());
+        }
 
         if (homePlanet == Planet.Earth)
         {

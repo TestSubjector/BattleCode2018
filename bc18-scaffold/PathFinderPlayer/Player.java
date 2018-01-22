@@ -53,20 +53,6 @@ public class Player
 //                time = "";
 //            }
 
-            if(currentRound % 5 == 0 || currentRound < 181)
-            {
-                currentBuilderFraction();
-                if (switchToPrimitiveMind(currentRound, timeLeftMs) && currentRound < 700)
-                {
-                    botIntelligenceLevel = 0;
-                }
-                else
-                {
-                    botIntelligenceLevel = 1;
-                }
-            }
-
-
             // Clear unit lists
             for (int i = 0; i < unitTypes.length; i++)
             {
@@ -132,6 +118,24 @@ public class Player
                 removeObsoleteMines();
                 removeObsoleteBlueprints();
                 removeObsoleteBuilders();
+            }
+
+            if(currentRound % 10 == 0)
+            {
+                setBuilderFraction();
+//                System.out.println(currentRound);
+//                System.out.println(builderFraction);
+//                System.out.println(builderSet.size());
+//                System.out.println(typeSortedUnitLists.get(UnitType.Worker).size());
+//                System.out.println();
+                if (switchToPrimitiveMind(currentRound, timeLeftMs) && currentRound < 700)
+                {
+                    botIntelligenceLevel = 0;
+                }
+                else
+                {
+                    botIntelligenceLevel = 1;
+                }
             }
 
             // Process units
