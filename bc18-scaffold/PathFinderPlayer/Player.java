@@ -59,7 +59,7 @@ public class Player
                 typeSortedUnitLists.get(unitTypes[i]).clear();
             }
 
-            if( currentRound > 200 && rocketProductionCooldown % 35 == 0)
+            if (currentRound > 200 && rocketProductionCooldown % 35 == 0)
             {
                 findRocketProductionCooldown();
             }
@@ -94,12 +94,12 @@ public class Player
                     }
                     xAverage /= visibleEnemyUnits.size();
                     yAverage /= visibleEnemyUnits.size();
-                    MapLocation enemyLocationAverage = mapLocationAt[(int)xAverage][(int)yAverage];
-                    if(homeMap.isPassableTerrainAt(enemyLocationAverage) == 1)
+                    MapLocation enemyLocationAverage = mapLocationAt[(int) xAverage][(int) yAverage];
+                    if (homeMap.isPassableTerrainAt(enemyLocationAverage) == 1)
                     {
-                        enemyLocationAverages.add(mapLocationAt[(int)xAverage][(int)yAverage]);
+                        enemyLocationAverages.add(mapLocationAt[(int) xAverage][(int) yAverage]);
                     }
-                    else if(visibleEnemyUnits.size() !=0)
+                    else if (visibleEnemyUnits.size() != 0)
                     {
                         enemyLocationAverages.add(mapLocationAt[visibleEnemyUnits.get(0).location().mapLocation().getX()][visibleEnemyUnits.get(0).location().mapLocation().getY()]);
                     }
@@ -120,7 +120,7 @@ public class Player
                 removeObsoleteBuilders();
             }
 
-            if(currentRound % 10 == 0)
+            if (currentRound % 10 == 0)
             {
                 setBuilderFraction();
 //                System.out.println(currentRound);
@@ -136,6 +136,13 @@ public class Player
                 {
                     botIntelligenceLevel = 1;
                 }
+            }
+
+            // Process build queue
+            setWorkersRequired();
+            while (shouldQueueWorker())
+            {
+                addUnitToQueue(UnitType.Worker);
             }
 
             // Process units

@@ -261,37 +261,28 @@ public class WorkerBot
             processMiner(unit, unitLocation, unitMapLocation);
         }
 
-        if (prepareRocketArmada)
-        {
-            return;
-        }
-
         // Replicate worker
-        // TODO - To stop worker Replication when required
-        if (unitList.size() < maxWorkerLimitAtTurn(currentRound))
+        if (!buildQueue.isEmpty() && buildQueue.peekFirst() == UnitType.Worker)
         {
             for (int j = 0; j < directions.length - 1; j++)
             {
                 Direction replicateDirection = directions[j];
-                if (gc.canReplicate(unit.id(), replicateDirection))
+                MapLocation replicateMapLocation = unitMapLocation.add(replicateDirection);
+                if (gc.canSenseLocation(replicateMapLocation) &&
+                        !gc.hasUnitAtLocation(replicateMapLocation) &&
+                        gc.canReplicate(unit.id(), replicateDirection))
                 {
                     gc.replicate(unit.id(), replicateDirection);
-                    MapLocation replicateMapLocation = unitMapLocation.add(replicateDirection);
-                    if (gc.canSenseLocation(replicateMapLocation))
+                    if (gc.hasUnitAtLocation(replicateMapLocation))
                     {
-                        if (gc.hasUnitAtLocation(replicateMapLocation))
+                        Unit newWorker = gc.senseUnitAtLocation(replicateMapLocation);
+                        unitList.add(newWorker);
+                        if (unitList.size() * builderFraction > builderSet.size())
                         {
-                            Unit newWorker = gc.senseUnitAtLocation(replicateMapLocation);
-                            if (newWorker.unitType() == UnitType.Worker)
-                            {
-                                unitList.add(newWorker);
-                                if (unitList.size() * builderFraction > builderSet.size())
-                                {
-                                    builderSet.add(newWorker.id());
-                                }
-                            }
+                            builderSet.add(newWorker.id());
                         }
                     }
+                    removeUnitFromQueue();
                     break;
                 }
             }

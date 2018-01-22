@@ -46,8 +46,17 @@ public class Globals
     public static long totalUnits;
     public static ArrayList<Unit> unitList;
     public static HashSet<Integer> builderSet;
-    public static Queue<UnitType> buildQueue;
+    public static Deque<UnitType> buildQueue;
+    public static int[] unitsInQueue;
 
+    // Build requirement variables
+    public static int workersRequired;
+    public static int knightsRequired;
+    public static int rangersRequired;
+    public static int magesRequired;
+    public static int healersRequired;
+    public static int factoriesRequired;
+    public static int rocketsRequired;
 
     public static short botIntelligenceLevel;
     public static double builderFraction;
@@ -156,18 +165,16 @@ public class Globals
         initialWorkers = homeMap.getInitial_units();
 
         builderSet = new HashSet<Integer>();
-        setBuilderFraction();
-        buildQueue = new ArrayDeque<UnitType>();
-
-        prepareRocketArmada = false;
-        rocketProductionCooldown = 0;
-
         // All initial workers are builders
         for (int i = 0; i < initialWorkers.size(); i++)
         {
             Unit worker = initialWorkers.get(i);
             builderSet.add(worker.id());
         }
+        setBuilderFraction();
+
+        prepareRocketArmada = false;
+        rocketProductionCooldown = 0;
 
         if (homePlanet == Planet.Earth)
         {
@@ -191,6 +198,17 @@ public class Globals
         {
             typeSortedUnitLists.put(unitTypes[i], new ArrayList<Unit>());
         }
+
+        buildQueue = new ArrayDeque<UnitType>();
+        unitsInQueue = new int[unitTypes.length];
+        setWorkersRequired();
+        // Uncomment after implementing
+//        setKnightsRequired();
+//        setRangersRequired();
+//        setMagesRequired();
+//        setHealersRequired();
+//        setFactoriesRequired();
+//        setRocketsRequired();
 
         friendlyVecUnits = new HashMap<Integer, VecUnit>();
         enemyVecUnits = new HashMap<Integer, VecUnit>();
@@ -310,5 +328,23 @@ public class Globals
                 potentialLandingSites.add(new QueuePair<>(appeal, mapLocation));
             }
         }
+    }
+
+    public static void addUnitToQueue(UnitType type)
+    {
+        buildQueue.addLast(type);
+        unitsInQueue[type.ordinal()]++;
+    }
+
+    public static void addUnitToQueueUrgently(UnitType type)
+    {
+        buildQueue.addFirst(type);
+        unitsInQueue[type.ordinal()]++;
+    }
+
+    public static void removeUnitFromQueue()
+    {
+        UnitType type = buildQueue.removeFirst();
+        unitsInQueue[type.ordinal()]--;
     }
 }
