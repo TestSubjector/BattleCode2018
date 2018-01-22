@@ -245,7 +245,7 @@ public class Combat
     private static int numberOfOtherAlliesInAttackRange(Unit unit, MapLocation targetLocation)
     {
         int allyAssistNumber = 0;
-        VecUnit nearbyFriendlyUnits = friendlyVecUnits.get(unit.id());
+        VecUnit nearbyFriendlyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), unit.visionRange(), ourTeam);
         Unit nearbyFriendlyUnit;
         UnitType friendlyUnitType;
         long distanceToLocation;
@@ -310,12 +310,10 @@ public class Combat
                             else
                             {
                                 boolean haveSupport = false;
-                                /*
                                 if(numberOfOtherAlliesInAttackRange(unit, loneEnemyUnit.location().mapLocation()) > 0)
                                 {
                                     haveSupport = true;
                                 }
-                                */
                                 // Have ally help
                                 if(haveSupport)
                                 {
@@ -361,7 +359,7 @@ public class Combat
                         else
                         {
                             // Can't attack enemy unit
-                            moveUnitAwayFrom(unit, loneEnemyUnit.location().mapLocation());
+                            moveUnitTo(unit, loneEnemyUnit.location().mapLocation());
                         }
                     }
                     else
