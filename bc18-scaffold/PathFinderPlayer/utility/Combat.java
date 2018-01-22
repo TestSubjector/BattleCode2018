@@ -497,6 +497,10 @@ public class Combat
                 {
                     return;
                 }
+                else
+                {
+
+                }
             }
         }
         else
