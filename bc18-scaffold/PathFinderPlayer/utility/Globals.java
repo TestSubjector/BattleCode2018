@@ -241,11 +241,10 @@ public class Globals
         buildQueue = new ArrayDeque<UnitType>();
         unitsInQueue = new int[unitTypes.length];
         setWorkersRequired();
-        // Uncomment after implementing
-//        setKnightsRequired();
-//        setRangersRequired();
-//        setMagesRequired();
-//        setHealersRequired();
+        setKnightsRequired();
+        setRangersRequired();
+        setMagesRequired();
+        setHealersRequired();
         setFactoriesRequired();
         setRocketsRequired();
     }

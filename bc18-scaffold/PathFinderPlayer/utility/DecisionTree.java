@@ -37,32 +37,28 @@ public class DecisionTree
 
     public static boolean shouldQueueRocket()
     {
-        return gc.researchInfo().getLevel(UnitType.Rocket) != 0 && typeSortedUnitLists.get(UnitType.Rocket).size() + unitsInQueue[UnitType.Rocket.ordinal()] < rocketsRequired;
+        return typeSortedUnitLists.get(UnitType.Rocket).size() + unitsInQueue[UnitType.Rocket.ordinal()] < rocketsRequired;
     }
-    // Implement the following and the setXRequired() functions
-    //
-    //
 
-    //
-    //    public static boolean shouldQueueRanger()
-    //    {
-    //        return typeSortedUnitLists.get(UnitType.Worker).size() + unitsInQueue[UnitType.Worker.ordinal()] < workersRequired;
-    //    }
-    //
-    //    public static boolean shouldQueueMage()
-    //    {
-    //        return typeSortedUnitLists.get(UnitType.Worker).size() + unitsInQueue[UnitType.Worker.ordinal()] < workersRequired;
-    //    }
-    //
-    //    public static boolean shouldQueueKnight()
-    //    {
-    //        return typeSortedUnitLists.get(UnitType.Worker).size() + unitsInQueue[UnitType.Worker.ordinal()] < workersRequired;
-    //    }
-    //
-    //    public static boolean shouldQueueHealer()
-    //    {
-    //        return typeSortedUnitLists.get(UnitType.Worker).size() + unitsInQueue[UnitType.Worker.ordinal()] < workersRequired;
-    //    }
+    public static boolean shouldQueueRanger()
+    {
+        return typeSortedUnitLists.get(UnitType.Ranger).size() + unitsInQueue[UnitType.Ranger.ordinal()] < rangersRequired;
+    }
+
+    public static boolean shouldQueueMage()
+    {
+        return typeSortedUnitLists.get(UnitType.Mage).size() + unitsInQueue[UnitType.Mage.ordinal()] < magesRequired;
+    }
+
+    public static boolean shouldQueueKnight()
+    {
+        return typeSortedUnitLists.get(UnitType.Knight).size() + unitsInQueue[UnitType.Knight.ordinal()] < knightsRequired;
+    }
+
+    public static boolean shouldQueueHealer()
+    {
+        return typeSortedUnitLists.get(UnitType.Healer).size() + unitsInQueue[UnitType.Healer.ordinal()] < healersRequired;
+    }
 
     // This is not very good, needs an overhaul
     public static void setWorkersRequired()
@@ -174,7 +170,8 @@ public class DecisionTree
         }
         else
         {
-            rocketsRequired = (int) ((Math.min(1, (double) currentRound - 120 / 400)) * Math.round((double) totalUnits / 30));
+            rocketsRequired = (int) (currentRound / 100);
+            // rocketsRequired = (int) ((Math.min(1, (double) currentRound - 120 / 400)) * Math.round((double) totalUnits / 30));
         }
     }
 
@@ -206,6 +203,54 @@ public class DecisionTree
         else
         {
             rocketProductionCooldown--;
+        }
+    }
+
+    public static void setRangersRequired()
+    {
+        if (currentRound <= 75)
+        {
+            rangersRequired = (int) (2 + ((double) currentRound / 75) * (double) homeMapSize / 300);
+        }
+        else
+        {
+            rangersRequired = (int) (((double) currentRound * (600 + homeMapSize) * passableTerrain) / (12000 * homeMapSize));
+        }
+    }
+
+    public static void setKnightsRequired()
+    {
+        if (currentRound <= 75)
+        {
+            knightsRequired = (int) (2 + ((double) currentRound / 75) * (double) homeMapSize / 300);
+        }
+        else
+        {
+            knightsRequired = (int) (((double) currentRound * (600 + homeMapSize) * passableTerrain) / (12000 * homeMapSize));
+        }
+    }
+
+    public static void setMagesRequired()
+    {
+        if (currentRound <= 75)
+        {
+            magesRequired = (int) (2 + ((double) currentRound / 75) * (double) homeMapSize / 300);
+        }
+        else
+        {
+            magesRequired = (int) (((double) currentRound * (600 + homeMapSize) * passableTerrain) / (12000 * homeMapSize));
+        }
+    }
+
+    public static void setHealersRequired()
+    {
+        if (currentRound <= 75)
+        {
+            healersRequired = (int) (2 + ((double) currentRound / 75) * (double) homeMapSize / 300);
+        }
+        else
+        {
+            healersRequired = (int) (((double) currentRound * (600 + homeMapSize) * passableTerrain) / (12000 * homeMapSize));
         }
     }
 

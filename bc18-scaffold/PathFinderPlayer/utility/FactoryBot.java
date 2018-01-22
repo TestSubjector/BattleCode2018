@@ -38,33 +38,15 @@ public class FactoryBot
         tryToUnloadRobot(unit);
         if (unit.isFactoryProducing() == 0)
         {
-            int workerCount = typeSortedUnitLists.get(UnitType.Worker).size(); // rarely produced
-            int knightCount = typeSortedUnitLists.get(UnitType.Knight).size(); // not being produced
-            int rangerCount = typeSortedUnitLists.get(UnitType.Ranger).size();
-            int mageCount = typeSortedUnitLists.get(UnitType.Mage).size();
-            int healerCount = typeSortedUnitLists.get(UnitType.Healer).size();
-
-            // Think of better condition later; produce workers if existing ones are being massacred
-            if (workerCount == 0)
+            if (!buildQueue.isEmpty() &&
+                    buildQueue.peekFirst() != UnitType.Worker &&
+                    buildQueue.peekFirst() != UnitType.Factory &&
+                    buildQueue.peekFirst() != UnitType.Rocket)
             {
-                if (gc.canProduceRobot(unit.id(), UnitType.Worker))
+                if (gc.canProduceRobot(unit.id(), buildQueue.peekFirst()))
                 {
-                    gc.produceRobot(unit.id(), UnitType.Worker);
-                }
-            }
-            else if (rangerCount >= 7 * (healerCount))
-            {
-                UnitType typeToBeProduced = UnitType.Healer;
-                if (gc.canProduceRobot(unit.id(), typeToBeProduced))
-                {
-                    gc.produceRobot(unit.id(), typeToBeProduced);
-                }
-            }
-            else
-            {
-                if (gc.canProduceRobot(unit.id(), UnitType.Ranger))
-                {
-                    gc.produceRobot(unit.id(), UnitType.Ranger);
+                    gc.produceRobot(unit.id(), buildQueue.peekFirst());
+                    removeUnitFromQueue();
                 }
             }
         }
