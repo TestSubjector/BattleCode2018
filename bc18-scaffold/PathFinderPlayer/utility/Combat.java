@@ -457,7 +457,6 @@ public class Combat
                         }
                         if(bestTarget != null)
                         {
-
                             if(gc.canAttack(unit.id(), bestTarget.id()))
                             {
                                 gc.attack(unit.id(), bestTarget.id());
@@ -522,7 +521,7 @@ public class Combat
             }
             if(nearestEnemyMapLocation == null || !moveUnitTo(unit, nearestEnemyMapLocation));
             {
-                moveUnitInRandomDirection(unit);
+                // moveUnitInRandomDirection(unit);
             }
         }
     }

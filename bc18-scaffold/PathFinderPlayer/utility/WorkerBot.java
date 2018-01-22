@@ -121,7 +121,7 @@ public class WorkerBot
                 // all points choked, move out
                 if (isMovementNeeded)
                 {
-                    moveUnitInRandomDirection(unit); // TODO better direction decision
+                    // moveUnitInRandomDirection(unit); // TODO better direction decision
                 }
                 else
                 {
