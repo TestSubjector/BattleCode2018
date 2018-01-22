@@ -106,7 +106,7 @@ public class DecisionTree
 
     public static long maxFactoryLimit(long earthInitialTotalKarbonite)
     {
-        return Math.round(4 + 2 *((double) homeMapHeight + homeMapWidth)/10) + earthInitialTotalKarbonite/1000;
+        return Math.round(4 + ((double) homeMapHeight + homeMapWidth)/10) + earthInitialTotalKarbonite/1000;
     }
 
     public static boolean makeRocketArmada(long totalUnits)
@@ -138,22 +138,19 @@ public class DecisionTree
         }
     }
 
+
     public static void currentBuilderFraction()
     {
-        // +0.1 to stop Arithmetic Exception
-//        double remainingKarbonite = earthInitialTotalKarbonite / (earthInitialTotalKarbonite - (10 * currentRound) + 0.1);
-//        if(currentRound > 180 || earthInitialTotalKarbonite < 100)
-//        {
-//            builderFraction = 1;
-//        }
-//        else if(remainingKarbonite > 0)
-//        {
-//            builderFraction =  0.35 + 0.65 * (1 / remainingKarbonite);
-//        }
-//        else
-//        {
-//            builderFraction = 1;
-//        }
+        /*
+        if(currentRound > 180 + (homeMapWidth + homeMapWidth)/2 || initialTotalKarbonite < 100)
+        {
+            builderFraction = 1;
+        }
+        else
+        {
+            builderFraction =  1 - 0.7 * (karboniteLocations.size()/ initialKarboniteLocationSize);
+        }
+        */
     }
 
     // Witch of Agnesi computation breaker
@@ -161,7 +158,7 @@ public class DecisionTree
     {
         // Give 5 secs to pathfinding
         // Constant value by integrating (8*57^3)/(x^2 + 57^2) dx from x = -infinity to -375
-        return timeLeft < 3920 + 25992* Math.tanh((currentRound - 375)/57);
+        return timeLeft < 18000 * (Math.tanh((currentRound - 375)/57)) + 26500;
     }
 
     // Cooldown till you can again make a Rocket

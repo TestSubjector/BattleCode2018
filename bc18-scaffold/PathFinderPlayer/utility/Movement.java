@@ -100,35 +100,35 @@ public class Movement
         return true;
     }
 
-    public static void moveUnitAwayFromMultipleUnits(VecUnit nearbyUnits, Unit unit)
+    // Simple Retreat Function [Now Improved]
+
+    public static boolean moveUnitAwayFromMultipleUnits(VecUnit nearbyUnits, Unit unit)
     {
-        long[] directionArray = {1,1,1,1,1,1,1,1,1};
+        long[] directionArray = {5,5,5,5,5,5,5,5,5};
         long numberOfNearbyUnits = nearbyUnits.size();
-        long count = 8;
+        long count = -20;
+        int index = -1;
         MapLocation unitLocation = unit.location().mapLocation();
-        for(int i = 0; i< numberOfNearbyUnits; i++)
+        for(int i = 0; i < numberOfNearbyUnits; i++)
         {
             // Gives Direction Between Units
             Direction directionToOtherUnit = unitLocation.directionTo(nearbyUnits.get(i).location().mapLocation());
-            directionArray[directionToOtherUnit.ordinal()] = 0;
+            directionArray[directionToOtherUnit.ordinal()] -= 2;
+            directionArray[directionToOtherUnit.ordinal() + 1] -= 1;
+            directionArray[(directionToOtherUnit.ordinal() + 7) % 8] -= 1;
         }
         for(int j = 0; j < 8; j++)
         {
-            if(directionArray[j] != 0)
+            if(count < directionArray[j])
             {
-                if(moveUnitInDirection(unit, Direction.values()[j]))
-                {
-                    break;
-                }
-            }
-            else
-            {
-                count--;
+                count = directionArray[j];
+                index = j;
             }
         }
-        if(count == 0)
+        if(index != -1)
         {
-            moveUnitInRandomDirection(unit);
+            return moveUnitInDirection(unit, Direction.values()[index]);
         }
+        return false;
     }
 }

@@ -56,16 +56,17 @@ public class Player
             if(currentRound % 5 == 0 || currentRound < 181)
             {
                 currentBuilderFraction();
+                if (switchToPrimitiveMind(currentRound, timeLeftMs) && currentRound < 700)
+                {
+                    botIntelligenceLevel = 0;
+                }
+                else
+                {
+                    botIntelligenceLevel = 1;
+                }
             }
 
-            if (switchToPrimitiveMind(currentRound, timeLeftMs) && currentRound < 700)
-            {
-                botIntelligenceLevel = 0;
-            }
-            else
-            {
-                botIntelligenceLevel = 1;
-            }
+
             // Clear unit lists
             for (int i = 0; i < unitTypes.length; i++)
             {
@@ -81,6 +82,9 @@ public class Player
             // Clear enemy hashmap
             enemyVecUnits.clear();
 
+            // Clear friendly units hashing
+            friendlyVecUnits.clear();
+
             // Fetch current units and sort by type
             VecUnit units = gc.myUnits();
             for (int i = 0; i < units.size(); i++)
@@ -92,6 +96,8 @@ public class Player
                 {
                     VecUnit visibleEnemyUnits = gc.senseNearbyUnitsByTeam(unitLocation.mapLocation(), unit.visionRange(), theirTeam);
                     enemyVecUnits.put(unit.id(), visibleEnemyUnits);
+                    VecUnit visibleFriendlyUnits = gc.senseNearbyUnitsByTeam(unitLocation.mapLocation(), unit.visionRange(), ourTeam);
+                    friendlyVecUnits.put(unit.id(), visibleFriendlyUnits);
                     double xAverage = 0;
                     double yAverage = 0;
                     for (int j = 0; j < visibleEnemyUnits.size(); j++)

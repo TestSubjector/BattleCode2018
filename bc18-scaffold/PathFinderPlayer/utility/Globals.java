@@ -35,9 +35,12 @@ public class Globals
     public static long passableTerrain;
     public static long initialTotalKarbonite;
     public static Set<MapLocation> karboniteLocations;
+    public static long initialKarboniteLocationSize;
+
     public static Set<Unit> unfinishedBlueprints;
     public static HashMap<UnitType, ArrayList<Unit>> typeSortedUnitLists;
     public static HashMap<Integer, VecUnit> enemyVecUnits;
+    public static HashMap<Integer, VecUnit> friendlyVecUnits;
     public static HashSet<MapLocation> enemyLocationAverages;
     public static long totalCombatUnits;
     public static long totalUnits;
@@ -150,7 +153,7 @@ public class Globals
 
         // TODO - Shift To Decision Tree
         builderSet = new HashSet<Integer>();
-        builderFraction = 0.1;
+        builderFraction = 0.3;
 
         prepareRocketArmada = false;
         rocketProductionCooldown = 0;
@@ -187,6 +190,8 @@ public class Globals
         {
             typeSortedUnitLists.put(unitTypes[i], new ArrayList<Unit>());
         }
+
+        friendlyVecUnits = new HashMap<Integer, VecUnit>();
         enemyVecUnits = new HashMap<Integer, VecUnit>();
         enemyLocationAverages = new HashSet<MapLocation>();
 
@@ -259,8 +264,8 @@ public class Globals
             }
         }
         factoryLimit = maxFactoryLimit(initialTotalKarbonite);
+        initialKarboniteLocationSize = karboniteLocations.size();
     }
-
 
     // Find the appeals of all map locations on Mars
     // Will only be called from Earth

@@ -323,7 +323,7 @@ public class WorkerBot
 
         if (unit.workerHasActed() == 0)
         {
-            moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
+            moveUnitInRandomDirection(unit);
         }
 
         // Replicate worker if enough Karbonite or Earth flooded

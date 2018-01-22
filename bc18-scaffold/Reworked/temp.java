@@ -32,7 +32,6 @@ private static boolean doMicro(RobotInfo[] nearbyEnemies, boolean shadowEnemyHar
         }
         }
 
-        if (tryFleeMissiles(nearbyEnemies)) return true;
 
         int numEnemiesAttackingUs = 0;
         RobotInfo[] enemiesAttackingUs = new RobotInfo[99];
@@ -257,44 +256,7 @@ private static boolean tryFleeMissiles(RobotInfo[] nearbyEnemies) throws GameAct
         return false;
         }
 
-private static boolean tryMoveToEngageEnemyAtLocationInOneTurnWithMaxEnemyExposure(MapLocation loc, int maxEnemyExposure, RobotInfo[] nearbyEnemies)
-        throws GameActionException {
-        Direction toLoc = here.directionTo(loc);
-        Direction[] tryDirs = new Direction[] { toLoc, toLoc.rotateLeft(), toLoc.rotateRight() };
-        for (Direction dir : tryDirs) {
-        if (!rc.canMove(dir)) continue;
-        MapLocation moveLoc = here.add(dir);
-        if (rc.getType().attackRadiusSquared < moveLoc.distanceSquaredTo(loc)) continue; // must engage in one turn
-        if (inEnemyTowerOrHQRange(moveLoc, enemyTowers)) continue;
 
-        int enemyExposure = numEnemiesAttackingLocation(moveLoc, nearbyEnemies);
-        if (enemyExposure <= maxEnemyExposure) {
-        rc.move(dir);
-        return true;
-        }
-        }
-
-        return false;
-        }
-
-private static boolean tryMoveTowardLocationWithMaxEnemyExposure(MapLocation loc, int maxEnemyExposure, RobotInfo[] nearbyEnemies)
-        throws GameActionException {
-        Direction toLoc = here.directionTo(loc);
-        Direction[] tryDirs = new Direction[] { toLoc, toLoc.rotateLeft(), toLoc.rotateRight() };
-        for (Direction dir : tryDirs) {
-        if (!rc.canMove(dir)) continue;
-        MapLocation moveLoc = here.add(dir);
-        if (inEnemyTowerOrHQRange(moveLoc, enemyTowers)) continue;
-
-        int enemyExposure = numEnemiesAttackingLocation(moveLoc, nearbyEnemies);
-        if (enemyExposure <= maxEnemyExposure) {
-        rc.move(dir);
-        return true;
-        }
-        }
-
-        return false;
-        }
 
 private static boolean tryMoveToEngageAnyUndefendedWorkerOrBuilding(RobotInfo[] nearbyEnemies) throws GameActionException {
         for (RobotInfo enemy : nearbyEnemies) {
@@ -367,12 +329,3 @@ private static void shadowHarasser(RobotInfo enemyToShadow, RobotInfo[] nearbyEn
         }
         }
 
-
-private static int numOtherAlliesInAttackRange(MapLocation loc) {
-        int ret = 0;
-        RobotInfo[] allies = rc.senseNearbyRobots(loc, 15, us);
-        for (RobotInfo ally : allies) {
-        if (ally.type.attackRadiusSquared >= loc.distanceSquaredTo(ally.location)) ret++;
-        }
-        return ret;
-        }
