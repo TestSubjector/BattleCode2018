@@ -49,26 +49,36 @@ public class Pathfinding
                 {
                     continue;
                 }
-
+                int totalPassableDiagonalSquares = 0;
                 for (int i = 1; i < directions.length - 1; i += 2)
                 {
-                    MapLocation diagonalSquareOne = possibleWaypoint.add(directions[i]);
-                    MapLocation diagonalSquareTwo = possibleWaypoint.add(directions[(i + 2) % 8]);
-                    MapLocation sideSquareOne = possibleWaypoint.add(directions[i - 1]);
-                    MapLocation sideSquareTwo = possibleWaypoint.add(directions[(i + 1) % 8]);
-                    MapLocation sideSquareThree = possibleWaypoint.add(directions[(i + 3) % 8]);
-                    boolean isExteriorCorner = homeMap.onMap(diagonalSquareOne) &&
-                            homeMap.isPassableTerrainAt(diagonalSquareOne) == 0 &&
-                            homeMap.isPassableTerrainAt(sideSquareOne) == 1 &&
-                            homeMap.isPassableTerrainAt(sideSquareTwo) == 1;
-                    boolean isDiagonalTurningPoint = homeMap.onMap(diagonalSquareOne) &&
-                            homeMap.onMap(diagonalSquareTwo) &&
-                            homeMap.isPassableTerrainAt(diagonalSquareOne) == 1 &&
-                            homeMap.isPassableTerrainAt(diagonalSquareTwo) == 1 &&
-                            homeMap.isPassableTerrainAt(sideSquareOne) == 0 &&
-                            homeMap.isPassableTerrainAt(sideSquareTwo) == 0 &&
-                            homeMap.isPassableTerrainAt(sideSquareThree) == 0;
-                    if (isExteriorCorner || isDiagonalTurningPoint)
+                    MapLocation diagonalSquare = possibleWaypoint.add(directions[i]);
+                    boolean diagonalSquareIsPassable = homeMap.onMap(diagonalSquare) &&
+                            homeMap.isPassableTerrainAt(diagonalSquare) == 1;
+                    if (diagonalSquareIsPassable)
+                    {
+                        totalPassableDiagonalSquares++;
+                    }
+                    MapLocation[] sideSquares = new MapLocation[4];
+                    sideSquares[0] = possibleWaypoint.add(directions[(i + 1) % 8]);
+                    sideSquares[1] = possibleWaypoint.add(directions[(i + 3) % 8]);
+                    sideSquares[2] = possibleWaypoint.add(directions[(i + 5) % 8]);
+                    sideSquares[3] = possibleWaypoint.add(directions[(i + 7) % 8]);
+                    boolean isExteriorCorner = homeMap.onMap(diagonalSquare) &&
+                            homeMap.isPassableTerrainAt(diagonalSquare) == 0 &&
+                            homeMap.isPassableTerrainAt(sideSquares[0]) == 1 &&
+                            homeMap.isPassableTerrainAt(sideSquares[3]) == 1;
+                    int blockedSides = 0;
+                    for (int j = 0; j < 4; j++)
+                    {
+                        if (!homeMap.onMap(sideSquares[j]) || homeMap.isPassableTerrainAt(sideSquares[j]) == 0)
+                        {
+                            blockedSides++;
+                        }
+                    }
+                    if (isExteriorCorner ||
+                            (totalPassableDiagonalSquares >= 1 && blockedSides >= 3) ||
+                            (totalPassableDiagonalSquares >= 2 && blockedSides >= 2))
                     {
                         waypointAdjacencyList.put(possibleWaypoint, new LinkedList<GraphPair<MapLocation, Long>>());
                         nearestUnobstructedWaypoints.put(possibleWaypoint, possibleWaypoint);
@@ -196,7 +206,6 @@ public class Pathfinding
         return nearest;
     }
 
-     // TODO - Fix unreachable locations
     public static void constructPathBetween(MapLocation startWaypoint, MapLocation endWaypoint)
     {
         Pair<MapLocation, MapLocation> key = new Pair<>(startWaypoint, endWaypoint);

@@ -53,14 +53,14 @@ public class WorkerBot
         }
         for (Unit obsoleteBlueprint : obsoleteBlueprints)
         {
-            if(obsoleteBlueprint.unitType() == UnitType.Rocket)
+            if (obsoleteBlueprint.unitType() == UnitType.Rocket)
             {
                 rocketProductionCooldown++;
             }
             unfinishedBlueprints.remove(obsoleteBlueprint);
         }
     }
-    
+
     private static void processBuilder(Unit unit, Location unitLocation, MapLocation unitMapLocation, VecUnit adjacentUnits)
     {
         // Blueprint structures
@@ -103,7 +103,10 @@ public class WorkerBot
                 }
 
                 // all points choked, move out
-                if (isMovementNeeded) moveUnitInRandomDirection(unit); // TODO better direction decision
+                if (isMovementNeeded)
+                {
+                    moveUnitInRandomDirection(unit); // TODO better direction decision
+                }
                 else
                 {
                     if (gc.canBlueprint(unit.id(), blueprintType, blueprintDirection))
@@ -124,7 +127,7 @@ public class WorkerBot
             Unit adjacentUnit = adjacentUnits.get(j);
             if (adjacentUnit.unitType() == UnitType.Rocket || adjacentUnit.unitType() == UnitType.Factory)
             {
-                if(adjacentUnit.health() < adjacentUnit.maxHealth())
+                if (adjacentUnit.health() < adjacentUnit.maxHealth())
                 {
                     shouldMove = false;
                     break;
@@ -205,7 +208,7 @@ public class WorkerBot
                     gc.build(unit.id(), adjacentUnit.id());
                     break;
                 }
-                else if(adjacentUnit.health() < adjacentUnit.maxHealth() && gc.canRepair(unit.id(), adjacentUnit.id()))
+                else if (adjacentUnit.health() < adjacentUnit.maxHealth() && gc.canRepair(unit.id(), adjacentUnit.id()))
                 {
                     gc.repair(unit.id(), adjacentUnit.id());
                     break;
@@ -226,16 +229,17 @@ public class WorkerBot
             }
         }
 
-        if (builderSet.contains(unit.id()))
-        {
-            processBuilder(unit, unitLocation, unitMapLocation, adjacentUnits);
-        }
-        else
-        {
-            processMiner(unit, unitLocation, unitMapLocation);
-        }
+        processMiner(unit, unitLocation, unitMapLocation);
+//        if (builderSet.contains(unit.id()))
+//        {
+//            processBuilder(unit, unitLocation, unitMapLocation, adjacentUnits);
+//        }
+//        else
+//        {
+//            processMiner(unit, unitLocation, unitMapLocation);
+//        }
 
-        if(prepareRocketArmada)
+        if (prepareRocketArmada)
         {
             return;
         }
@@ -256,7 +260,7 @@ public class WorkerBot
                         if (gc.hasUnitAtLocation(replicateMapLocation))
                         {
                             Unit newWorker = gc.senseUnitAtLocation(replicateMapLocation);
-                            if(newWorker.unitType() == UnitType.Worker)
+                            if (newWorker.unitType() == UnitType.Worker)
                             {
                                 unitList.add(newWorker);
                                 // TODO - Remove builders when dead
@@ -284,7 +288,7 @@ public class WorkerBot
         for (int j = 0; j < adjacentUnits.size(); j++)
         {
             Unit adjacentUnit = adjacentUnits.get(j);
-            if(adjacentUnit.health() < adjacentUnit.maxHealth() && gc.canRepair(unit.id(), adjacentUnit.id()))
+            if (adjacentUnit.health() < adjacentUnit.maxHealth() && gc.canRepair(unit.id(), adjacentUnit.id()))
             {
                 gc.repair(unit.id(), adjacentUnit.id());
                 break;
@@ -304,13 +308,13 @@ public class WorkerBot
             }
         }
 
-        if(unit.workerHasActed() == 0)
+        if (unit.workerHasActed() == 0)
         {
             moveUnitAwayFromMultipleUnits(adjacentUnits, unit);
         }
 
         // Replicate worker if enough Karbonite or Earth flooded
-        if( currentRound > 749 || gc.karbonite() > 100)
+        if (currentRound > 749 || gc.karbonite() > 100)
         {
             for (int j = 0; j < directions.length - 1; j++)
             {
@@ -324,7 +328,7 @@ public class WorkerBot
                         if (gc.hasUnitAtLocation(replicateMapLocation))
                         {
                             Unit newWorker = gc.senseUnitAtLocation(replicateMapLocation);
-                            if(newWorker.unitType() == UnitType.Worker)
+                            if (newWorker.unitType() == UnitType.Worker)
                             {
                                 unitList.add(newWorker);
                             }
@@ -362,19 +366,29 @@ public class WorkerBot
             MapLocation adjacentMapLocation = mapLocation.add(directions[i]);
             if (!homeMap.onMap(adjacentMapLocation) || (homeMap.isPassableTerrainAt(adjacentMapLocation) == 0))
             {
-                switch (i) {
-                    case 0: up_block++; break;
+                switch (i)
+                {
+                    case 0:
+                        up_block++;
+                        break;
 
                     case 1:
                     case 2:
-                    case 3: right_blockages++; break;
+                    case 3:
+                        right_blockages++;
+                        break;
 
-                    case 4: down_block++; break;
+                    case 4:
+                        down_block++;
+                        break;
 
                     case 5:
                     case 6:
-                    case 7: left_blockages++; break;
-                    default: break; //center; will never have a blockage
+                    case 7:
+                        left_blockages++;
+                        break;
+                    default:
+                        break; //center; will never have a blockage
                 }
 
                 appeal += WEIGHT_IMPASSABLE;
@@ -385,19 +399,29 @@ public class WorkerBot
                 UnitType type = gc.senseUnitAtLocation(adjacentMapLocation).unitType();
                 if (type == UnitType.Factory || type == UnitType.Rocket)
                 {
-                    switch (i) {
-                        case 0: up_block++; break;
+                    switch (i)
+                    {
+                        case 0:
+                            up_block++;
+                            break;
 
                         case 1:
                         case 2:
-                        case 3: right_blockages++; break;
+                        case 3:
+                            right_blockages++;
+                            break;
 
-                        case 4: down_block++; break;
+                        case 4:
+                            down_block++;
+                            break;
 
                         case 5:
                         case 6:
-                        case 7: left_blockages++; break;
-                        default: break; //center; will never have a blockage
+                        case 7:
+                            left_blockages++;
+                            break;
+                        default:
+                            break; //center; will never have a blockage
                     }
 
                     appeal += WEIGHT_STRUCTURE;
@@ -406,13 +430,31 @@ public class WorkerBot
         }
 
         int blocksum = 0;
-        if (left_blockages != 0) blocksum++;
-        if (right_blockages != 0) blocksum++;
-        if (up_block != 0) blocksum++;
-        if (down_block!= 0) blocksum++;
+        if (left_blockages != 0)
+        {
+            blocksum++;
+        }
+        if (right_blockages != 0)
+        {
+            blocksum++;
+        }
+        if (up_block != 0)
+        {
+            blocksum++;
+        }
+        if (down_block != 0)
+        {
+            blocksum++;
+        }
 
         // blockage on single side only is fine
-        if (blocksum > 1) return -1002L;
-        else return appeal;
+        if (blocksum > 1)
+        {
+            return -1002L;
+        }
+        else
+        {
+            return appeal;
+        }
     }
 }
