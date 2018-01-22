@@ -125,6 +125,7 @@ public class Player
             {
                 removeObsoleteMines();
                 removeObsoleteBlueprints();
+                removeObsoleteBuilders();
             }
 
             // Process units

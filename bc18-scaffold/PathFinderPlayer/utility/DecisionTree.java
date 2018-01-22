@@ -17,15 +17,15 @@ public class DecisionTree
         {
             if(currentRound < 75)
             {
-                if(earthInitialTotalKarbonite > 1000)
+                if(initialTotalKarbonite > 1000)
                 {
                     return 20;
                 }
-                else if(earthInitialTotalKarbonite > 750)
+                else if(initialTotalKarbonite > 750)
                 {
                     return 15;
                 }
-                else if(earthInitialTotalKarbonite < 100)
+                else if(initialTotalKarbonite < 100)
                 {
                     return 5;
                 }
@@ -39,26 +39,26 @@ public class DecisionTree
         {
             if(currentRound < 85)
             {
-                if(earthInitialTotalKarbonite > 1000)
+                if(initialTotalKarbonite > 1000)
                 {
                     return 20;
                 }
-                else if(earthInitialTotalKarbonite > 750)
+                else if(initialTotalKarbonite > 750)
                 {
                     return 15;
                 }
-                else if(earthInitialTotalKarbonite < 100)
+                else if(initialTotalKarbonite < 100)
                 {
                     return 5;
                 }
             }
             else
             {
-                if(earthInitialTotalKarbonite < 500)
+                if(initialTotalKarbonite < 500)
                 {
                     return 12;
                 }
-                else if(earthInitialTotalKarbonite > 1000)
+                else if(initialTotalKarbonite > 1000)
                 {
                     return 20;
                 }
@@ -72,11 +72,11 @@ public class DecisionTree
         {
             if(currentRound < 75)
             {
-                if(earthInitialTotalKarbonite > 3000)
+                if(initialTotalKarbonite > 3000)
                 {
                     return 30;
                 }
-                else if(earthInitialTotalKarbonite > 1000)
+                else if(initialTotalKarbonite > 1000)
                 {
                     return 20;
                 }
@@ -87,11 +87,11 @@ public class DecisionTree
             }
             else
             {
-                if(earthInitialTotalKarbonite < 500)
+                if(initialTotalKarbonite < 500)
                 {
                     return 10;
                 }
-                else if(earthInitialTotalKarbonite > 1500)
+                else if(initialTotalKarbonite > 1500)
                 {
                     return 25;
                 }
@@ -121,7 +121,7 @@ public class DecisionTree
         }
         else
         {
-            return totalUnits > earthPassableTerrain * ((double)homeMapHeight + homeMapWidth) / (2 * (homeMapSize));
+            return totalUnits > passableTerrain * ((double)homeMapHeight + homeMapWidth) / (2 * (homeMapSize));
         }
     }
 

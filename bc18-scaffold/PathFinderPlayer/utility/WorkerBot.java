@@ -14,7 +14,7 @@ public class WorkerBot
     {
         // Remove obsolete mine locations
         LinkedList<MapLocation> obsoleteMines = new LinkedList<MapLocation>();
-        for (MapLocation karboniteMapLocation : earthKarboniteLocations)
+        for (MapLocation karboniteMapLocation : karboniteLocations)
         {
             if (gc.canSenseLocation(karboniteMapLocation) &&
                     gc.karboniteAt(karboniteMapLocation) == 0)
@@ -24,7 +24,7 @@ public class WorkerBot
         }
         for (MapLocation obsoleteMine : obsoleteMines)
         {
-            earthKarboniteLocations.remove(obsoleteMine);
+            karboniteLocations.remove(obsoleteMine);
         }
     }
 
@@ -58,6 +58,22 @@ public class WorkerBot
                 rocketProductionCooldown++;
             }
             unfinishedBlueprints.remove(obsoleteBlueprint);
+        }
+    }
+
+    public static void removeObsoleteBuilders()
+    {
+        LinkedList<Integer> obsoleteBuilders = new LinkedList<Integer>();
+        for (int builderID : builderSet)
+        {
+            if (!gc.canSenseUnit(builderID))
+            {
+                obsoleteBuilders.add(builderID);
+            }
+        }
+        for (int obsoleteBuilder : obsoleteBuilders)
+        {
+            builderSet.remove(obsoleteBuilder);
         }
     }
 
@@ -167,7 +183,7 @@ public class WorkerBot
             {
                 MapLocation nearestMineMapLocation = null;
                 long minDiagonalDistance = 1000L;
-                for (MapLocation karboniteMapLocation : earthKarboniteLocations)
+                for (MapLocation karboniteMapLocation : karboniteLocations)
                 {
                     long diagonalDistanceToMine = diagonalDistanceBetween(karboniteMapLocation, unitMapLocation);
                     if (diagonalDistanceToMine < minDiagonalDistance)
@@ -184,14 +200,13 @@ public class WorkerBot
                 {
                     if (!moveUnitTo(unit, nearestMineMapLocation))
                     {
-                        earthKarboniteLocations.remove(nearestMineMapLocation);
+                        karboniteLocations.remove(nearestMineMapLocation);
                     }
                 }
             }
         }
     }
 
-    // TODO - Add repair
     public static void processEarthWorker(Unit unit, Location unitLocation)
     {
         MapLocation unitMapLocation = unitLocation.mapLocation();
@@ -262,7 +277,6 @@ public class WorkerBot
                             if (newWorker.unitType() == UnitType.Worker)
                             {
                                 unitList.add(newWorker);
-                                // TODO - Remove builders when dead
                                 if (unitList.size() * builderFraction > builderSet.size())
                                 {
                                     builderSet.add(newWorker.id());

@@ -32,9 +32,9 @@ public class Globals
     public static long factoryLimit;
     public static MapLocation[][] mapLocationAt;
     public static VecUnit initialWorkers;
-    public static long earthPassableTerrain;
-    public static long earthInitialTotalKarbonite;
-    public static Set<MapLocation> earthKarboniteLocations;
+    public static long passableTerrain;
+    public static long initialTotalKarbonite;
+    public static Set<MapLocation> karboniteLocations;
     public static Set<Unit> unfinishedBlueprints;
     public static HashMap<UnitType, ArrayList<Unit>> typeSortedUnitLists;
     public static HashMap<Integer, VecUnit> enemyVecUnits;
@@ -148,9 +148,9 @@ public class Globals
 
         initialWorkers = homeMap.getInitial_units();
 
-        builderSet = new HashSet<Integer>();
         // TODO - Shift To Decision Tree
-        builderFraction = 0.2;
+        builderSet = new HashSet<Integer>();
+        builderFraction = 0.1;
 
         prepareRocketArmada = false;
         rocketProductionCooldown = 0;
@@ -162,13 +162,12 @@ public class Globals
 //            builderSet.add(worker.id());
 //        }
 
+        karboniteLocations = new HashSet<MapLocation>();
+        getInitialKarboniteLocations();
+
         if (homePlanet == Planet.Earth)
         {
-            earthKarboniteLocations = new HashSet<MapLocation>();
-            getInitialKarboniteLocations();
-
             unfinishedBlueprints = new HashSet<Unit>();
-
             potentialLandingSites = new PriorityQueue<QueuePair<Long, MapLocation>>();
             marsMapAppeals = new long[(int) awayMapWidth][(int) awayMapHeight];
             findMarsLocationAppeals();
@@ -177,7 +176,6 @@ public class Globals
         }
         else
         {
-            earthKarboniteLocations = null;
             unfinishedBlueprints = null;
             potentialLandingSites = null;
             marsMapAppeals = null;
@@ -250,14 +248,17 @@ public class Globals
                 // karbonite amount check
                 if (karboniteAtTempMapLocation > 0)
                 {
-                    earthKarboniteLocations.add(tempMapLocation);
-                    earthInitialTotalKarbonite += karboniteAtTempMapLocation;
+                    karboniteLocations.add(tempMapLocation);
+                    initialTotalKarbonite += karboniteAtTempMapLocation;
                 }
 
-                if (homeMap.isPassableTerrainAt(tempMapLocation) == 1) earthPassableTerrain++;
+                if (homeMap.isPassableTerrainAt(tempMapLocation) == 1)
+                {
+                    passableTerrain++;
+                }
             }
         }
-        factoryLimit = maxFactoryLimit(earthInitialTotalKarbonite);
+        factoryLimit = maxFactoryLimit(initialTotalKarbonite);
     }
 
 
