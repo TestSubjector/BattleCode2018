@@ -465,11 +465,7 @@ public class Combat
                             else if(unit.attackRange() < unit.location().mapLocation().distanceSquaredTo(bestTarget.location().mapLocation()))
                             {
                                 // TODO - Retreat function here
-                                if(moveUnitTo(unit, bestTarget.location().mapLocation()))
-                                {
-                                    return;
-                                }
-                                else
+                                if(moveUnitTo(unit, bestTarget.location().mapLocation()) && gc.canAttack(unit.id(), bestTarget.id()))
                                 {
                                     // Desperate attack
                                     gc.attack(unit.id(), bestTarget.id());
