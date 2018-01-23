@@ -28,31 +28,22 @@ public class Globals
     public static long awayMapHeight;
     public static long awayMapSize;
     public static long currentRound;
-    public static long currentKarbonite;
     public static MapLocation[][] mapLocationAt;
-    public static VecUnit initialWorkers;
+    public static ArrayList<Unit> initialWorkers;
     public static long passableTerrain;
     public static long initialTotalKarbonite;
     public static Set<MapLocation> karboniteLocations;
     public static long initialKarboniteLocationSize;
 
-    public static Set<Unit> unfinishedBlueprints;
+    public static short botIntelligenceLevel;
+
     public static HashMap<UnitType, ArrayList<Unit>> typeSortedUnitLists;
+    public static ArrayList<Unit> unitList;
     public static long totalCombatUnits;
     public static long totalUnits;
-    public static ArrayList<Unit> unitList;
-    public static HashSet<Integer> builderSet;
-
-    // Enemy locations
-    public static Stack<MapLocation> initialGuesses;
-    public static Set<MapLocation> enemyFactories;
-    public static HashMap<Integer, VecUnit> enemyVecUnits;
-    public static ArrayList<QueuePair<Double, MapLocation>> enemyHotspots;
-
-    public static short botIntelligenceLevel;
     public static double builderFraction;
-    public static boolean prepareRocketArmada;
-    public static int rocketProductionCooldown;
+    public static HashSet<Integer> builderSet;
+    public static Set<Unit> unfinishedBlueprints;
 
     // Rocket landing sites
     public static PriorityQueue<QueuePair<Long, MapLocation>> potentialLandingSites;
@@ -68,11 +59,16 @@ public class Globals
     // Pathfinding data structures
     public static HashMap<MapLocation, Boolean> visited;
     public static HashMap<MapLocation, LinkedList<GraphPair<MapLocation, Long>>> waypointAdjacencyList;
-    public static HashMap<MapLocation, HashMap<MapLocation, Boolean>> isReachable;
     public static HashMap<MapLocation, HashMap<MapLocation, MapLocation>> shortestPathTrees;
     public static HashMap<MapLocation, MapLocation> nearestUnobstructedWaypoints;
     public static HashMap<Pair<MapLocation, MapLocation>, MapLocation> nextBestWaypoint;
     public static HashMap<Integer, MapLocation> lastVisited;
+
+    // Enemy locations
+    public static Stack<MapLocation> initialEnemyWorkers;
+    public static Set<MapLocation> enemyFactories;
+    public static HashMap<Integer, VecUnit> enemyVecUnits;
+    public static ArrayList<QueuePair<Double, MapLocation>> enemyHotspots;
 
     // Combat variables
     public static HashMap<UnitType, Long> attackRange;
@@ -97,10 +93,10 @@ public class Globals
 
     // Research queue
     // 25+25+100+100+100+25+75+100+25+75+100+25+75+100+25+75
-    public final static UnitType[] RESEARCH_QUEUE_HARD = {UnitType.Worker, UnitType.Ranger, UnitType.Ranger, UnitType.Rocket,
+    public final static UnitType[] RESEARCH_QUEUE_HARD = {UnitType.Worker, UnitType.Knight, UnitType.Rocket, UnitType.Ranger,
             UnitType.Rocket, UnitType.Healer, UnitType.Healer, UnitType.Rocket, UnitType.Worker,
             UnitType.Worker, UnitType.Worker, UnitType.Mage, UnitType.Mage, UnitType.Mage,
-            UnitType.Knight, UnitType.Knight};
+            UnitType.Knight, UnitType.Ranger};
 
 
     // Initializer method
@@ -166,19 +162,30 @@ public class Globals
         karboniteLocations = new HashSet<MapLocation>();
         getInitialKarboniteLocations();
 
-        initialWorkers = homeMap.getInitial_units();
+        VecUnit allInitialWorkers = homeMap.getInitial_units();
+        initialWorkers = new ArrayList<Unit>();
+
+        enemyVecUnits = new HashMap<Integer, VecUnit>();
+        initialEnemyWorkers = new Stack<MapLocation>();
+        enemyFactories = new HashSet<MapLocation>();
+        enemyHotspots = new ArrayList<QueuePair<Double, MapLocation>>();
 
         builderSet = new HashSet<Integer>();
         // All initial workers are builders
-        for (int i = 0; i < initialWorkers.size(); i++)
+        for (int i = 0; i < allInitialWorkers.size(); i++)
         {
-            Unit worker = initialWorkers.get(i);
-            builderSet.add(worker.id());
+            Unit worker = allInitialWorkers.get(i);
+            if (worker.team() == ourTeam)
+            {
+                initialWorkers.add(worker);
+                builderSet.add(worker.id());
+            }
+            else
+            {
+                initialEnemyWorkers.push(worker.location().mapLocation());
+            }
         }
         setBuilderFraction();
-
-        prepareRocketArmada = false;
-        rocketProductionCooldown = 0;
 
         if (homePlanet == Planet.Earth)
         {
@@ -203,22 +210,8 @@ public class Globals
             typeSortedUnitLists.put(unitTypes[i], new ArrayList<Unit>());
         }
 
-        enemyVecUnits = new HashMap<Integer, VecUnit>();
-        initialGuesses = new Stack<MapLocation>();
-        enemyFactories = new HashSet<MapLocation>();
-        enemyHotspots = new ArrayList<QueuePair<Double, MapLocation>>();
-        for (int i = 0; i < initialWorkers.size(); i++)
-        {
-            Unit worker = initialWorkers.get(i);
-            MapLocation workerMapLocation = worker.location().mapLocation();
-            int x = (int) homeMapWidth - 1 - workerMapLocation.getX();
-            int y = (int) homeMapHeight - 1 - workerMapLocation.getY();
-            initialGuesses.push(new MapLocation(homePlanet, x, y));
-        }
-
         visited = new HashMap<MapLocation, Boolean>();
         waypointAdjacencyList = new HashMap<MapLocation, LinkedList<GraphPair<MapLocation, Long>>>();
-        isReachable = new HashMap<MapLocation, HashMap<MapLocation, Boolean>>();
         shortestPathTrees = new HashMap<MapLocation, HashMap<MapLocation, MapLocation>>();
         nearestUnobstructedWaypoints = new HashMap<MapLocation, MapLocation>();
         nextBestWaypoint = new HashMap<Pair<MapLocation, MapLocation>, MapLocation>();

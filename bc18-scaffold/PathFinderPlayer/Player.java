@@ -36,23 +36,22 @@ public class Player
         while (true)
         {
             currentRound = gc.round();
-            currentKarbonite = gc.karbonite();
             int timeLeftMs = gc.getTimeLeftMs();
-//            if (currentRound > 1)
-//            {
-//                time += "Time taken in round " + (currentRound - 1) + " : " + (lastTime - timeLeftMs) + "\n";
-//            }
+            if (currentRound > 1)
+            {
+                time += "Time taken in round " + (currentRound - 1) + " : " + (lastTime - timeLeftMs) + "\n";
+            }
             lastTime = timeLeftMs + 50;
             if (currentRound % 50 == 0)
             {
                 System.runFinalization();
                 System.gc();
             }
-//            if (currentRound % 250 == 2)
-//            {
-//                System.out.println(time);
-//                time = "";
-//            }
+            if (currentRound % 150 == 2)
+            {
+                System.out.println(time);
+                time = "";
+            }
 
             // Clear unit lists
             for (int i = 0; i < unitTypes.length; i++)
@@ -62,9 +61,6 @@ public class Player
 
             // Clear enemy hashmap
             enemyVecUnits.clear();
-
-            // Clear friendly units hashing
-            //friendlyVecUnits.clear();
 
             // Fetch current units and sort by type
             VecUnit units = gc.myUnits();

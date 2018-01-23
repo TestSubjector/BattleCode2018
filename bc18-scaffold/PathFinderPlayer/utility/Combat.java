@@ -550,7 +550,7 @@ public class Combat
                 }
                 if (nearestEnemyFactoryLocation == null || !moveUnitTo(unit, nearestEnemyFactoryLocation))
                 {
-                    moveUnitTo(unit, initialGuesses.peek());
+                    moveUnitTo(unit, initialEnemyWorkers.peek());
                 }
             }
         }
@@ -720,7 +720,7 @@ public class Combat
                 }
                 if (nearestEnemyFactoryLocation == null || !moveUnitTo(unit, nearestEnemyFactoryLocation))
                 {
-                    moveUnitTo(unit, initialGuesses.peek());
+                    moveUnitTo(unit, initialEnemyWorkers.peek());
                 }
             }
         }
