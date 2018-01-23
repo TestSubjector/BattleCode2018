@@ -1,5 +1,6 @@
 #!/bin/bash
 
+docker pull battlecode/battlecode-18
 docker pull battlecode/battlecode-2018
 
 docker stop $(docker ps -q)
