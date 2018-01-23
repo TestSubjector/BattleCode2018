@@ -52,6 +52,7 @@ public class RocketBot
     {
         if (unit.structureIsBuilt() == 1)
         {
+            rocketPositions.add(unitLocation.mapLocation());
             // Check all adjacent squares
             VecUnit nearbyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 2, ourTeam);
             for (int j = 0; j < nearbyUnits.size(); j++)
@@ -88,6 +89,7 @@ public class RocketBot
                 if (gc.canLaunchRocket(unit.id(), dest))
                 {
                     gc.launchRocket(unit.id(), dest);
+                    rocketPositions.remove(unitLocation.mapLocation());
                     updateSurroundingAppeal(destPair);
                 }
             }

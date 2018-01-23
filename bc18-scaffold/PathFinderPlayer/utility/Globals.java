@@ -67,6 +67,7 @@ public class Globals
     // Enemy locations
     public static Stack<MapLocation> initialEnemyWorkers;
     public static Set<MapLocation> enemyFactories;
+    public static Set<MapLocation> rocketPositions;
     public static HashMap<Integer, VecUnit> enemyVecUnits;
     public static ArrayList<QueuePair<Double, MapLocation>> enemyHotspots;
 
@@ -168,6 +169,7 @@ public class Globals
         enemyVecUnits = new HashMap<Integer, VecUnit>();
         initialEnemyWorkers = new Stack<MapLocation>();
         enemyFactories = new HashSet<MapLocation>();
+        rocketPositions = new HashSet<MapLocation>();
         enemyHotspots = new ArrayList<QueuePair<Double, MapLocation>>();
 
         builderSet = new HashSet<Integer>();

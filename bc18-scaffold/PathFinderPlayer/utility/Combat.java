@@ -546,6 +546,11 @@ public class Combat
                         nearestEnemyFactoryLocation = factoryMapLocation;
                         nearestEnemyFactoryDistance = enemyFactoryDistance;
                     }
+                    if(nearestEnemyMapLocation != null && unit.visionRange() >= unitMapLocation.distanceSquaredTo(nearestEnemyMapLocation))
+                    {
+                        nearestEnemyMapLocation = null;
+                        enemyFactories.remove(it);
+                    }
                 }
                 if (nearestEnemyFactoryLocation == null || !moveUnitTo(unit, nearestEnemyFactoryLocation))
                 {
@@ -640,6 +645,11 @@ public class Combat
                     {
                         nearestEnemyFactoryLocation = factoryMapLocation;
                         nearestEnemyFactoryDistance = enemyFactoryDistance;
+                    }
+                    if(nearestEnemyMapLocation != null && unit.visionRange() >= unitMapLocation.distanceSquaredTo(nearestEnemyMapLocation))
+                    {
+                        nearestEnemyMapLocation = null;
+                        enemyFactories.remove(it);
                     }
                 }
                 if (nearestEnemyFactoryLocation == null || !moveUnitTo(unit, nearestEnemyFactoryLocation))

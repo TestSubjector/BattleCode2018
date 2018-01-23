@@ -69,11 +69,11 @@ public class DecisionTree
             {
                 if (initialTotalKarbonite > 1000)
                 {
-                    workersRequired = 20;
+                    workersRequired = 10;
                 }
                 else if (initialTotalKarbonite > 750)
                 {
-                    workersRequired = 15;
+                    workersRequired = 8;
                 }
                 else if (initialTotalKarbonite < 100)
                 {
@@ -82,7 +82,7 @@ public class DecisionTree
             }
             else
             {
-                workersRequired = 10;
+                workersRequired = 5;
             }
         }
         else if (homeMapSize <= 900)
@@ -188,9 +188,9 @@ public class DecisionTree
         }
         if(homeMapSize <= 600)
         {
-            knightsRequired = (int) (1 + ((double) currentRound / 75) * (double) homeMapSize / 600);
+            knightsRequired = (int) (1 + ((double) currentRound / 75) * (double) homeMapSize / 900);
         }
-        if (currentRound <= 75)
+        else if (currentRound <= 75)
         {
             knightsRequired = (int) (4 + ((double) currentRound / 75) * (double) homeMapSize / 300);
         }

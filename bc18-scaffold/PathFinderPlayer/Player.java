@@ -61,6 +61,7 @@ public class Player
 
             // Clear enemy hashmap
             enemyVecUnits.clear();
+            rocketPositions.clear();
             enemyHotspots.clear();
 
             // Fetch current units and sort by type
@@ -198,9 +199,9 @@ public class Player
                     addUnitToBuildQueue(UnitType.Rocket);
                     // System.out.println("Roc");
                 }
-                System.out.println(currentRound);
-                System.out.println(buildQueue.peekFirst());
-                System.out.println(trainQueue.peekFirst());
+//                System.out.println(currentRound);
+//                System.out.println(buildQueue.peekFirst());
+//                System.out.println(trainQueue.peekFirst());
                 if (trainQueue.isEmpty())
                 {
                     addUnitToTrainQueue(UnitType.Ranger);
