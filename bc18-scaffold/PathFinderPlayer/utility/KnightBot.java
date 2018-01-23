@@ -19,7 +19,9 @@ public class KnightBot
 
     public static void processMarsKnight(Unit unit, Location unitLocation)
     {
-
+        MapLocation unitMapLocation = unitLocation.mapLocation();
+        // VecUnit adjacentUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 2, ourTeam);
+        doMicroKnight(unit, unitMapLocation, enemyVecUnits.get(unit.id()));
     }
 
     public static void processKnight(Unit unit, Location unitLocation)

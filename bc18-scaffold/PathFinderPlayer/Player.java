@@ -197,10 +197,6 @@ public class Player
                     addUnitToBuildQueue(UnitType.Rocket);
                     // System.out.println("Roc");
                 }
-                if (trainQueue.isEmpty())
-                {
-                    addUnitToTrainQueue(UnitType.Ranger);
-                }
                 System.out.println(currentRound);
                 System.out.println(buildQueue.peekFirst());
                 System.out.println(trainQueue.peekFirst());

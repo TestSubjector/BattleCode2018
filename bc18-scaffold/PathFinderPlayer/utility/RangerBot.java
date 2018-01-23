@@ -21,7 +21,10 @@ public class RangerBot
 
     public static void processMarsRanger(Unit unit, Location unitLocation)
     {
+        MapLocation unitMapLocation = unitLocation.mapLocation();
+        VecUnit nearbyEnemyUnits = enemyVecUnits.get(unit.id());
 
+        doMicroRangers(unit, unitMapLocation, nearbyEnemyUnits);
     }
 
     public static void processRanger(Unit unit, Location unitLocation)

@@ -549,7 +549,10 @@ public class Combat
                 }
                 if (nearestEnemyFactoryLocation == null || !moveUnitTo(unit, nearestEnemyFactoryLocation))
                 {
-                    moveUnitTo(unit, initialEnemyWorkers.peek());
+                    if (homePlanet == Planet.Earth)
+                    {
+                    	moveUnitTo(unit, initialEnemyWorkers.peek());
+                    }
                 }
             }
         }
@@ -636,7 +639,10 @@ public class Combat
                 }
                 if (nearestEnemyFactoryLocation == null || !moveUnitTo(unit, nearestEnemyFactoryLocation))
                 {
-                    moveUnitTo(unit, initialGuesses.peek());
+                    if (homePlanet == Planet.Earth)
+                    {
+                    	moveUnitTo(unit, initialEnemyWorkers.peek());
+                    }
                 }
             }
         }
@@ -760,7 +766,10 @@ public class Combat
                 }
                 if (nearestEnemyFactoryLocation == null || !moveUnitTo(unit, nearestEnemyFactoryLocation))
                 {
-                    moveUnitTo(unit, initialEnemyWorkers.peek());
+                    if (homePlanet == Planet.Earth)
+                    {
+                    	moveUnitTo(unit, initialEnemyWorkers.peek());
+                    }
                 }
             }
         }
