@@ -325,16 +325,27 @@ public class Globals
             for (int y = 0; y < awayMapHeight; y++)
             {
                 MapLocation mapLocation = new MapLocation(awayPlanet, x, y);
-                long appeal = WEIGHT_NONE;
-                for (int i = 0; i < directions.length - 1; i++)
-                {
-                    MapLocation adjacentMapLocation = mapLocation.add(directions[i]);
-                    if (awayMap.onMap(adjacentMapLocation) && awayMap.isPassableTerrainAt(adjacentMapLocation) == 1)
+                // add only passable squares to the queue
+                if (marsMapAppeals[x][y] != WEIGHT_IMPASSABLE) {
+                    long appeal = WEIGHT_NONE;
+                    // directions will not use CENTER because < length-1 and center is the last one
+                    for (int i = 0; i < directions.length - 1; i++)
                     {
-                        appeal += marsMapAppeals[adjacentMapLocation.getX()][adjacentMapLocation.getY()];
+                        MapLocation adjacentMapLocation = mapLocation.add(directions[i]);
+
+                        if (awayMap.onMap(adjacentMapLocation))
+                        {
+                            appeal += marsMapAppeals[adjacentMapLocation.getX()][adjacentMapLocation.getY()];
+                        }
+                        else
+                        {
+                            // map edges
+                            appeal += WEIGHT_IMPASSABLE;
+                        }
+
                     }
+                    potentialLandingSites.add(new QueuePair<>(appeal, mapLocation));
                 }
-                potentialLandingSites.add(new QueuePair<>(appeal, mapLocation));
             }
         }
     }

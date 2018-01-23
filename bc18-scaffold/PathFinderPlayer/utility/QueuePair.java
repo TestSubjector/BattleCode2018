@@ -1,5 +1,7 @@
 package utility;
 
+import bc.MapLocation;
+
 import java.util.Objects;
 
 public class QueuePair<A extends Comparable<A>, B> implements Comparable<QueuePair<A, B>>
@@ -49,5 +51,10 @@ public class QueuePair<A extends Comparable<A>, B> implements Comparable<QueuePa
     public int compareTo(QueuePair<A, B> o)
     {
         return o.first.compareTo(this.first);
+    }
+
+    @Override
+    public String toString() {
+        return "pr = " + first + ", mapLoc = (" + ((MapLocation)second).getX() + ", " + ((MapLocation)second).getY() + ")";
     }
 }
