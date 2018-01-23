@@ -669,7 +669,7 @@ public class Combat
                     else
                     {
                         Unit bestTarget = null;
-                        long minimumEnemyDistance = 99999L;
+                        long minimumEnemyDistance = 999999L;
                         long enemyUnitHealth = 251;
                         for (int j = 0; j < nearbyEnemyUnits.size(); j++)
                         {
@@ -737,7 +737,7 @@ public class Combat
         }
         else
         {
-            long nearestEnemyGridDistance = 100000L;
+            long nearestEnemyGridDistance = 1000000L;
             MapLocation nearestEnemyMapLocation = null;
             for(QueuePair<Double, MapLocation> enemyHotspot : enemyHotspots)
             {
@@ -751,20 +751,20 @@ public class Combat
             }
             if(nearestEnemyMapLocation == null || !moveUnitTo(unit, nearestEnemyMapLocation));
             {
-                long nearestEnemyFactoryDistance = 100000L;
-                MapLocation nearestEnemyFactoryLocation = null;
-                Iterator<MapLocation> it = enemyFactories.iterator();
-                while (it.hasNext())
-                {
-                    MapLocation factoryMapLocation = it.next();
-                    long enemyFactoryDistance = diagonalDistanceBetween(unitMapLocation, factoryMapLocation);
-                    if(enemyFactoryDistance < nearestEnemyFactoryDistance)
-                    {
-                        nearestEnemyFactoryLocation = factoryMapLocation;
-                        nearestEnemyFactoryDistance = enemyFactoryDistance;
-                    }
-                }
-                if (nearestEnemyFactoryLocation == null || !moveUnitTo(unit, nearestEnemyFactoryLocation))
+//                long nearestEnemyFactoryDistance = 100000L;
+//                MapLocation nearestEnemyFactoryLocation = null;
+//                Iterator<MapLocation> it = enemyFactories.iterator();
+//                while (it.hasNext())
+//                {
+//                    MapLocation factoryMapLocation = it.next();
+//                    long enemyFactoryDistance = diagonalDistanceBetween(unitMapLocation, factoryMapLocation);
+//                    if(enemyFactoryDistance < nearestEnemyFactoryDistance)
+//                    {
+//                        nearestEnemyFactoryLocation = factoryMapLocation;
+//                        nearestEnemyFactoryDistance = enemyFactoryDistance;
+//                    }
+//                }
+//                if (nearestEnemyFactoryLocation == null || !moveUnitTo(unit, nearestEnemyFactoryLocation))
                 {
                     if (homePlanet == Planet.Earth)
                     {

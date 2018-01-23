@@ -200,9 +200,16 @@ public class Player
                 System.out.println(currentRound);
                 System.out.println(buildQueue.peekFirst());
                 System.out.println(trainQueue.peekFirst());
+                if (trainQueue.isEmpty())
+                {
+                    addUnitToTrainQueue(UnitType.Ranger);
+                }
+                // System.out.println(currentRound);
+                // System.out.println(buildQueue.peekFirst());
+                // System.out.println(trainQueue.peekFirst());
 //                System.out.println(workersRequired);
 //                System.out.println(factoriesRequired);
-                System.out.println();
+                // System.out.println();
             }
 //            System.out.println(workersRequired);
 //            System.out.println(workersRequired);
