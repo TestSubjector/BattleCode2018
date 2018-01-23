@@ -208,24 +208,27 @@ public class DecisionTree
         }
         else
         {
-            rangersRequired = (int) (((double) currentRound * (600 + homeMapSize) * passableTerrain) / (12000 * homeMapSize));
+            rangersRequired = (int) Math.round(Math.min(1, Math.sqrt((double) currentRound / 450)) *
+                    ((homeMapSize - passableTerrain) / homeMapSize) *
+                    (23 + (homeMapSize - 400) * (23 / 2100)));
         }
     }
 
     public static void setMagesRequired()
     {
-        if (typeSortedUnitLists.get(UnitType.Factory).size() < 1 || shouldQueueWorker() || shouldQueueFactory())
-        {
-            return;
-        }
-        if (currentRound <= 75)
-        {
-            magesRequired = (int) (2 + ((double) currentRound / 75) * (double) homeMapSize / 300);
-        }
-        else
-        {
-            magesRequired = (int) (((double) currentRound * (600 + homeMapSize) * passableTerrain) / (12000 * homeMapSize));
-        }
+        magesRequired = 0;
+//        if (typeSortedUnitLists.get(UnitType.Factory).size() < 1 || shouldQueueWorker() || shouldQueueFactory())
+//        {
+//            return;
+//        }
+//        if (currentRound <= 75)
+//        {
+//            magesRequired = (int) (2 + ((double) currentRound / 75) * (double) homeMapSize / 300);
+//        }
+//        else
+//        {
+//            magesRequired = (int) (((double) currentRound * (600 + homeMapSize) * passableTerrain) / (12000 * homeMapSize));
+//        }
     }
 
     public static void setHealersRequired()
@@ -240,7 +243,7 @@ public class DecisionTree
         }
         else
         {
-            healersRequired = (int) (Math.round((rangersRequired + 2 * knightsRequired + 0.3 * magesRequired) / 7));
+            healersRequired = (int) (Math.round((rangersRequired + 1.8 * knightsRequired + 0.3 * magesRequired) / 5));
         }
     }
 
