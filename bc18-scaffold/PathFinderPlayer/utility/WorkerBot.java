@@ -203,7 +203,6 @@ public class WorkerBot
                     {
                         if (unitList.size() * builderFraction > builderSet.size())
                         {
-                            System.out.println("Became builder at " + unitMapLocation);
                             builderSet.add(unit.id());
                         }
                     }

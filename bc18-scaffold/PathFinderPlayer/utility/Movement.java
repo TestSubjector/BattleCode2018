@@ -56,7 +56,7 @@ public class Movement
     {
         if (waypointAdjacencyList.isEmpty())
         {
-            moveUnitTowards(unit ,targetMapLocation);
+            moveUnitTowards(unit, targetMapLocation);
             return true;
         }
         MapLocation unitMapLocation = getConstantMapLocationRepresentation(unit.location().mapLocation());
@@ -100,35 +100,43 @@ public class Movement
         return true;
     }
 
-    // Simple Retreat Function [Now Improved]
-
-    public static boolean moveUnitAwayFromMultipleUnits(VecUnit nearbyUnits, Unit unit)
+    // Retreat Function
+    public static boolean moveUnitAwayFromMultipleUnits(Unit unit, VecUnit nearbyUnits)
     {
-        long[] directionArray = {5,5,5,5,5,5,5,5,5};
-        long numberOfNearbyUnits = nearbyUnits.size();
-        long count = -20;
-        int index = -1;
-        MapLocation unitLocation = unit.location().mapLocation();
-        for(int i = 0; i < numberOfNearbyUnits; i++)
+        long n = nearbyUnits.size();
+        MapLocation unitMapLocation = unit.location().mapLocation();
+        long x = unitMapLocation.getX();
+        long y = unitMapLocation.getY();
+        double X = 0;
+        double Y = 0;
+        for (int i = 0; i < n; i++)
         {
-            // Gives Direction Between Units
-            Direction directionToOtherUnit = unitLocation.directionTo(nearbyUnits.get(i).location().mapLocation());
-            directionArray[directionToOtherUnit.ordinal()] -= 2;
-            directionArray[directionToOtherUnit.ordinal() + 1] -= 1;
-            directionArray[(directionToOtherUnit.ordinal() + 7) % 8] -= 1;
-        }
-        for(int j = 0; j < 8; j++)
-        {
-            if(count < directionArray[j])
+            Unit u = nearbyUnits.get(i);
+            double d1 = x - u.location().mapLocation().getX();
+            double d2 = y - u.location().mapLocation().getY();
+            if (u.team() == theirTeam)
             {
-                count = directionArray[j];
-                index = j;
+                if (d1 != 0)
+                {
+                    X += 3 / d1;
+                }
+                if (d2 != 0)
+                {
+                    Y += 3 / d2;
+                }
+            }
+            else
+            {
+                if (d1 != 0)
+                {
+                    X += 1 / d1;
+                }
+                if (d2 != 0)
+                {
+                    Y += 1 / d2;
+                }
             }
         }
-        if(index != -1)
-        {
-            return moveUnitInDirection(unit, Direction.values()[index]);
-        }
-        return false;
+        return moveUnitInDirection(unit, unitMapLocation.directionTo(new MapLocation(homePlanet, (int) Math.round(x + X), (int) Math.round(y + Y))));
     }
 }

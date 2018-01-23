@@ -14,6 +14,8 @@ import static utility.FactoryBot.*;
 import static utility.RocketBot.*;
 import static utility.DecisionTree.*;
 
+import static utility.Movement.*;
+
 
 public class Player
 {
@@ -89,7 +91,7 @@ public class Player
                     xAverage /= visibleEnemyUnits.size();
                     yAverage /= visibleEnemyUnits.size();
                     MapLocation enemyLocationAverage = mapLocationAt[(int) xAverage][(int) yAverage];
-                    if (homeMap.isPassableTerrainAt(enemyLocationAverage) == 1)
+                    if (visibleEnemyUnits.size() != 0 && homeMap.isPassableTerrainAt(enemyLocationAverage) == 1)
                     {
                         enemyLocationAverages.add(mapLocationAt[(int) xAverage][(int) yAverage]);
                     }
@@ -175,9 +177,9 @@ public class Player
                 addUnitToQueue(UnitType.Healer);
                 // System.out.println("Heal");
             }
-            System.out.println(currentRound);
-            System.out.println(buildQueue.peekFirst());
-            System.out.println();
+//            System.out.println(currentRound);
+//            System.out.println(buildQueue.peekFirst());
+//            System.out.println();
 //            System.out.println(workersRequired);
 //            System.out.println(unitsInQueue[UnitType.Worker.ordinal()]);
 //            System.out.println(factoriesRequired);

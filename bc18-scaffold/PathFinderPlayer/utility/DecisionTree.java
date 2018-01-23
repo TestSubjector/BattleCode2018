@@ -151,7 +151,6 @@ public class DecisionTree
                 }
             }
         }
-        workersRequired = 10;
     }
 
     public static void setFactoriesRequired()
