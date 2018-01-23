@@ -562,8 +562,8 @@ public class Combat
                         }
                     }
                     else {
-                        if (friendlyUnitHealth < heathMinimumOutOfRange && friendlyUnitHealth < nearbyFriendlyUnit.maxHealth()) {
-                            heathMinimumOutOfRange = friendlyUnitHealth;
+                        if (friendlyUnitHealth < nearbyFriendlyUnit.maxHealth())
+                        {
                             indexOfUnitWithLowestHealthOutOfRange = j;
                         }
                     }
