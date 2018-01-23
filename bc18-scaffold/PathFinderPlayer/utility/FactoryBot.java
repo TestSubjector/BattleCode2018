@@ -38,15 +38,15 @@ public class FactoryBot
         tryToUnloadRobot(unit);
         if (unit.isFactoryProducing() == 0)
         {
-            if (!buildQueue.isEmpty() &&
-                    (buildQueue.peekFirst() != UnitType.Worker || typeSortedUnitLists.get(UnitType.Worker).size() < 4) &&
-                    buildQueue.peekFirst() != UnitType.Factory &&
-                    buildQueue.peekFirst() != UnitType.Rocket)
+            if (!trainQueue.isEmpty() &&
+                    (trainQueue.peekFirst() != UnitType.Worker || typeSortedUnitLists.get(UnitType.Worker).size() < 4) &&
+                    trainQueue.peekFirst() != UnitType.Factory &&
+                    trainQueue.peekFirst() != UnitType.Rocket)
             {
-                if (gc.canProduceRobot(unit.id(), buildQueue.peekFirst()))
+                if (gc.canProduceRobot(unit.id(), trainQueue.peekFirst()))
                 {
-                    gc.produceRobot(unit.id(), buildQueue.peekFirst());
-                    removeUnitFromQueue();
+                    gc.produceRobot(unit.id(), trainQueue.peekFirst());
+                    removeUnitFromTrainQueue();
                 }
             }
         }

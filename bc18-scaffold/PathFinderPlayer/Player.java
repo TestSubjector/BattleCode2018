@@ -134,52 +134,60 @@ public class Player
                 }
             }
 
+            // TODO - add stagnation
             // Process build queue
             setWorkersRequired();
             while (shouldQueueWorker())
             {
-                addUnitToQueue(UnitType.Worker);
+                addUnitToTrainQueue(UnitType.Worker);
                 // System.out.println("Worker");
             }
-            setFactoriesRequired();
-            while (shouldQueueFactory())
+            if (homePlanet == Planet.Earth)
             {
-                addUnitToQueue(UnitType.Factory);
-                // System.out.println("Fac");
+                setKnightsRequired();
+                while (shouldQueueKnight())
+                {
+                    addUnitToTrainQueue(UnitType.Knight);
+                    // System.out.println("Kni");
+                }
+                setRangersRequired();
+                while (shouldQueueRanger())
+                {
+                    addUnitToTrainQueue(UnitType.Ranger);
+                    // System.out.println("Ran");
+                }
+                setMagesRequired();
+                while (shouldQueueMage())
+                {
+                    addUnitToTrainQueue(UnitType.Mage);
+                    // System.out.println("Mag");
+                }
+                setHealersRequired();
+                while (shouldQueueHealer())
+                {
+                    addUnitToTrainQueue(UnitType.Healer);
+                    // System.out.println("Heal");
+                }
+                setFactoriesRequired();
+                while (shouldQueueFactory())
+                {
+                    addUnitToBuildQueue(UnitType.Factory);
+                    // System.out.println("Fac");
+                }
+                setRocketsRequired();
+                while (shouldQueueRocket())
+                {
+                    addUnitToBuildQueue(UnitType.Rocket);
+                    // System.out.println("Roc");
+                }
+                System.out.println(currentRound);
+                System.out.println(buildQueue.peekFirst());
+                System.out.println(trainQueue.peekFirst());
+//                System.out.println(workersRequired);
+//                System.out.println(factoriesRequired);
+                System.out.println();
             }
-            setRocketsRequired();
-            while (shouldQueueRocket())
-            {
-                addUnitToQueue(UnitType.Rocket);
-                // System.out.println("Roc");
-            }
-            setKnightsRequired();
-            while (shouldQueueKnight())
-            {
-                addUnitToQueue(UnitType.Knight);
-                // System.out.println("Kni");
-            }
-            setRangersRequired();
-            while (shouldQueueRanger())
-            {
-                addUnitToQueue(UnitType.Ranger);
-                // System.out.println("Ran");
-            }
-            setMagesRequired();
-            while (shouldQueueMage())
-            {
-                addUnitToQueue(UnitType.Mage);
-                // System.out.println("Mag");
-            }
-            setHealersRequired();
-            while (shouldQueueHealer())
-            {
-                addUnitToQueue(UnitType.Healer);
-                // System.out.println("Heal");
-            }
-//            System.out.println(currentRound);
-//            System.out.println(buildQueue.peekFirst());
-//            System.out.println();
+//            System.out.println(workersRequired);
 //            System.out.println(workersRequired);
 //            System.out.println(unitsInQueue[UnitType.Worker.ordinal()]);
 //            System.out.println(factoriesRequired);

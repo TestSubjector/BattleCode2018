@@ -81,7 +81,9 @@ public class Globals
 
     // Build requirement variables
     public static Deque<UnitType> buildQueue;
-    public static int[] unitsInQueue;
+    public static int[] unitsInBuildQueue;
+    public static Deque<UnitType> trainQueue;
+    public static int[] unitsInTrainQueue;
     public static int workersRequired;
     public static int knightsRequired;
     public static int rangersRequired;
@@ -239,13 +241,15 @@ public class Globals
         visionRange.put(UnitType.Healer, 50L);
 
         buildQueue = new ArrayDeque<UnitType>();
-        unitsInQueue = new int[unitTypes.length];
+        unitsInBuildQueue = new int[unitTypes.length];
+        trainQueue = new ArrayDeque<UnitType>();
+        unitsInTrainQueue = new int[unitTypes.length];
         setWorkersRequired();
+        setFactoriesRequired();
         setKnightsRequired();
         setRangersRequired();
         setMagesRequired();
         setHealersRequired();
-        setFactoriesRequired();
         setRocketsRequired();
     }
 
@@ -327,21 +331,39 @@ public class Globals
         }
     }
 
-    public static void addUnitToQueue(UnitType type)
+    public static void addUnitToBuildQueue(UnitType type)
     {
         buildQueue.addLast(type);
-        unitsInQueue[type.ordinal()]++;
+        unitsInBuildQueue[type.ordinal()]++;
     }
 
-    public static void addUnitToQueueUrgently(UnitType type)
+    public static void addUnitToBuildQueueUrgently(UnitType type)
     {
         buildQueue.addFirst(type);
-        unitsInQueue[type.ordinal()]++;
+        unitsInBuildQueue[type.ordinal()]++;
     }
 
-    public static void removeUnitFromQueue()
+    public static void removeUnitFromBuildQueue()
     {
         UnitType type = buildQueue.removeFirst();
-        unitsInQueue[type.ordinal()]--;
+        unitsInBuildQueue[type.ordinal()]--;
+    }
+
+    public static void addUnitToTrainQueue(UnitType type)
+    {
+        trainQueue.addLast(type);
+        unitsInTrainQueue[type.ordinal()]++;
+    }
+
+    public static void addUnitToTrainQueueUrgently(UnitType type)
+    {
+        trainQueue.addFirst(type);
+        unitsInTrainQueue[type.ordinal()]++;
+    }
+
+    public static void removeUnitFromTrainQueue()
+    {
+        UnitType type = trainQueue.removeFirst();
+        unitsInTrainQueue[type.ordinal()]--;
     }
 }
