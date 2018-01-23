@@ -532,7 +532,7 @@ public class Combat
                     nearestEnemyGridDistance = enemyGridDistance;
                 }
             }
-            if(nearestEnemyMapLocation == null || !moveUnitTo(unit, nearestEnemyMapLocation));
+            if(nearestEnemyMapLocation == null || !moveUnitTo(unit, nearestEnemyMapLocation))
             {
                 long nearestEnemyFactoryDistance = 100000L;
                 MapLocation nearestEnemyFactoryLocation = null;
@@ -553,12 +553,16 @@ public class Combat
                     {
                     	moveUnitTo(unit, initialEnemyWorkers.peek());
                     }
+                    else
+                    {
+                        moveUnitInRandomDirection(unit);
+                    }
                 }
             }
         }
     }
 
-    public static  void doMicroHealers(Unit unit, MapLocation unitMapLocation, VecUnit nearbyEnemyUnits, VecUnit nearbyFriendlyUnits)
+    public static void doMicroHealers(Unit unit, MapLocation unitMapLocation, VecUnit nearbyEnemyUnits, VecUnit nearbyFriendlyUnits)
     {
         boolean hasHealedThisTurn = false;
         boolean hasMovedThisTurn = false;
@@ -577,7 +581,8 @@ public class Combat
                 {
                     long friendlyUnitHealth = nearbyFriendlyUnit.health();
                     if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id())) {
-                        if (friendlyUnitHealth < heathMinimumInRange && friendlyUnitHealth < nearbyFriendlyUnit.maxHealth()) {
+                        if (friendlyUnitHealth < heathMinimumInRange && friendlyUnitHealth < nearbyFriendlyUnit.maxHealth())
+                        {
                             heathMinimumInRange = friendlyUnitHealth;
                             indexOfUnitWithLowestHealthInRange = j;
                         }
@@ -622,7 +627,7 @@ public class Combat
                     nearestEnemyGridDistance = enemyGridDistance;
                 }
             }
-            if(nearestEnemyMapLocation == null || !moveUnitTo(unit, nearestEnemyMapLocation));
+            if(nearestEnemyMapLocation == null || !moveUnitTo(unit, nearestEnemyMapLocation))
             {
                 long nearestEnemyFactoryDistance = 100000L;
                 MapLocation nearestEnemyFactoryLocation = null;
@@ -643,6 +648,10 @@ public class Combat
                     {
                     	moveUnitTo(unit, initialEnemyWorkers.peek());
                     }
+                    else
+                    {
+                        moveUnitInRandomDirection(unit);
+                    }
                 }
             }
         }
@@ -662,11 +671,11 @@ public class Combat
             {
                 if(nearbyEnemyUnits.size() != 0)
                 {
-                    if (botIntelligenceLevel == 0)
-                    {
-                        simpleCombat(unit, nearbyEnemyUnits);
-                    }
-                    else
+//                    if (botIntelligenceLevel == 0)
+//                    {
+//                        simpleCombat(unit, nearbyEnemyUnits);
+//                    }
+//                    else
                     {
                         Unit bestTarget = null;
                         long minimumEnemyDistance = 999999L;
@@ -748,29 +757,41 @@ public class Combat
                     nearestEnemyMapLocation = mapLocation;
                     nearestEnemyGridDistance = enemyGridDistance;
                 }
+                if(nearestEnemyMapLocation != null && unit.visionRange() >= unitMapLocation.distanceSquaredTo(nearestEnemyMapLocation))
+                {
+                    nearestEnemyMapLocation = null;
+                }
             }
-            if(nearestEnemyMapLocation == null || !moveUnitTo(unit, nearestEnemyMapLocation));
+            if(nearestEnemyMapLocation == null || !moveUnitTo(unit, nearestEnemyMapLocation))
             {
-//                long nearestEnemyFactoryDistance = 100000L;
-//                MapLocation nearestEnemyFactoryLocation = null;
-//                Iterator<MapLocation> it = enemyFactories.iterator();
-//                while (it.hasNext())
-//                {
-//                    MapLocation factoryMapLocation = it.next();
-//                    long enemyFactoryDistance = diagonalDistanceBetween(unitMapLocation, factoryMapLocation);
-//                    if(enemyFactoryDistance < nearestEnemyFactoryDistance)
-//                    {
-//                        nearestEnemyFactoryLocation = factoryMapLocation;
-//                        nearestEnemyFactoryDistance = enemyFactoryDistance;
-//                    }
-//                }
-//                if (nearestEnemyFactoryLocation == null || !moveUnitTo(unit, nearestEnemyFactoryLocation))
+                long nearestEnemyFactoryDistance = 100000L;
+                MapLocation nearestEnemyFactoryLocation = null;
+                Iterator<MapLocation> it = enemyFactories.iterator();
+                while (it.hasNext())
+                {
+                    MapLocation factoryMapLocation = it.next();
+                    long enemyFactoryDistance = diagonalDistanceBetween(unitMapLocation, factoryMapLocation);
+                    if(enemyFactoryDistance < nearestEnemyFactoryDistance)
+                    {
+                        nearestEnemyFactoryLocation = factoryMapLocation;
+                        nearestEnemyFactoryDistance = enemyFactoryDistance;
+                    }
+                }
+                if (nearestEnemyFactoryLocation == null || !moveUnitTo(unit, nearestEnemyFactoryLocation))
                 {
                     if (homePlanet == Planet.Earth)
                     {
                     	moveUnitTo(unit, initialEnemyWorkers.peek());
                     }
+                    else
+                    {
+                        moveUnitInRandomDirection(unit);
+                    }
                 }
+            }
+            else
+            {
+                moveUnitInRandomDirection(unit);
             }
         }
     }

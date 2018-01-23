@@ -186,6 +186,10 @@ public class DecisionTree
         {
             return;
         }
+        if(homeMapSize <= 600)
+        {
+            knightsRequired = (int) (1 + ((double) currentRound / 75) * (double) homeMapSize / 600);
+        }
         if (currentRound <= 75)
         {
             knightsRequired = (int) (4 + ((double) currentRound / 75) * (double) homeMapSize / 300);
@@ -202,7 +206,11 @@ public class DecisionTree
         {
             return;
         }
-        if (currentRound <= 75)
+        if(homeMapSize <= 600)
+        {
+            rangersRequired = (int) (6 + ((double) currentRound / 75) * (double) homeMapSize / 100);
+        }
+        else if (currentRound <= 75)
         {
             rangersRequired = (int) (2 + ((double) currentRound / 75) * (double) homeMapSize / 300);
         }
