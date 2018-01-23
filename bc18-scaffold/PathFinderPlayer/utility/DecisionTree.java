@@ -19,6 +19,10 @@ public class DecisionTree
         {
             builderFraction = 1;
         }
+        else if(currentRound > 650)
+        {
+            builderFraction = 1;
+        }
         else
         {
             builderFraction = Math.min(1, (((double) currentRound + 200) / 400) * (1 - 0.5 * ((double) karboniteLocations.size() / initialKarboniteLocationSize)));
@@ -57,7 +61,7 @@ public class DecisionTree
 
     public static boolean shouldQueueRocket()
     {
-        return gc.researchInfo().getLevel(UnitType.Rocket) > 0 && typeSortedUnitLists.get(UnitType.Rocket).size() + unitsInBuildQueue[UnitType.Rocket.ordinal()] < rocketsRequired;
+        return currentRound > 100 && typeSortedUnitLists.get(UnitType.Rocket).size() + unitsInBuildQueue[UnitType.Rocket.ordinal()] < rocketsRequired;
     }
 
     // This is not very good, needs an overhaul
@@ -172,11 +176,11 @@ public class DecisionTree
     {
         if (enemyVecUnits.size() == 0 && currentRound > 500)
         {
-            rocketsRequired = 10;
+            rocketsRequired = 25;
         }
         else
         {
-            rocketsRequired = (int) ((Math.min(1, (double) (currentRound * currentRound) / (400 * 400))) * Math.round((double) totalUnits / 5));
+            rocketsRequired = (int) ((Math.min(2, (double) (currentRound * currentRound) / (300 * 300))) * Math.round((double) totalUnits / 5));
         }
     }
 

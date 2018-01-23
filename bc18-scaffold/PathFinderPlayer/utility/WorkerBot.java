@@ -16,15 +16,25 @@ public class WorkerBot
         if (unit.workerHasActed() == 0)
         {
             UnitType blueprintType = null;
-            if (buildQueue.peekFirst() == UnitType.Factory && gc.karbonite() >= 100)
+            if(currentRound > 650)
             {
-                // Blueprint a factory
-                blueprintType = UnitType.Factory;
+                if (gc.karbonite() >= 75)
+                {
+                    blueprintType = UnitType.Rocket;
+                }
             }
-            if (buildQueue.peekFirst() == UnitType.Rocket && gc.karbonite() >= 75)
+            else
             {
-                // Blueprint a rocket
-                blueprintType = UnitType.Rocket;
+                if (buildQueue.peekFirst() == UnitType.Factory && gc.karbonite() >= 100)
+                {
+                    // Blueprint a factory
+                    blueprintType = UnitType.Factory;
+                }
+                if (buildQueue.peekFirst() == UnitType.Rocket && gc.karbonite() >= 75)
+                {
+                    // Blueprint a rocket
+                    blueprintType = UnitType.Rocket;
+                }
             }
 
             if (blueprintType != null)
@@ -64,7 +74,10 @@ public class WorkerBot
                         Unit newBlueprint = gc.senseUnitAtLocation(blueprintMapLocation);
                         unfinishedBlueprints.add(newBlueprint);
                         typeSortedUnitLists.get(blueprintType).add(newBlueprint);
-                        removeUnitFromBuildQueue();
+                        if(currentRound <650)
+                        {
+                            removeUnitFromBuildQueue();
+                        }
                     }
                 }
             }
@@ -153,6 +166,10 @@ public class WorkerBot
                         karboniteLocations.remove(nearestMineMapLocation);
                     }
                 }
+            }
+            if(currentRound > 250  && unit.location().isOnPlanet(Planet.Earth))
+            {
+                builderSet.add(unit.id());
             }
         }
     }
@@ -268,7 +285,7 @@ public class WorkerBot
         }
 
         // Replicate worker if enough Karbonite or Earth flooded
-        if (currentRound > 749 || gc.karbonite() > 100)
+        if (currentRound > 749 || gc.karbonite() > 200)
         {
             for (int j = 0; j < directions.length - 1; j++)
             {

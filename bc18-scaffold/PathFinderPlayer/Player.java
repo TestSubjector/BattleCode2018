@@ -49,7 +49,7 @@ public class Player
             }
             if (currentRound % 150 == 2)
             {
-                System.out.println(time);
+                //System.out.println(time);
                 time = "";
             }
 
@@ -163,49 +163,67 @@ public class Player
             }
             if (homePlanet == Planet.Earth)
             {
-                setKnightsRequired();
-                while (shouldQueueKnight())
+                if(currentRound == 650)
                 {
-                    addUnitToTrainQueue(UnitType.Knight);
-                    // System.out.println("Kni");
+                    trainQueue.clear();
+                    buildQueue.clear();
                 }
-                setRangersRequired();
-                while (shouldQueueRanger())
+                else if(currentRound > 650)
                 {
-                    addUnitToTrainQueue(UnitType.Ranger);
-                    // System.out.println("Ran");
+                    setRocketsRequired();
+                    while (shouldQueueRocket())
+                    {
+                        addUnitToBuildQueue(UnitType.Rocket);
+                        // System.out.println("Roc");
+                    }
                 }
-                setMagesRequired();
-                while (shouldQueueMage())
+                else
                 {
-                    addUnitToTrainQueue(UnitType.Mage);
-                    // System.out.println("Mag");
-                }
-                setHealersRequired();
-                while (shouldQueueHealer())
-                {
-                    addUnitToTrainQueue(UnitType.Healer);
-                    // System.out.println("Heal");
-                }
-                setFactoriesRequired();
-                while (shouldQueueFactory())
-                {
-                    addUnitToBuildQueue(UnitType.Factory);
-                    // System.out.println("Fac");
-                }
-                setRocketsRequired();
-                while (shouldQueueRocket())
-                {
-                    addUnitToBuildQueue(UnitType.Rocket);
-                    // System.out.println("Roc");
-                }
+                    setKnightsRequired();
+                    while (shouldQueueKnight())
+                    {
+                        addUnitToTrainQueue(UnitType.Knight);
+                        // System.out.println("Kni");
+                    }
+                    setRangersRequired();
+                    while (shouldQueueRanger())
+                    {
+                        addUnitToTrainQueue(UnitType.Ranger);
+                        // System.out.println("Ran");
+                    }
+                    setMagesRequired();
+                    while (shouldQueueMage())
+                    {
+                        addUnitToTrainQueue(UnitType.Mage);
+                        // System.out.println("Mag");
+                    }
+                    setHealersRequired();
+                    while (shouldQueueHealer())
+                    {
+                        addUnitToTrainQueue(UnitType.Healer);
+                        // System.out.println("Heal");
+                    }
+                    setFactoriesRequired();
+                    while (shouldQueueFactory())
+                    {
+                        addUnitToBuildQueue(UnitType.Factory);
+                        // System.out.println("Fac");
+                    }
+                    setRocketsRequired();
+                    while (shouldQueueRocket())
+                    {
+                        addUnitToBuildQueue(UnitType.Rocket);
+                        // System.out.println("Roc");
+                    }
 //                System.out.println(currentRound);
 //                System.out.println(buildQueue.peekFirst());
 //                System.out.println(trainQueue.peekFirst());
-                if (trainQueue.isEmpty())
-                {
-                    addUnitToTrainQueue(UnitType.Ranger);
+                    if (trainQueue.isEmpty())
+                    {
+                        addUnitToTrainQueue(UnitType.Ranger);
+                    }
                 }
+
                 // System.out.println(currentRound);
                 // System.out.println(buildQueue.peekFirst());
                 // System.out.println(trainQueue.peekFirst());

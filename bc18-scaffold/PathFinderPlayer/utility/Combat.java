@@ -358,6 +358,7 @@ public class Combat
     public static void doMicroRangers(Unit unit, MapLocation unitMapLocation, VecUnit nearbyEnemyUnits)
     {
         long sizeOfEnemy = nearbyEnemyUnits.size();
+        boolean hasMovedThisTurn = false;
         if(sizeOfEnemy != 0)
         {
             // Must be refined later with movement code above this
@@ -514,7 +515,15 @@ public class Combat
                 }
                 if(bestTarget != null && unit.attackRange() < unitMapLocation.distanceSquaredTo(bestTarget.location().mapLocation()))
                 {
-                    moveUnitTo(unit, bestTarget.location().mapLocation());
+                    if(moveUnitTo(unit, bestTarget.location().mapLocation()))
+                    {
+                        hasMovedThisTurn = true;
+                    }
+                }
+                else if(!hasMovedThisTurn)
+                {
+                    moveUnitInRandomDirection(unit);
+                    hasMovedThisTurn = true;
                 }
             }
         }
@@ -556,13 +565,21 @@ public class Combat
                 {
                     if (homePlanet == Planet.Earth)
                     {
-                    	moveUnitTo(unit, initialEnemyWorkers.peek());
+                        if(moveUnitTo(unit, initialEnemyWorkers.peek()))
+                        {
+                            hasMovedThisTurn = true;
+                        }
                     }
                     else
                     {
                         moveUnitInRandomDirection(unit);
                     }
                 }
+            }
+            else if(!hasMovedThisTurn)
+            {
+                moveUnitInRandomDirection(unit);
+                hasMovedThisTurn = true;
             }
         }
     }
@@ -664,12 +681,17 @@ public class Combat
                     }
                 }
             }
+            else
+            {
+                moveUnitInRandomDirection(unit);
+            }
         }
     }
 
     public static void doMicroKnight(Unit unit, MapLocation unitMapLocation, VecUnit nearbyEnemyUnits)
     {
         long sizeOfEnemy = nearbyEnemyUnits.size();
+        boolean hasMovedThisTurn = false;
         if(sizeOfEnemy != 0)
         {
             if (unitFrozenByHeat(unit))
@@ -750,7 +772,15 @@ public class Combat
                 }
                 if(bestTarget != null)
                 {
-                    moveUnitTo(unit, bestTarget.location().mapLocation());
+                    if(moveUnitTo(unit, bestTarget.location().mapLocation()))
+                    {
+                        hasMovedThisTurn = true;
+                    }
+                }
+                else if(!hasMovedThisTurn)
+                {
+                    moveUnitInRandomDirection(unit);
+                    hasMovedThisTurn = true;
                 }
             }
         }
@@ -791,7 +821,10 @@ public class Combat
                 {
                     if (homePlanet == Planet.Earth)
                     {
-                    	moveUnitTo(unit, initialEnemyWorkers.peek());
+                    	if(moveUnitTo(unit, initialEnemyWorkers.peek()))
+                        {
+                            hasMovedThisTurn = true;
+                        }
                     }
                     else
                     {
@@ -799,9 +832,10 @@ public class Combat
                     }
                 }
             }
-            else
+            else if(!hasMovedThisTurn)
             {
                 moveUnitInRandomDirection(unit);
+                hasMovedThisTurn = true;
             }
         }
     }
