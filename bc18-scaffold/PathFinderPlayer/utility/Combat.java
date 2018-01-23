@@ -600,57 +600,80 @@ public class Combat
 
     public static void doMicroKnight(Unit unit, MapLocation unitMapLocation, VecUnit nearbyEnemyUnits)
     {
-        if (unitFrozenByHeat(unit))
+        long sizeOfEnemy = nearbyEnemyUnits.size();
+        if(sizeOfEnemy != 0)
         {
-            return;
-        }
-
-        if(gc.isAttackReady(unit.id()))
-        {
-
-            if(nearbyEnemyUnits.size() != 0)
+            if (unitFrozenByHeat(unit))
             {
-                if (botIntelligenceLevel == 0) {
-                    simpleCombat(unit, nearbyEnemyUnits);
-                }
-                else
+                return;
+            }
+
+            if(gc.isAttackReady(unit.id()))
+            {
+
+                if(nearbyEnemyUnits.size() != 0)
                 {
-                    Unit bestTarget = null;
-                    long minimumEnemyDistance = 99999L;
-                    long enemyUnitHealth = 251;
-                    for (int j = 0; j < nearbyEnemyUnits.size(); j++)
-                    {
-                        Unit enemyUnit = nearbyEnemyUnits.get(j);
-                        long enemyDistance = unitMapLocation.distanceSquaredTo(enemyUnit.location().mapLocation());
-                        if (enemyDistance < minimumEnemyDistance)
-                        {
-                            enemyUnitHealth = enemyUnit.health();
-                            minimumEnemyDistance = enemyDistance;
-                            bestTarget = enemyUnit;
-                        }
-                        else if (enemyDistance == minimumEnemyDistance && enemyUnit.health() < enemyUnitHealth)
-                        {
-                            enemyUnitHealth = enemyUnit.health();
-                            minimumEnemyDistance = enemyDistance;
-                            bestTarget = enemyUnit;
-                        }
+                    if (botIntelligenceLevel == 0) {
+                        simpleCombat(unit, nearbyEnemyUnits);
                     }
-                    if (bestTarget != null) {
-                        if (gc.canAttack(unit.id(), bestTarget.id()))
+                    else
+                    {
+                        Unit bestTarget = null;
+                        long minimumEnemyDistance = 99999L;
+                        long enemyUnitHealth = 251;
+                        for (int j = 0; j < nearbyEnemyUnits.size(); j++)
                         {
-                            gc.attack(unit.id(), bestTarget.id());
-                            return;
+                            Unit enemyUnit = nearbyEnemyUnits.get(j);
+                            long enemyDistance = unitMapLocation.distanceSquaredTo(enemyUnit.location().mapLocation());
+                            if (enemyDistance < minimumEnemyDistance)
+                            {
+                                enemyUnitHealth = enemyUnit.health();
+                                minimumEnemyDistance = enemyDistance;
+                                bestTarget = enemyUnit;
+                            }
+                            else if (enemyDistance == minimumEnemyDistance && enemyUnit.health() < enemyUnitHealth)
+                            {
+                                enemyUnitHealth = enemyUnit.health();
+                                minimumEnemyDistance = enemyDistance;
+                                bestTarget = enemyUnit;
+                            }
                         }
-                        else if (unit.attackRange() < minimumEnemyDistance)
-                        {
-                            // TODO - Retreat function here
-                            if (moveUnitTo(unit, bestTarget.location().mapLocation()) && gc.canAttack(unit.id(), bestTarget.id()))
+                        if (bestTarget != null) {
+                            if (gc.canAttack(unit.id(), bestTarget.id()))
                             {
                                 gc.attack(unit.id(), bestTarget.id());
                                 return;
                             }
+                            else if (unit.attackRange() < minimumEnemyDistance)
+                            {
+                                // TODO - Retreat function here
+                                if (moveUnitTo(unit, bestTarget.location().mapLocation()) && gc.canAttack(unit.id(), bestTarget.id()))
+                                {
+                                    gc.attack(unit.id(), bestTarget.id());
+                                    return;
+                                }
+                            }
                         }
                     }
+                }
+            }
+            if(unit.movementHeat() < 10)
+            {
+                int numberOfAllyUnitsFightingEnemy = 0;
+                int index = 0;
+                for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+                {
+                    Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
+                    numberOfAllyUnitsFightingEnemy = numberOfOtherAlliesInAttackRange(nearbyEnemyUnit, nearbyEnemyUnit.location().mapLocation());
+                    if(numberOfAllyUnitsFightingEnemy > 0)
+                    {
+                        index = j;
+                        break;
+                    }
+                }
+                if(tryMoveToEngageEnemyAtLocationWithMaxEnemyExposure(unit, nearbyEnemyUnits.get(index).location().mapLocation(), numberOfAllyUnitsFightingEnemy, nearbyEnemyUnits))
+                {
+                    return;
                 }
             }
         }
