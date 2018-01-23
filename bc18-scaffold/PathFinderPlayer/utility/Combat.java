@@ -348,7 +348,7 @@ public class Combat
     }
 
     // Multiple Units
-    public static void doMicro(Unit unit, MapLocation unitMapLocation, VecUnit nearbyEnemyUnits)
+    public static void doMicroRangers(Unit unit, MapLocation unitMapLocation, VecUnit nearbyEnemyUnits)
     {
         long sizeOfEnemy = nearbyEnemyUnits.size();
         if(sizeOfEnemy != 0)
@@ -538,8 +538,54 @@ public class Combat
         }
     }
 
+    public static  void doMicroHealers(Unit unit, MapLocation unitMaplocation, VecUnit nearbyEnemyUnits, VecUnit nearbyFriendlyUnits) {
+        boolean hasHealedThisTurn = false;
+        boolean hasMovedThisTurn = false;
+        int indexOfUnitWithLowestHealthInRange = -1;
+        int indexOfUnitWithLowestHealthOutOfRange = -1;
 
+        if (unitFrozenByHeat(unit)) {
+            return;
+        }
 
+        if (gc.isHealReady(unit.id())) {
+            long heathMinimumInRange = 250;
+            long heathMinimumOutOfRange = 250;
+            for (int j = 0; j < nearbyFriendlyUnits.size(); j++) {
+                Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
+                {
+                    long friendlyUnitHealth = nearbyFriendlyUnit.health();
+                    if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id())) {
+                        if (friendlyUnitHealth < heathMinimumInRange && friendlyUnitHealth < nearbyFriendlyUnit.maxHealth()) {
+                            heathMinimumInRange = friendlyUnitHealth;
+                            indexOfUnitWithLowestHealthInRange = j;
+                        }
+                    }
+                    else {
+                        if (friendlyUnitHealth < heathMinimumOutOfRange && friendlyUnitHealth < nearbyFriendlyUnit.maxHealth()) {
+                            heathMinimumOutOfRange = friendlyUnitHealth;
+                            indexOfUnitWithLowestHealthOutOfRange = j;
+                        }
+                    }
+                }
+            }
+            if (indexOfUnitWithLowestHealthInRange != -1) {
+                gc.heal(unit.id(), nearbyFriendlyUnits.get(indexOfUnitWithLowestHealthInRange).id());
+                hasHealedThisTurn = true;
+            }
+            else if (indexOfUnitWithLowestHealthOutOfRange != -1) {
+                moveUnitTo(unit, nearbyFriendlyUnits.get(indexOfUnitWithLowestHealthOutOfRange).location().mapLocation());
+                hasMovedThisTurn = true;
+            }
+        }
+
+        // TODO - Implement Running/Retreating Function
+        if (nearbyEnemyUnits.size() != 0 && !hasMovedThisTurn)
+        {
+            moveUnitAwayFromMultipleUnits(unit, nearbyEnemyUnits);
+        }
+    }
+    
     // Decides the incentive to attack an unit by Rangers
     // TODO - Make it live rather fixed static values, if computation allows
     /*
