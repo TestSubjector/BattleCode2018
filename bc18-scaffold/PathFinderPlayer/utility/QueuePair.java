@@ -54,7 +54,8 @@ public class QueuePair<A extends Comparable<A>, B> implements Comparable<QueuePa
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return "pr = " + first + ", mapLoc = (" + ((MapLocation)second).getX() + ", " + ((MapLocation)second).getY() + ")";
     }
 }
