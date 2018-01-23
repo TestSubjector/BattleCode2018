@@ -243,12 +243,19 @@ public class Combat
             int enemyExposure = numberEnemyUnitsAimingAtLocation(moveLocation, nearbyEnemyUnits);
             if (enemyExposure <= maxEnemyExposure)
             {
-                if(gc.isMoveReady(unit.id()))
+                if(unit.location().mapLocation().distanceSquaredTo(moveLocation) < 10 && unit.unitType() == UnitType.Ranger)
                 {
-                    if(gc.canMove(unit.id(), directionToMoveTo))
+                    continue;
+                }
+                else
+                {
+                    if(gc.isMoveReady(unit.id()))
                     {
-                        gc.moveRobot(unit.id(), directionToMoveTo);
-                        return true;
+                        if(gc.canMove(unit.id(), directionToMoveTo))
+                        {
+                            gc.moveRobot(unit.id(), directionToMoveTo);
+                            return true;
+                        }
                     }
                 }
             }
@@ -366,10 +373,11 @@ public class Combat
                     simpleCombat(unit, nearbyEnemyUnits);
                 }
                 else
-                {   // TODO - Make condition so that if Knight then attack rather than retreat
+                {
                     if(sizeOfEnemy == 1)
                     {
                         Unit loneEnemyUnit = nearbyEnemyUnits.get(0);
+                        MapLocation loneEnemyUnitMapLocation = loneEnemyUnit.location().mapLocation();
                         if(gc.canAttack(unit.id(), loneEnemyUnit.id()))
                         {
                             if(canWin1v1(unit, loneEnemyUnit))
@@ -381,7 +389,7 @@ public class Combat
                             else
                             {
                                 boolean haveSupport = false;
-                                if(numberOfOtherAlliesInAttackRange(unit, loneEnemyUnit.location().mapLocation()) > 0)
+                                if(numberOfOtherAlliesInAttackRange(unit,loneEnemyUnitMapLocation ) > 0)
                                 {
                                     haveSupport = true;
                                 }
@@ -407,7 +415,7 @@ public class Combat
                                         if(unit.movementHeat() <10)
                                         {
                                             // TODO - Retreat function here
-                                            if(moveUnitAwayFrom(unit, loneEnemyUnit.location().mapLocation()))
+                                            if(moveUnitAwayFrom(unit, loneEnemyUnitMapLocation))
                                             {
                                                 return;
                                             }
@@ -430,7 +438,14 @@ public class Combat
                         else
                         {
                             // Can't attack enemy unit
-                            moveUnitTo(unit, loneEnemyUnit.location().mapLocation());
+                            if(unit.location().mapLocation().distanceSquaredTo(loneEnemyUnitMapLocation) > 10)
+                            {
+                                moveUnitTo(unit, loneEnemyUnit.location().mapLocation());
+                            }
+                            else
+                            {
+                                moveUnitAwayFrom(unit, loneEnemyUnitMapLocation);
+                            }
                         }
                     }
                     // Multiple Units
@@ -494,10 +509,6 @@ public class Combat
                 if(tryMoveToEngageEnemyAtLocationWithMaxEnemyExposure(unit, nearbyEnemyUnits.get(index).location().mapLocation(), numberOfAllyUnitsFightingEnemy, nearbyEnemyUnits))
                 {
                     return;
-                }
-                else
-                {
-
                 }
             }
         }
