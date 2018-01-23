@@ -477,7 +477,7 @@ public class Combat
                                 gc.attack(unit.id(), bestTarget.id());
                                 return;
                             }
-                            else if(unit.attackRange() < unit.location().mapLocation().distanceSquaredTo(bestTarget.location().mapLocation()))
+                            else if(unit.attackRange() < unitMapLocation.distanceSquaredTo(bestTarget.location().mapLocation()))
                             {
                                 // TODO - Retreat function here
                                 if(moveUnitTo(unit, bestTarget.location().mapLocation()) && gc.canAttack(unit.id(), bestTarget.id()))
@@ -549,7 +549,8 @@ public class Combat
         }
     }
 
-    public static  void doMicroHealers(Unit unit, MapLocation unitMaplocation, VecUnit nearbyEnemyUnits, VecUnit nearbyFriendlyUnits) {
+    public static  void doMicroHealers(Unit unit, MapLocation unitMaplocation, VecUnit nearbyEnemyUnits, VecUnit nearbyFriendlyUnits)
+    {
         boolean hasHealedThisTurn = false;
         boolean hasMovedThisTurn = false;
         int indexOfUnitWithLowestHealthInRange = -1;
@@ -594,6 +595,90 @@ public class Combat
         if (nearbyEnemyUnits.size() != 0 && !hasMovedThisTurn)
         {
             moveUnitAwayFromMultipleUnits(unit, nearbyEnemyUnits);
+        }
+    }
+
+    public static void doMicroKnight(Unit unit, MapLocation unitMapLocation, VecUnit nearbyEnemyUnits)
+    {
+        if (unitFrozenByHeat(unit))
+        {
+            return;
+        }
+
+        if(nearbyEnemyUnits.size() != 0)
+        {
+            Unit bestTarget = null;
+            long minimumEnemyDistance = 9999L;
+            long enemyUnitHealth = 251;
+            for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+            {
+                Unit enemyUnit = nearbyEnemyUnits.get(j);
+                long enemyDistance = unitMapLocation.distanceSquaredTo(enemyUnit.location().mapLocation());
+                if(enemyDistance < minimumEnemyDistance)
+                {
+                        enemyUnitHealth = enemyUnit.health();
+                        minimumEnemyDistance = enemyDistance;
+                        bestTarget = enemyUnit;
+                }
+                else if(enemyDistance == minimumEnemyDistance && enemyUnit.health() < enemyUnitHealth)
+                {
+                    enemyUnitHealth = enemyUnit.health();
+                    minimumEnemyDistance = enemyDistance;
+                    bestTarget = enemyUnit;
+                }
+            }
+            if(bestTarget != null)
+            {
+                if (gc.canAttack(unit.id(), bestTarget.id()))
+                {
+                    gc.attack(unit.id(), bestTarget.id());
+                    return;
+                }
+                else if (unit.attackRange() < minimumEnemyDistance)
+                {
+                    // TODO - Retreat function here
+                    if (moveUnitTo(unit, bestTarget.location().mapLocation()) && gc.canAttack(unit.id(), bestTarget.id()))
+                    {
+                        gc.attack(unit.id(), bestTarget.id());
+                        return;
+                    }
+                }
+            }
+        }
+        else
+        {
+            long nearestEnemyGridDistance = 100000L;
+            MapLocation nearestEnemyMapLocation = null;
+            for(QueuePair<Double, MapLocation> enemyHotspot : enemyHotspots)
+            {
+                MapLocation mapLocation = enemyHotspot.getSecond();
+                long enemyGridDistance = diagonalDistanceBetween(unitMapLocation, mapLocation);
+                if(enemyGridDistance < nearestEnemyGridDistance)
+                {
+                    nearestEnemyMapLocation = mapLocation;
+                    nearestEnemyGridDistance = enemyGridDistance;
+                }
+            }
+            if(nearestEnemyMapLocation == null || !moveUnitTo(unit, nearestEnemyMapLocation));
+            {
+                long nearestEnemyFactoryDistance = 100000L;
+                MapLocation nearestEnemyFactoryLocation = null;
+                Iterator<MapLocation> it = enemyFactories.iterator();
+                while (it.hasNext())
+                {
+                    MapLocation factoryMapLocation = it.next();
+                    long enemyFactoryDistance = diagonalDistanceBetween(unitMapLocation, factoryMapLocation);
+                    if(enemyFactoryDistance < nearestEnemyFactoryDistance)
+                    {
+                        nearestEnemyFactoryLocation = factoryMapLocation;
+                        nearestEnemyFactoryDistance = enemyFactoryDistance;
+                    }
+                }
+                if (nearestEnemyFactoryLocation == null || !moveUnitTo(unit, nearestEnemyFactoryLocation))
+                {
+                    moveUnitTo(unit, initialGuesses.peek());
+                }
+            }
         }
     }
     

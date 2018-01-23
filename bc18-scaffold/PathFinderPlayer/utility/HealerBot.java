@@ -18,7 +18,6 @@ public class HealerBot
         doMicroHealers(unit, unitLocation.mapLocation(), nearbyEnemyUnits, nearbyFriendlyUnits);
     }
 
-
     public static void processMarsHealer(Unit unit, Location unitLocation)
     {
 
