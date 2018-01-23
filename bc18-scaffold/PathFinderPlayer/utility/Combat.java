@@ -321,7 +321,7 @@ public class Combat
         }
         else if (enemyUnit == UnitType.Factory)
         {
-            enemyUnitPriority = 0.8;
+            enemyUnitPriority = 3.0;
         }
         else if (enemyUnit == UnitType.Rocket)
         {
@@ -507,21 +507,37 @@ public class Combat
         }
         else
         {
-            // QueuePair<Long, Unit> enemyData;
             long nearestEnemyGridDistance = 100000L;
             MapLocation nearestEnemyMapLocation = null;
-            for(MapLocation enemyLocationAverageLocation : enemyLocationAverages)
+            for(QueuePair<Double, MapLocation> enemyHotspot : enemyHotspots)
             {
-                long enemyGridDistance = diagonalDistanceBetween(unitMapLocation, enemyLocationAverageLocation);
+                MapLocation mapLocation = enemyHotspot.getSecond();
+                long enemyGridDistance = diagonalDistanceBetween(unitMapLocation, mapLocation);
                 if(enemyGridDistance < nearestEnemyGridDistance)
                 {
-                    nearestEnemyMapLocation = enemyLocationAverageLocation;
+                    nearestEnemyMapLocation = mapLocation;
                     nearestEnemyGridDistance = enemyGridDistance;
                 }
             }
             if(nearestEnemyMapLocation == null || !moveUnitTo(unit, nearestEnemyMapLocation));
             {
-                // moveUnitInRandomDirection(unit);
+                long nearestEnemyFactoryDistance = 100000L;
+                MapLocation nearestEnemyFactoryLocation = null;
+                Iterator<MapLocation> it = enemyFactories.iterator();
+                while (it.hasNext())
+                {
+                    MapLocation factoryMapLocation = it.next();
+                    long enemyFactoryDistance = diagonalDistanceBetween(unitMapLocation, factoryMapLocation);
+                    if(enemyFactoryDistance < nearestEnemyFactoryDistance)
+                    {
+                        nearestEnemyFactoryLocation = factoryMapLocation;
+                        nearestEnemyFactoryDistance = enemyFactoryDistance;
+                    }
+                }
+                if (nearestEnemyFactoryLocation == null || !moveUnitTo(unit, nearestEnemyFactoryLocation))
+                {
+                    moveUnitTo(unit, initialGuesses.peek());
+                }
             }
         }
     }

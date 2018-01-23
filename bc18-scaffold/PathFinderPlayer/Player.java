@@ -5,6 +5,7 @@ import bc.*;
 import utility.QueuePair;
 
 import static utility.Globals.*;
+import static utility.Combat.*;
 import static utility.WorkerBot.*;
 import static utility.KnightBot.*;
 import static utility.RangerBot.*;
@@ -13,8 +14,6 @@ import static utility.HealerBot.*;
 import static utility.FactoryBot.*;
 import static utility.RocketBot.*;
 import static utility.DecisionTree.*;
-
-import static utility.Movement.*;
 
 
 public class Player
@@ -80,27 +79,48 @@ public class Player
                     enemyVecUnits.put(unit.id(), visibleEnemyUnits);
                     // VecUnit visibleFriendlyUnits = gc.senseNearbyUnitsByTeam(unitLocation.mapLocation(), unit.visionRange(), ourTeam);
                     // friendlyVecUnits.put(unit.id(), visibleFriendlyUnits);
-                    double xAverage = 0;
-                    double yAverage = 0;
-                    for (int j = 0; j < visibleEnemyUnits.size(); j++)
+
+                    if (visibleEnemyUnits.size() != 0)
                     {
-                        Unit visibleEnemyUnit = visibleEnemyUnits.get(j);
-                        xAverage += visibleEnemyUnit.location().mapLocation().getX();
-                        yAverage += visibleEnemyUnit.location().mapLocation().getY();
-                    }
-                    xAverage /= visibleEnemyUnits.size();
-                    yAverage /= visibleEnemyUnits.size();
-                    MapLocation enemyLocationAverage = mapLocationAt[(int) xAverage][(int) yAverage];
-                    if (visibleEnemyUnits.size() != 0 && homeMap.isPassableTerrainAt(enemyLocationAverage) == 1)
-                    {
-                        enemyLocationAverages.add(mapLocationAt[(int) xAverage][(int) yAverage]);
-                    }
-                    else if (visibleEnemyUnits.size() != 0)
-                    {
-                        enemyLocationAverages.add(mapLocationAt[visibleEnemyUnits.get(0).location().mapLocation().getX()][visibleEnemyUnits.get(0).location().mapLocation().getY()]);
+                        double xAverage = 0;
+                        double yAverage = 0;
+                        double priority = 0;
+                        for (int j = 0; j < visibleEnemyUnits.size(); j++)
+                        {
+                            Unit visibleEnemyUnit = visibleEnemyUnits.get(j);
+                            MapLocation mapLocation = getConstantMapLocationRepresentation(visibleEnemyUnit.location().mapLocation());
+                            if (visibleEnemyUnit.unitType() == UnitType.Factory &&
+                                    !enemyFactories.contains(mapLocation))
+                            {
+                                enemyFactories.add(mapLocation);
+                            }
+                            xAverage += visibleEnemyUnit.location().mapLocation().getX();
+                            yAverage += visibleEnemyUnit.location().mapLocation().getY();
+                            priority += getEnemyUnitPriority(visibleEnemyUnit.unitType());
+                        }
+                        QueuePair<Double, MapLocation> minQP = null;
+                        double minPriority = 10000;
+                        for (QueuePair<Double, MapLocation> enemyHotspot : enemyHotspots)
+                        {
+                            if (minPriority > enemyHotspot.getFirst())
+                            {
+                                minPriority = enemyHotspot.getFirst();
+                                minQP = enemyHotspot;
+                            }
+                        }
+                        if (minPriority < priority)
+                        {
+                            xAverage /= visibleEnemyUnits.size();
+                            yAverage /= visibleEnemyUnits.size();
+                            MapLocation enemyLocationAverage = mapLocationAt[(int) xAverage][(int) yAverage];
+                            QueuePair<Double, MapLocation> qp = new QueuePair<Double, MapLocation>(priority, enemyLocationAverage);
+                            enemyHotspots.remove(minQP);
+                            enemyHotspots.add(qp);
+                        }
                     }
                 }
             }
+            Collections.sort(enemyHotspots);
 
             // Maintain a total of the number of combat/non-combat units we have
             totalCombatUnits = typeSortedUnitLists.get(UnitType.Ranger).size() + typeSortedUnitLists.get(UnitType.Healer).size() +
@@ -180,12 +200,12 @@ public class Player
                     addUnitToBuildQueue(UnitType.Rocket);
                     // System.out.println("Roc");
                 }
-                System.out.println(currentRound);
-                System.out.println(buildQueue.peekFirst());
-                System.out.println(trainQueue.peekFirst());
+//                System.out.println(currentRound);
+//                System.out.println(buildQueue.peekFirst());
+//                System.out.println(trainQueue.peekFirst());
 //                System.out.println(workersRequired);
 //                System.out.println(factoriesRequired);
-                System.out.println();
+//                System.out.println();
             }
 //            System.out.println(workersRequired);
 //            System.out.println(workersRequired);

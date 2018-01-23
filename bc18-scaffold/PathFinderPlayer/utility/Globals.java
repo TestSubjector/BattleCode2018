@@ -38,13 +38,16 @@ public class Globals
 
     public static Set<Unit> unfinishedBlueprints;
     public static HashMap<UnitType, ArrayList<Unit>> typeSortedUnitLists;
-    public static HashMap<Integer, VecUnit> enemyVecUnits;
-    public static HashMap<Integer, VecUnit> friendlyVecUnits;
-    public static HashSet<MapLocation> enemyLocationAverages;
     public static long totalCombatUnits;
     public static long totalUnits;
     public static ArrayList<Unit> unitList;
     public static HashSet<Integer> builderSet;
+
+    // Enemy locations
+    public static Stack<MapLocation> initialGuesses;
+    public static Set<MapLocation> enemyFactories;
+    public static HashMap<Integer, VecUnit> enemyVecUnits;
+    public static ArrayList<QueuePair<Double, MapLocation>> enemyHotspots;
 
     public static short botIntelligenceLevel;
     public static double builderFraction;
@@ -200,9 +203,18 @@ public class Globals
             typeSortedUnitLists.put(unitTypes[i], new ArrayList<Unit>());
         }
 
-        friendlyVecUnits = new HashMap<Integer, VecUnit>();
         enemyVecUnits = new HashMap<Integer, VecUnit>();
-        enemyLocationAverages = new HashSet<MapLocation>();
+        initialGuesses = new Stack<MapLocation>();
+        enemyFactories = new HashSet<MapLocation>();
+        enemyHotspots = new ArrayList<QueuePair<Double, MapLocation>>();
+        for (int i = 0; i < initialWorkers.size(); i++)
+        {
+            Unit worker = initialWorkers.get(i);
+            MapLocation workerMapLocation = worker.location().mapLocation();
+            int x = (int) homeMapWidth - workerMapLocation.getX();
+            int y = (int) homeMapHeight - workerMapLocation.getY();
+            initialGuesses.push(new MapLocation(homePlanet, x, y));
+        }
 
         visited = new HashMap<MapLocation, Boolean>();
         waypointAdjacencyList = new HashMap<MapLocation, LinkedList<GraphPair<MapLocation, Long>>>();
