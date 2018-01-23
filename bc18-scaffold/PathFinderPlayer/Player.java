@@ -134,6 +134,7 @@ public class Player
                 removeObsoleteMines();
                 removeObsoleteBlueprints();
                 removeObsoleteBuilders();
+                removeObsoleteEnemyFactories();
             }
 
             if (currentRound % 10 == 0)

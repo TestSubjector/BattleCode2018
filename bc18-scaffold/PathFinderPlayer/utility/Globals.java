@@ -378,4 +378,95 @@ public class Globals
         UnitType type = trainQueue.removeFirst();
         unitsInTrainQueue[type.ordinal()]--;
     }
+
+    public static void removeObsoleteMines()
+    {
+        // Remove obsolete mine locations
+        LinkedList<MapLocation> obsoleteMines = new LinkedList<MapLocation>();
+        for (MapLocation karboniteMapLocation : karboniteLocations)
+        {
+            if (gc.canSenseLocation(karboniteMapLocation) &&
+                    gc.karboniteAt(karboniteMapLocation) == 0)
+            {
+                obsoleteMines.add(karboniteMapLocation);
+            }
+        }
+        for (MapLocation obsoleteMine : obsoleteMines)
+        {
+            karboniteLocations.remove(obsoleteMine);
+        }
+    }
+
+    public static void removeObsoleteBlueprints()
+    {
+        LinkedList<Unit> obsoleteBlueprints = new LinkedList<Unit>();
+        for (Unit blueprint : unfinishedBlueprints)
+        {
+            MapLocation blueprintMapLocation = blueprint.location().mapLocation();
+            if (gc.canSenseLocation(blueprintMapLocation))
+            {
+                if (!gc.hasUnitAtLocation(blueprintMapLocation))
+                {
+                    obsoleteBlueprints.add(blueprint);
+                }
+                else
+                {
+                    Unit unitAtLocation = gc.senseUnitAtLocation(blueprintMapLocation);
+                    if ((unitAtLocation.unitType() == UnitType.Factory || unitAtLocation.unitType() == UnitType.Rocket) &&
+                            (unitAtLocation.structureIsBuilt() == 1))
+                    {
+                        obsoleteBlueprints.add(blueprint);
+                    }
+                }
+            }
+        }
+        for (Unit obsoleteBlueprint : obsoleteBlueprints)
+        {
+            unfinishedBlueprints.remove(obsoleteBlueprint);
+        }
+    }
+
+    public static void removeObsoleteBuilders()
+    {
+        LinkedList<Integer> obsoleteBuilders = new LinkedList<Integer>();
+        for (int builderID : builderSet)
+        {
+            if (!gc.canSenseUnit(builderID))
+            {
+                obsoleteBuilders.add(builderID);
+            }
+        }
+        for (int obsoleteBuilder : obsoleteBuilders)
+        {
+            builderSet.remove(obsoleteBuilder);
+        }
+    }
+
+    public static void removeObsoleteEnemyFactories()
+    {
+        // Remove obsolete enemy factory locations
+        LinkedList<MapLocation> obsoleteEnemyFactories = new LinkedList<MapLocation>();
+        for (MapLocation enemyFactory : enemyFactories)
+        {
+            if (gc.canSenseLocation(enemyFactory))
+            {
+                if (gc.hasUnitAtLocation(enemyFactory))
+                {
+                    Unit unit = gc.senseUnitAtLocation(enemyFactory);
+                    if (unit.unitType() != UnitType.Factory || unit.team() != theirTeam)
+                    {
+                        obsoleteEnemyFactories.add(enemyFactory);
+                    }
+                }
+                else
+                {
+                    obsoleteEnemyFactories.add(enemyFactory);
+                }
+            }
+        }
+        for (MapLocation obsoleteEnemyFactory : obsoleteEnemyFactories)
+        {
+            enemyFactories.remove(obsoleteEnemyFactory);
+        }
+    }
 }

@@ -52,54 +52,6 @@ public class Movement
         return moveUnitInDirection(unit, directions[random.nextInt(8)]);
     }
 
-    public static boolean moveUnitTo(Unit unit, MapLocation targetMapLocation)
-    {
-        if (waypointAdjacencyList.isEmpty())
-        {
-            moveUnitTowards(unit, targetMapLocation);
-            return true;
-        }
-        MapLocation unitMapLocation = getConstantMapLocationRepresentation(unit.location().mapLocation());
-        targetMapLocation = getConstantMapLocationRepresentation(targetMapLocation);
-        MapLocation startWaypoint = findNearestUnobstructedWaypoint(unitMapLocation);
-        MapLocation endWaypoint = findNearestUnobstructedWaypoint(targetMapLocation);
-        if (startWaypoint == null)
-        {
-            // We are stuck
-            return false;
-        }
-        if (endWaypoint == null)
-        {
-            // Target unreachable
-            return false;
-        }
-        if (startWaypoint.equals(endWaypoint))
-        {
-            moveUnitTowards(unit, targetMapLocation);
-            return true;
-        }
-        constructPathBetween(startWaypoint, endWaypoint);
-        MapLocation nextWaypoint = nextBestWaypoint.get(new Pair<MapLocation, MapLocation>(startWaypoint, endWaypoint));
-        if (nextWaypoint == null)
-        {
-            // Target unreachable
-            return false;
-        }
-        if (unitMapLocation.distanceSquaredTo(startWaypoint) <= 2)
-        {
-            lastVisited.put(unit.id(), startWaypoint);
-        }
-        if (lastVisited.containsKey(unit.id()) && lastVisited.get(unit.id()).equals(startWaypoint))
-        {
-            moveUnitTowards(unit, nextWaypoint);
-        }
-        else
-        {
-            moveUnitTowards(unit, startWaypoint);
-        }
-        return true;
-    }
-
     // Retreat Function
     public static boolean moveUnitAwayFromMultipleUnits(Unit unit, VecUnit nearbyUnits)
     {
@@ -139,5 +91,58 @@ public class Movement
             }
         }
         return moveUnitInDirection(unit, unitMapLocation.directionTo(new MapLocation(homePlanet, (int) Math.round(x + X), (int) Math.round(y + Y))));
+    }
+
+    public static boolean moveUnitTo(Unit unit, MapLocation targetMapLocation)
+    {
+        if (waypointAdjacencyList.isEmpty())
+        {
+            moveUnitTowards(unit, targetMapLocation);
+            return true;
+        }
+        MapLocation unitMapLocation = getConstantMapLocationRepresentation(unit.location().mapLocation());
+        targetMapLocation = getConstantMapLocationRepresentation(targetMapLocation);
+        if (isUninterruptedPathBetween(unitMapLocation, targetMapLocation))
+        {
+            moveUnitTowards(unit, targetMapLocation);
+            return true;
+        }
+        MapLocation startWaypoint = findNearestUnobstructedWaypoint(unitMapLocation);
+        MapLocation endWaypoint = findNearestUnobstructedWaypoint(targetMapLocation);
+        if (startWaypoint == null)
+        {
+            // We are stuck
+            return false;
+        }
+        if (endWaypoint == null)
+        {
+            // Target unreachable
+            return false;
+        }
+        if (startWaypoint.equals(endWaypoint))
+        {
+            moveUnitTowards(unit, targetMapLocation);
+            return true;
+        }
+        constructPathBetween(startWaypoint, endWaypoint);
+        MapLocation nextWaypoint = nextBestWaypoint.get(new Pair<MapLocation, MapLocation>(startWaypoint, endWaypoint));
+        if (nextWaypoint == null)
+        {
+            // Target unreachable
+            return false;
+        }
+        if (unitMapLocation.distanceSquaredTo(startWaypoint) <= 2)
+        {
+            lastVisited.put(unit.id(), startWaypoint);
+        }
+        if (lastVisited.containsKey(unit.id()) && lastVisited.get(unit.id()).equals(startWaypoint))
+        {
+            moveUnitTowards(unit, nextWaypoint);
+        }
+        else
+        {
+            moveUnitTowards(unit, startWaypoint);
+        }
+        return true;
     }
 }

@@ -10,69 +10,6 @@ import static utility.Movement.*;
 
 public class WorkerBot
 {
-    public static void removeObsoleteMines()
-    {
-        // Remove obsolete mine locations
-        LinkedList<MapLocation> obsoleteMines = new LinkedList<MapLocation>();
-        for (MapLocation karboniteMapLocation : karboniteLocations)
-        {
-            if (gc.canSenseLocation(karboniteMapLocation) &&
-                    gc.karboniteAt(karboniteMapLocation) == 0)
-            {
-                obsoleteMines.add(karboniteMapLocation);
-            }
-        }
-        for (MapLocation obsoleteMine : obsoleteMines)
-        {
-            karboniteLocations.remove(obsoleteMine);
-        }
-    }
-
-    public static void removeObsoleteBlueprints()
-    {
-        LinkedList<Unit> obsoleteBlueprints = new LinkedList<Unit>();
-        for (Unit blueprint : unfinishedBlueprints)
-        {
-            MapLocation blueprintMapLocation = blueprint.location().mapLocation();
-            if (gc.canSenseLocation(blueprintMapLocation))
-            {
-                if (!gc.hasUnitAtLocation(blueprintMapLocation))
-                {
-                    obsoleteBlueprints.add(blueprint);
-                }
-                else
-                {
-                    Unit unitAtLocation = gc.senseUnitAtLocation(blueprintMapLocation);
-                    if ((unitAtLocation.unitType() == UnitType.Factory || unitAtLocation.unitType() == UnitType.Rocket) &&
-                            (unitAtLocation.structureIsBuilt() == 1))
-                    {
-                        obsoleteBlueprints.add(blueprint);
-                    }
-                }
-            }
-        }
-        for (Unit obsoleteBlueprint : obsoleteBlueprints)
-        {
-            unfinishedBlueprints.remove(obsoleteBlueprint);
-        }
-    }
-
-    public static void removeObsoleteBuilders()
-    {
-        LinkedList<Integer> obsoleteBuilders = new LinkedList<Integer>();
-        for (int builderID : builderSet)
-        {
-            if (!gc.canSenseUnit(builderID))
-            {
-                obsoleteBuilders.add(builderID);
-            }
-        }
-        for (int obsoleteBuilder : obsoleteBuilders)
-        {
-            builderSet.remove(obsoleteBuilder);
-        }
-    }
-
     private static void processBuilder(Unit unit, Location unitLocation, MapLocation unitMapLocation, VecUnit adjacentUnits)
     {
         // Blueprint structures
@@ -169,7 +106,7 @@ public class WorkerBot
                                 homeMap.isPassableTerrainAt(adjacentSpace) == 1 &&
                                 !gc.hasUnitAtLocation(adjacentSpace))
                         {
-                            moveUnitTowards(unit,adjacentSpace);
+                            moveUnitTowards(unit, adjacentSpace);
                         }
                     }
                 }
