@@ -605,42 +605,51 @@ public class Combat
             return;
         }
 
-        if(nearbyEnemyUnits.size() != 0)
+        if(gc.isAttackReady(unit.id()))
         {
-            Unit bestTarget = null;
-            long minimumEnemyDistance = 9999L;
-            long enemyUnitHealth = 251;
-            for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+
+            if(nearbyEnemyUnits.size() != 0)
             {
-                Unit enemyUnit = nearbyEnemyUnits.get(j);
-                long enemyDistance = unitMapLocation.distanceSquaredTo(enemyUnit.location().mapLocation());
-                if(enemyDistance < minimumEnemyDistance)
-                {
-                        enemyUnitHealth = enemyUnit.health();
-                        minimumEnemyDistance = enemyDistance;
-                        bestTarget = enemyUnit;
+                if (botIntelligenceLevel == 0) {
+                    simpleCombat(unit, nearbyEnemyUnits);
                 }
-                else if(enemyDistance == minimumEnemyDistance && enemyUnit.health() < enemyUnitHealth)
+                else
                 {
-                    enemyUnitHealth = enemyUnit.health();
-                    minimumEnemyDistance = enemyDistance;
-                    bestTarget = enemyUnit;
-                }
-            }
-            if(bestTarget != null)
-            {
-                if (gc.canAttack(unit.id(), bestTarget.id()))
-                {
-                    gc.attack(unit.id(), bestTarget.id());
-                    return;
-                }
-                else if (unit.attackRange() < minimumEnemyDistance)
-                {
-                    // TODO - Retreat function here
-                    if (moveUnitTo(unit, bestTarget.location().mapLocation()) && gc.canAttack(unit.id(), bestTarget.id()))
+                    Unit bestTarget = null;
+                    long minimumEnemyDistance = 99999L;
+                    long enemyUnitHealth = 251;
+                    for (int j = 0; j < nearbyEnemyUnits.size(); j++)
                     {
-                        gc.attack(unit.id(), bestTarget.id());
-                        return;
+                        Unit enemyUnit = nearbyEnemyUnits.get(j);
+                        long enemyDistance = unitMapLocation.distanceSquaredTo(enemyUnit.location().mapLocation());
+                        if (enemyDistance < minimumEnemyDistance)
+                        {
+                            enemyUnitHealth = enemyUnit.health();
+                            minimumEnemyDistance = enemyDistance;
+                            bestTarget = enemyUnit;
+                        }
+                        else if (enemyDistance == minimumEnemyDistance && enemyUnit.health() < enemyUnitHealth)
+                        {
+                            enemyUnitHealth = enemyUnit.health();
+                            minimumEnemyDistance = enemyDistance;
+                            bestTarget = enemyUnit;
+                        }
+                    }
+                    if (bestTarget != null) {
+                        if (gc.canAttack(unit.id(), bestTarget.id()))
+                        {
+                            gc.attack(unit.id(), bestTarget.id());
+                            return;
+                        }
+                        else if (unit.attackRange() < minimumEnemyDistance)
+                        {
+                            // TODO - Retreat function here
+                            if (moveUnitTo(unit, bestTarget.location().mapLocation()) && gc.canAttack(unit.id(), bestTarget.id()))
+                            {
+                                gc.attack(unit.id(), bestTarget.id());
+                                return;
+                            }
+                        }
                     }
                 }
             }
