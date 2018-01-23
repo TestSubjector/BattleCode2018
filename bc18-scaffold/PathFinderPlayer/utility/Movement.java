@@ -114,26 +114,27 @@ public class Movement
             Unit u = nearbyUnits.get(i);
             double d1 = x - u.location().mapLocation().getX();
             double d2 = y - u.location().mapLocation().getY();
+            double magnitudeSquared = x * x + y * y;
             if (u.team() == theirTeam)
             {
                 if (d1 != 0)
                 {
-                    X += 3 / d1;
+                    X += (3000 * d1) / magnitudeSquared;
                 }
                 if (d2 != 0)
                 {
-                    Y += 3 / d2;
+                    Y += (3000 * d2) / magnitudeSquared;
                 }
             }
             else
             {
                 if (d1 != 0)
                 {
-                    X += 1 / d1;
+                    X += (1000 * d1) / magnitudeSquared;
                 }
                 if (d2 != 0)
                 {
-                    Y += 1 / d2;
+                    Y += (1000 * d1) / magnitudeSquared;
                 }
             }
         }
