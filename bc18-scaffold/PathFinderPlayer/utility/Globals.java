@@ -211,8 +211,8 @@ public class Globals
         {
             Unit worker = initialWorkers.get(i);
             MapLocation workerMapLocation = worker.location().mapLocation();
-            int x = (int) homeMapWidth - workerMapLocation.getX();
-            int y = (int) homeMapHeight - workerMapLocation.getY();
+            int x = (int) homeMapWidth - 1 - workerMapLocation.getX();
+            int y = (int) homeMapHeight - 1 - workerMapLocation.getY();
             initialGuesses.push(new MapLocation(homePlanet, x, y));
         }
 
