@@ -178,118 +178,120 @@ public class Combat
         return locationExposure;
     }
 
-    public static int numberFriendlyUnitsAimingAtLocation(MapLocation targetLocation, VecUnit nearbyFriendlyUnits)
-    {
-        int locationExposure = 0;
-        for (int j = 0; nearbyFriendlyUnits != null && j < nearbyFriendlyUnits.size(); j++)
-        {
-            Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
-            UnitType friendlyUnitType = nearbyFriendlyUnit.unitType();
-            if(friendlyUnitType != UnitType.Ranger && friendlyUnitType != UnitType.Knight && friendlyUnitType != UnitType.Mage)
-            {
-                continue;
-            }
-            long distanceFromEnemyToLocation = targetLocation.distanceSquaredTo(nearbyFriendlyUnit.location().mapLocation());
-            if (nearbyFriendlyUnit.unitType() == UnitType.Ranger)
-            {
-                if(distanceFromEnemyToLocation > 10 && distanceFromEnemyToLocation < 50)
-                {
-                    locationExposure++;
-                }
-            }
-            else if (nearbyFriendlyUnit.attackRange() >= distanceFromEnemyToLocation)
-            {
-                locationExposure++;
-            }
-        }
-        return locationExposure;
-    }
 
-    public static boolean tryMoveToEngageEnemyAtLocationInOneTurnWithMaxEnemyExposure(Unit unit, MapLocation targetLocation, int maxEnemyExposure, VecUnit nearbyEnemyUnits)
-    {
-        Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
-        Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
-        for (Direction directionToMoveTo : tryDirection)
-        {
-            if (!gc.canMove(unit.id(), directionToMoveTo))
-            {
-                continue;
-            }
-            MapLocation moveLocation = unit.location().mapLocation().add(directionToMoveTo);
-            if (unit.attackRange() < moveLocation.distanceSquaredTo(targetLocation))
-            {
-                continue; // must engage in one turn
-            }
-
-            int enemyExposure = numberEnemyUnitsAimingAtLocation(moveLocation, nearbyEnemyUnits);
-            if (enemyExposure <= maxEnemyExposure)
-            {
-                if(gc.isMoveReady(unit.id()))
-                {
-                    if(gc.canMove(unit.id(), directionToMoveTo))
-                    {
-                        gc.moveRobot(unit.id(), directionToMoveTo);
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    public static boolean tryMoveToEngageEnemyAtLocationWithMaxEnemyExposure(Unit unit, MapLocation targetLocation, int maxEnemyExposure, VecUnit nearbyEnemyUnits)
-    {
-        Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
-        Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
-        for (Direction directionToMoveTo : tryDirection) {
-            if (!gc.canMove(unit.id(), directionToMoveTo))
-            {
-                continue;
-            }
-            MapLocation moveLocation = unit.location().mapLocation().add(directionToMoveTo);
-            int enemyExposure = numberEnemyUnitsAimingAtLocation(moveLocation, nearbyEnemyUnits);
-            if (enemyExposure <= maxEnemyExposure)
-            {
-                if(unit.location().mapLocation().distanceSquaredTo(moveLocation) < 10 && unit.unitType() == UnitType.Ranger)
-                {
-                    continue;
-                }
-                else
-                {
-                    if(gc.isMoveReady(unit.id()))
-                    {
-                        if(gc.canMove(unit.id(), directionToMoveTo))
-                        {
-                            gc.moveRobot(unit.id(), directionToMoveTo);
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    public static boolean tryMoveToEngageEnemyAtWithMaxEnemyExposure(Unit unit, MapLocation targetLocation, int maxEnemyExposure, VecUnit nearbyEnemyUnits)
-    {
-        Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
-        Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
-        for (Direction directionToMoveTo : tryDirection)
-        {
-            if (!gc.canMove(unit.id(), directionToMoveTo))
-            {
-                continue;
-            }
-            MapLocation moveLocation = unit.location().mapLocation().add(directionToMoveTo);
-            int enemyExposure = numberEnemyUnitsAimingAtLocation(moveLocation, nearbyEnemyUnits);
-            if (enemyExposure <= maxEnemyExposure)
-            {
-                gc.moveRobot(unit.id(), directionToMoveTo);
-                return true;
-            }
-        }
-        return false;
-    }
+//    public static int numberFriendlyUnitsAimingAtLocation(MapLocation targetLocation, VecUnit nearbyFriendlyUnits)
+//    {
+//        int locationExposure = 0;
+//        for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
+//        {
+//            Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
+//            UnitType friendlyUnitType = nearbyFriendlyUnit.unitType();
+//            if(friendlyUnitType != UnitType.Ranger && friendlyUnitType != UnitType.Knight && friendlyUnitType != UnitType.Mage)
+//            {
+//                continue;
+//            }
+//            long distanceFromEnemyToLocation = targetLocation.distanceSquaredTo(nearbyFriendlyUnit.location().mapLocation());
+//            if (nearbyFriendlyUnit.unitType() == UnitType.Ranger)
+//            {
+//                if(distanceFromEnemyToLocation > 10 && distanceFromEnemyToLocation < 50)
+//                {
+//                    locationExposure++;
+//                }
+//            }
+//            else if (nearbyFriendlyUnit.attackRange() >= distanceFromEnemyToLocation)
+//            {
+//                locationExposure++;
+//            }
+//        }
+//        return locationExposure;
+//    }
+//
+//    public static boolean tryMoveToEngageEnemyAtLocationInOneTurnWithMaxEnemyExposure(Unit unit, MapLocation targetLocation, int maxEnemyExposure, VecUnit nearbyEnemyUnits)
+//    {
+//        Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
+//        Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
+//        for (Direction directionToMoveTo : tryDirection)
+//        {
+//            if (!gc.canMove(unit.id(), directionToMoveTo))
+//            {
+//                continue;
+//            }
+//            MapLocation moveLocation = unit.location().mapLocation().add(directionToMoveTo);
+//            if (unit.attackRange() < moveLocation.distanceSquaredTo(targetLocation))
+//            {
+//                continue; // must engage in one turn
+//            }
+//
+//            int enemyExposure = numberEnemyUnitsAimingAtLocation(moveLocation, nearbyEnemyUnits);
+//            if (enemyExposure <= maxEnemyExposure)
+//            {
+//                if(gc.isMoveReady(unit.id()))
+//                {
+//                    if(gc.canMove(unit.id(), directionToMoveTo))
+//                    {
+//                        gc.moveRobot(unit.id(), directionToMoveTo);
+//                        return true;
+//                    }
+//                }
+//            }
+//        }
+//        return false;
+//    }
+//
+//    public static boolean tryMoveToEngageEnemyAtLocationWithMaxEnemyExposure(Unit unit, MapLocation targetLocation, int maxEnemyExposure, VecUnit nearbyEnemyUnits)
+//    {
+//        Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
+//        Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
+//        for (Direction directionToMoveTo : tryDirection) {
+//            if (!gc.canMove(unit.id(), directionToMoveTo))
+//            {
+//                continue;
+//            }
+//            MapLocation moveLocation = unit.location().mapLocation().add(directionToMoveTo);
+//            int enemyExposure = numberEnemyUnitsAimingAtLocation(moveLocation, nearbyEnemyUnits);
+//            if (enemyExposure <= maxEnemyExposure)
+//            {
+//                if(unit.location().mapLocation().distanceSquaredTo(moveLocation) < 10 && unit.unitType() == UnitType.Ranger)
+//                {
+//                    continue;
+//                }
+//                else
+//                {
+//                    if(gc.isMoveReady(unit.id()))
+//                    {
+//                        if(gc.canMove(unit.id(), directionToMoveTo))
+//                        {
+//                            gc.moveRobot(unit.id(), directionToMoveTo);
+//                            return true;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return false;
+//    }
+//
+//    public static boolean tryMoveToEngageEnemyAtWithMaxEnemyExposure(Unit unit, MapLocation targetLocation, int maxEnemyExposure, VecUnit nearbyEnemyUnits)
+//    {
+//        Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
+//        Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
+//        for (Direction directionToMoveTo : tryDirection)
+//        {
+//            if (!gc.canMove(unit.id(), directionToMoveTo))
+//            {
+//                continue;
+//            }
+//            MapLocation moveLocation = unit.location().mapLocation().add(directionToMoveTo);
+//            int enemyExposure = numberEnemyUnitsAimingAtLocation(moveLocation, nearbyEnemyUnits);
+//            if (enemyExposure <= maxEnemyExposure)
+//            {
+//                gc.moveRobot(unit.id(), directionToMoveTo);
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+>>>>>>> Make initial enemy position marking more versatile
 
     // TODO - Factor in Cooldown
     private static int numberOfOtherAlliesInAttackRange(Unit unit, MapLocation targetLocation)
@@ -657,9 +659,25 @@ public class Combat
                     {
                         if (homePlanet == Planet.Earth)
                         {
-                            if(moveUnitTo(unit, initialEnemyWorkers.peek()))
+                            long nearestEnemyHomeBaseDistance = 100000L;
+                            MapLocation nearestEnemyHomeBase = null;
+                            for(int j = 0; j < initialEnemyWorkers.size(); j++)
                             {
-                                hasMovedThisTurn = true;
+                                MapLocation soloEnemyInitialPosition = initialEnemyWorkers.get(j);
+                                if(nearestEnemyHomeBaseDistance > unitMapLocation.distanceSquaredTo(soloEnemyInitialPosition))
+                                {
+                                    nearestEnemyHomeBaseDistance = unitMapLocation.distanceSquaredTo(soloEnemyInitialPosition);
+                                    nearestEnemyHomeBase = soloEnemyInitialPosition;
+                                }
+                                // Since this comes under else case of no enemy units in sight
+                                if(unit.visionRange() > unitMapLocation.distanceSquaredTo(soloEnemyInitialPosition))
+                                {
+                                    initialEnemyWorkers.remove(soloEnemyInitialPosition);
+                                }
+                            }
+                            if(nearestEnemyHomeBase != null)
+                            {
+                                moveUnitTo(unit, nearestEnemyHomeBase);
                             }
                         }
                         else
@@ -668,10 +686,9 @@ public class Combat
                         }
                     }
                 }
-                else if(!hasMovedThisTurn)
+                else
                 {
                     moveUnitInRandomDirection(unit);
-                    hasMovedThisTurn = true;
                 }
             }
         }
@@ -922,7 +939,26 @@ public class Combat
                     {
                         if (homePlanet == Planet.Earth)
                         {
-                            moveUnitTo(unit, initialEnemyWorkers.peek());
+                            long nearestEnemyHomeBaseDistance = 100000L;
+                            MapLocation nearestEnemyHomeBase = null;
+                            for(int j = 0; j < initialEnemyWorkers.size(); j++)
+                            {
+                                MapLocation soloEnemyInitialPosition = initialEnemyWorkers.get(j);
+                                if(nearestEnemyHomeBaseDistance > unitMapLocation.distanceSquaredTo(soloEnemyInitialPosition))
+                                {
+                                    nearestEnemyHomeBaseDistance = unitMapLocation.distanceSquaredTo(soloEnemyInitialPosition);
+                                    nearestEnemyHomeBase = soloEnemyInitialPosition;
+                                }
+                                // Since this comes under else case of no enemy units in sight
+                                if(unit.visionRange() > unitMapLocation.distanceSquaredTo(soloEnemyInitialPosition))
+                                {
+                                    initialEnemyWorkers.remove(soloEnemyInitialPosition);
+                                }
+                            }
+                            if(nearestEnemyHomeBase != null)
+                            {
+                                moveUnitTo(unit, nearestEnemyHomeBase);
+                            }
                         }
                         else
                         {
@@ -1128,9 +1164,25 @@ public class Combat
                     {
                         if (homePlanet == Planet.Earth)
                         {
-                            if(moveUnitTo(unit, initialEnemyWorkers.peek()))
+                            long nearestEnemyHomeBaseDistance = 100000L;
+                            MapLocation nearestEnemyHomeBase = null;
+                            for(int j = 0; j < initialEnemyWorkers.size(); j++)
                             {
-                                hasMovedThisTurn = true;
+                                MapLocation soloEnemyInitialPosition = initialEnemyWorkers.get(j);
+                                if(nearestEnemyHomeBaseDistance > unitMapLocation.distanceSquaredTo(soloEnemyInitialPosition))
+                                {
+                                    nearestEnemyHomeBaseDistance = unitMapLocation.distanceSquaredTo(soloEnemyInitialPosition);
+                                    nearestEnemyHomeBase = soloEnemyInitialPosition;
+                                }
+                                // Since this comes under else case of no enemy units in sight
+                                if(unit.visionRange() > unitMapLocation.distanceSquaredTo(soloEnemyInitialPosition))
+                                {
+                                    initialEnemyWorkers.remove(soloEnemyInitialPosition);
+                                }
+                            }
+                            if(nearestEnemyHomeBase != null)
+                            {
+                                moveUnitTo(unit, nearestEnemyHomeBase);
                             }
                         }
                         else
@@ -1139,10 +1191,9 @@ public class Combat
                         }
                     }
                 }
-                else if(!hasMovedThisTurn)
+                else
                 {
                     moveUnitInRandomDirection(unit);
-                    hasMovedThisTurn = true;
                 }
             }
         }

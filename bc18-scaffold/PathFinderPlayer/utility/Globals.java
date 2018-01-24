@@ -67,7 +67,7 @@ public class Globals
     public static int numberOfConnectedComponents;
 
     // Enemy locations
-    public static Stack<MapLocation> initialEnemyWorkers;
+    public static ArrayList<MapLocation> initialEnemyWorkers;
     public static Set<MapLocation> enemyFactories;
     public static Set<MapLocation> rocketPositions;
     public static HashMap<Integer, VecUnit> enemyVecUnits;
@@ -170,7 +170,7 @@ public class Globals
         initialWorkers = new ArrayList<Unit>();
 
         enemyVecUnits = new HashMap<Integer, VecUnit>();
-        initialEnemyWorkers = new Stack<MapLocation>();
+        initialEnemyWorkers = new ArrayList<MapLocation>();
         enemyFactories = new HashSet<MapLocation>();
         rocketPositions = new HashSet<MapLocation>();
         enemyHotspots = new ArrayList<QueuePair<Double, MapLocation>>();
@@ -187,7 +187,7 @@ public class Globals
             }
             else
             {
-                initialEnemyWorkers.push(worker.location().mapLocation());
+                initialEnemyWorkers.add(worker.location().mapLocation());
                 // System.out.println("Enemy Worker Here" + worker.location().mapLocation());
             }
         }
