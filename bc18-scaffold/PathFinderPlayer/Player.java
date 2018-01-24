@@ -177,12 +177,6 @@ public class Player
 
             // TODO - add stagnation
             // Process build and train queues
-            setWorkersRequired();
-            while (shouldQueueWorker())
-            {
-                addUnitToTrainQueue(UnitType.Worker);
-                // System.out.println("Worker");
-            }
             if (homePlanet == Planet.Earth)
             {
                 if (currentRound == 650)
@@ -242,7 +236,25 @@ public class Player
                         addUnitToTrainQueue(UnitType.Ranger);
                     }
                 }
-
+            }
+            setWorkersRequired();
+            int workerCost = 30;
+            int structureCosts = 0;
+            int buildQueueSize = buildQueue.size();
+            for (int j = 0; j < buildQueueSize; j++)
+            {
+                structureCosts += (buildQueue.peekFirst() == UnitType.Factory) ? 100 : 75;
+                buildQueue.addLast(buildQueue.removeFirst());
+            }
+            while (typeSortedUnitLists.get(UnitType.Factory).size() * 20 + workerCost + structureCosts <= gc.karbonite())
+            {
+                addUnitToTrainQueueUrgently(UnitType.Worker);
+                workerCost += 30;
+            }
+            while (shouldQueueWorker())
+            {
+                addUnitToTrainQueue(UnitType.Worker);
+                // System.out.println("Worker");
             }
 
             // Process units

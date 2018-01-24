@@ -160,16 +160,9 @@ public class DecisionTree
 
     public static void setFactoriesRequired()
     {
-        if (currentRound < (homeMapSize / 400))
-        {
-            factoriesRequired = 1;
-        }
-        else
-        {
-            factoriesRequired = (int) ((Math.min(1, Math.sqrt((double) currentRound / 400))) *
-                    (Math.round(3 + ((double) homeMapHeight + homeMapWidth) / 10) +
-                            (double) initialTotalKarbonite / 1500));
-        }
+        factoriesRequired = 1 + (int) ((Math.min(1, Math.sqrt((double) currentRound / 400))) *
+                (Math.round(3 + ((double) homeMapHeight + homeMapWidth) / 10) +
+                        (double) initialTotalKarbonite / 1500));
     }
 
     public static void setRocketsRequired()

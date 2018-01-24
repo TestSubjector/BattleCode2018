@@ -124,6 +124,8 @@ public class WorkerBot
                 }
             }
         }
+        processMiner(unit, unitLocation, unitMapLocation);
+        moveUnitInRandomDirection(unit);
     }
 
     private static void processMiner(Unit unit, Location unitLocation, MapLocation unitMapLocation)
@@ -148,17 +150,14 @@ public class WorkerBot
                         }
                     }
                 }
-                if (nearestMineMapLocation != null)
+                if (nearestMineMapLocation == null || unitList.size() * builderFraction > builderSet.size())
                 {
-                    if (!moveUnitTo(unit, nearestMineMapLocation))
-                    {
-                        initialKarboniteLocationSize--;
-                        karboniteLocations.remove(nearestMineMapLocation);
-                    }
-                    if (unitList.size() * builderFraction > builderSet.size())
-                    {
-                        builderSet.add(unit.id());
-                    }
+                    builderSet.add(unit.id());
+                }
+                else if (!moveUnitTo(unit, nearestMineMapLocation))
+                {
+                    initialKarboniteLocationSize--;
+                    karboniteLocations.remove(nearestMineMapLocation);
                 }
             }
         }
