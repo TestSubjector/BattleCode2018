@@ -698,7 +698,7 @@ public class Combat
             for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
             {
                 Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
-                if(nearbyFriendlyUnit.unitType() != UnitType.Factory && nearbyFriendlyUnit.unitType() != UnitType.Healer)
+                if(nearbyFriendlyUnit.unitType() != UnitType.Factory && nearbyFriendlyUnit.unitType() != UnitType.Rocket)
                 {
                     long friendlyUnitHealth = nearbyFriendlyUnit.health();
                     if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()))
@@ -721,17 +721,8 @@ public class Combat
             }
             if (indexOfUnitWithLowestHealthInRange != -1)
             {
-                int targetFriendlyUnitID = nearbyFriendlyUnits.get(indexOfUnitWithLowestHealthInRange).id();
-                gc.heal(unit.id(), targetFriendlyUnitID);
+                gc.heal(unit.id(), nearbyFriendlyUnits.get(indexOfUnitWithLowestHealthInRange).id());
                 hasHealedThisTurn = true;
-                if(gc.isOverchargeReady(unit.id()))
-                {
-                    if(gc.canOvercharge(unit.id(), targetFriendlyUnitID))
-                    {
-                        gc.overcharge(unit.id(), targetFriendlyUnitID);
-                        overchargedUnitsExtraTurn(nearbyFriendlyUnits.get(indexOfUnitWithLowestHealthInRange));
-                    }
-                }
             }
             else if (indexOfUnitWithLowestHealthOutOfRange != -1)
             {
@@ -746,12 +737,92 @@ public class Combat
                     gc.heal(unit.id(), targetFriendlyUnitID);
                     hasHealedThisTurn = true;
                 }
-                if(gc.isOverchargeReady(unit.id()))
+            }
+        }
+
+        // Overcharging Category
+        if(gc.isOverchargeReady(unit.id()))
+        {
+            if(nearbyFriendlyUnits.size() != 0)
+            {
+                long overChargedUnitIndexInRange = -1;
+                long potentialOverchargedUnitPriorityInRange = -1;
+                long overChargedUnitIndexOutOfRange = -1;
+                long potentialOverchargedUnitPriorityOutOfRange = -1;
+
+                for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
                 {
-                    if(gc.canOvercharge(unit.id(), targetFriendlyUnitID))
+                    long unitOverChargePriority = 0;
+                    Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
+                    if(nearbyFriendlyUnit.unitType() == UnitType.Factory || nearbyFriendlyUnit.unitType() == UnitType.Rocket ||
+                            nearbyFriendlyUnit.unitType() == UnitType.Healer)
                     {
-                        gc.overcharge(unit.id(), targetFriendlyUnitID);
-                        overchargedUnitsExtraTurn(targetFriendlyUnit);
+                        continue;
+                    }
+                    if(nearbyFriendlyUnit.movementHeat() >= 10)
+                    {
+                        unitOverChargePriority += 1;
+                    }
+                    if(nearbyFriendlyUnit.attackHeat() >= 10)
+                    {
+                        unitOverChargePriority += 2;
+                    }
+                    if(nearbyFriendlyUnit.abilityHeat() >= 10)
+                    {
+                        unitOverChargePriority += 3;
+                    }
+                    if(nearbyFriendlyUnit.unitType() == UnitType.Worker)
+                    {
+                        unitOverChargePriority += 1;
+                    }
+                    else if(nearbyFriendlyUnit.unitType() == UnitType.Mage)
+                    {
+                        unitOverChargePriority += 2;
+                    }
+                    else if(nearbyFriendlyUnit.unitType() == UnitType.Ranger)
+                    {
+                        unitOverChargePriority += 3;
+                    }
+                    else if(nearbyFriendlyUnit.unitType() == UnitType.Knight)
+                    {
+                        unitOverChargePriority += 4;
+                    }
+
+                    if(unitMapLocation.distanceSquaredTo(nearbyFriendlyUnit.location().mapLocation()) <= 30)
+                    {
+                        if(unitOverChargePriority > potentialOverchargedUnitPriorityInRange)
+                        {
+                            potentialOverchargedUnitPriorityInRange = unitOverChargePriority;
+                            overChargedUnitIndexInRange = j;
+                        }
+                    }
+                    else
+                    {
+                        if(unitOverChargePriority > potentialOverchargedUnitPriorityOutOfRange)
+                        {
+                            potentialOverchargedUnitPriorityOutOfRange = unitOverChargePriority;
+                            overChargedUnitIndexOutOfRange = j;
+                        }
+                    }
+                }
+
+                if(overChargedUnitIndexInRange != -1)
+                {
+                    if(gc.canOvercharge(unit.id(), nearbyFriendlyUnits.get(overChargedUnitIndexInRange).id()))
+                    {
+                        gc.overcharge(unit.id(), nearbyFriendlyUnits.get(overChargedUnitIndexInRange).id());
+                        overchargedUnitsExtraTurn(nearbyFriendlyUnits.get(overChargedUnitIndexInRange));
+                    }
+                }
+                else if(overChargedUnitIndexOutOfRange != -1)
+                {
+                    if(moveUnitTo(unit, nearbyFriendlyUnits.get(overChargedUnitIndexOutOfRange).location().mapLocation()))
+                    {
+                        if(gc.canOvercharge(unit.id(), nearbyFriendlyUnits.get(overChargedUnitIndexOutOfRange).id()))
+                        {
+                            gc.overcharge(unit.id(), nearbyFriendlyUnits.get(overChargedUnitIndexOutOfRange).id());
+                            overchargedUnitsExtraTurn(nearbyFriendlyUnits.get(overChargedUnitIndexOutOfRange));
+                        }
                     }
                 }
             }
