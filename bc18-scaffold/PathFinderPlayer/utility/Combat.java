@@ -531,7 +531,7 @@ public class Combat
         {
             if(!rocketPositions.isEmpty())
             {
-                long distanceFromUnit = 101;
+                long distanceFromUnit = 100000L;
                 MapLocation indexLocation = unitMapLocation;
                 Iterator<MapLocation> rmp = rocketPositions.iterator();
                 while(rmp.hasNext())
@@ -562,9 +562,9 @@ public class Combat
                         indexLocation = rocketMapLocation;
                     }
                 }
-                if(moveUnitTo(unit, indexLocation))
+                if(currentRound < 750 && (distanceFromUnit < 40 || (currentRound > 650 && distanceFromUnit < 170)))
                 {
-                    return;
+                    moveUnitTo(unit, indexLocation);
                 }
             }
 
@@ -678,7 +678,7 @@ public class Combat
         {
             if(!rocketPositions.isEmpty())
             {
-                long distanceFromUnit = 101;
+                long distanceFromUnit = 100000L;
                 MapLocation indexLocation = unitMapLocation;
                 Iterator<MapLocation> rmp = rocketPositions.iterator();
                 while(rmp.hasNext())
@@ -709,9 +709,9 @@ public class Combat
                         indexLocation = rocketMapLocation;
                     }
                 }
-                if(moveUnitTo(unit, indexLocation))
+                if(currentRound < 750 && (distanceFromUnit < 40 || (currentRound > 650 && distanceFromUnit < 170)))
                 {
-                    return;
+                    moveUnitTo(unit, indexLocation);
                 }
             }
             long nearestEnemyGridDistance = 100000L;
@@ -879,7 +879,7 @@ public class Combat
         {
             if(!rocketPositions.isEmpty())
             {
-                long distanceFromUnit = 101;
+                long distanceFromUnit = 100000L;
                 MapLocation indexLocation = unitMapLocation;
                 Iterator<MapLocation> rmp = rocketPositions.iterator();
                 while(rmp.hasNext())
@@ -910,9 +910,9 @@ public class Combat
                         indexLocation = rocketMapLocation;
                     }
                 }
-                if(moveUnitTo(unit, indexLocation))
+                if(currentRound < 750 && (distanceFromUnit < 40 || (currentRound > 650 && distanceFromUnit < 170)))
                 {
-                    return;
+                    moveUnitTo(unit, indexLocation);
                 }
             }
             long nearestEnemyGridDistance = 1000000L;
