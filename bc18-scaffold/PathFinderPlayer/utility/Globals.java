@@ -34,6 +34,7 @@ public class Globals
     public static long initialTotalKarbonite;
     public static Set<MapLocation> karboniteLocations;
     public static long initialKarboniteLocationSize;
+    public static AsteroidPattern asteroidPattern;
 
     public static short botIntelligenceLevel;
 
@@ -162,6 +163,7 @@ public class Globals
 
         karboniteLocations = new HashSet<MapLocation>();
         getInitialKarboniteLocations();
+        asteroidPattern = gc.asteroidPattern();
 
         VecUnit allInitialWorkers = homeMap.getInitial_units();
         initialWorkers = new ArrayList<Unit>();

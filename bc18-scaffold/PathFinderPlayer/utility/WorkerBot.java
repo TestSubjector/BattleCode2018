@@ -16,7 +16,7 @@ public class WorkerBot
         if (unit.workerHasActed() == 0)
         {
             UnitType blueprintType = null;
-            if(currentRound > 650)
+            if (currentRound > 650)
             {
                 if (gc.karbonite() >= 75)
                 {
@@ -74,7 +74,7 @@ public class WorkerBot
                         Unit newBlueprint = gc.senseUnitAtLocation(blueprintMapLocation);
                         unfinishedBlueprints.add(newBlueprint);
                         typeSortedUnitLists.get(blueprintType).add(newBlueprint);
-                        if(currentRound <650)
+                        if (currentRound < 650)
                         {
                             removeUnitFromBuildQueue();
                         }
@@ -83,7 +83,6 @@ public class WorkerBot
             }
         }
 
-        // TODO - Remember previous target
         if (unit.movementHeat() < 10)
         {
             // Move towards nearest blueprint
@@ -132,8 +131,6 @@ public class WorkerBot
         if (unit.movementHeat() < 10)
         {
             // Move towards nearest mine
-            // TODO - Priority for good mines
-            // TODO - Remember previous target
             if (gc.karboniteAt(unitMapLocation) == 0)
             {
                 MapLocation nearestMineMapLocation = null;
@@ -153,23 +150,16 @@ public class WorkerBot
                 }
                 if (nearestMineMapLocation != null)
                 {
-                    if (diagonalDistanceBetween(unitMapLocation, nearestMineMapLocation) > 0.4 * (homeMapHeight + homeMapWidth) / 2)
-                    {
-                        if (unitList.size() * builderFraction > builderSet.size())
-                        {
-                            builderSet.add(unit.id());
-                        }
-                    }
                     if (!moveUnitTo(unit, nearestMineMapLocation))
                     {
                         initialKarboniteLocationSize--;
                         karboniteLocations.remove(nearestMineMapLocation);
                     }
+                    if (unitList.size() * builderFraction > builderSet.size())
+                    {
+                        builderSet.add(unit.id());
+                    }
                 }
-            }
-            if(currentRound > 250  && unit.location().isOnPlanet(Planet.Earth))
-            {
-                builderSet.add(unit.id());
             }
         }
     }
@@ -198,16 +188,13 @@ public class WorkerBot
             }
         }
 
-        if (unit.workerHasActed() == 0)
+        // Mine karbonite if adjacent to or standing on a mine
+        for (int j = 0; j < directions.length; j++)
         {
-            // Mine karbonite if adjacent to or standing on a mine
-            for (int j = 0; j < directions.length; j++)
+            if (gc.canHarvest(unit.id(), directions[j]))
             {
-                if (gc.canHarvest(unit.id(), directions[j]))
-                {
-                    gc.harvest(unit.id(), directions[j]);
-                    break;
-                }
+                gc.harvest(unit.id(), directions[j]);
+                break;
             }
         }
 
@@ -248,8 +235,6 @@ public class WorkerBot
         }
     }
 
-    // TODO - Worker replication code
-    // TODO - Inform Mars about the state
     public static void processMarsWorker(Unit unit, Location unitLocation)
     {
         MapLocation unitMapLocation = unitLocation.mapLocation();
@@ -279,10 +264,7 @@ public class WorkerBot
             }
         }
 
-        if (unit.workerHasActed() == 0)
-        {
-            moveUnitInRandomDirection(unit);
-        }
+        processMiner(unit, unitLocation, unitMapLocation);
 
         // Replicate worker if enough Karbonite or Earth flooded
         if (currentRound > 749 || gc.karbonite() > 200)

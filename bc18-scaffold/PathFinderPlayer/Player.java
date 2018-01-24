@@ -39,7 +39,7 @@ public class Player
             int timeLeftMs = gc.getTimeLeftMs();
             if (currentRound > 1)
             {
-                time += "Time taken in round " + (currentRound - 1) + " : " + (lastTime - timeLeftMs) + "\n";
+                // time += "Time taken in round " + (currentRound - 1) + " : " + (lastTime - timeLeftMs) + "\n";
             }
             lastTime = timeLeftMs + 50;
             if (currentRound % 50 == 0)
@@ -50,7 +50,30 @@ public class Player
             if (currentRound % 150 == 2)
             {
                 //System.out.println(time);
-                time = "";
+                // time = "";
+            }
+
+            if (homePlanet == Planet.Mars)
+            {
+                if (asteroidPattern.hasAsteroid(currentRound + 1))
+                {
+                    AsteroidStrike asteroidStrike = asteroidPattern.asteroid(currentRound + 1);
+                    MapLocation asteroidLocation = asteroidStrike.getLocation();
+                    boolean isReachable = false;
+                    for (int j = 0; j < directions.length - 1; j++)
+                    {
+                        if (homeMap.onMap(asteroidLocation.add(directions[j])) &&
+                                homeMap.isPassableTerrainAt(asteroidLocation.add(directions[j])) == 1)
+                        {
+                            isReachable = true;
+                            break;
+                        }
+                    }
+                    if (isReachable)
+                    {
+                        karboniteLocations.add(asteroidLocation);
+                    }
+                }
             }
 
             // Clear unit lists
@@ -126,9 +149,9 @@ public class Player
                     typeSortedUnitLists.get(UnitType.Factory).size() + typeSortedUnitLists.get(UnitType.Rocket).size();
 
 
+            removeObsoleteMines();
             if (homePlanet == Planet.Earth)
             {
-                removeObsoleteMines();
                 removeObsoleteBlueprints();
                 removeObsoleteBuilders();
                 removeObsoleteEnemyFactories();
@@ -153,7 +176,7 @@ public class Player
             }
 
             // TODO - add stagnation
-            // Process build queue
+            // Process build and train queues
             setWorkersRequired();
             while (shouldQueueWorker())
             {
@@ -162,12 +185,12 @@ public class Player
             }
             if (homePlanet == Planet.Earth)
             {
-                if(currentRound == 650)
+                if (currentRound == 650)
                 {
                     trainQueue.clear();
                     buildQueue.clear();
                 }
-                else if(currentRound > 650)
+                if (currentRound >= 650)
                 {
                     setRocketsRequired();
                     while (shouldQueueRocket())
@@ -214,31 +237,13 @@ public class Player
                         addUnitToBuildQueue(UnitType.Rocket);
                         // System.out.println("Roc");
                     }
-//                System.out.println(currentRound);
-//                System.out.println(buildQueue.peekFirst());
-//                System.out.println(trainQueue.peekFirst());
                     if (trainQueue.isEmpty())
                     {
                         addUnitToTrainQueue(UnitType.Ranger);
                     }
                 }
 
-                // System.out.println(currentRound);
-                // System.out.println(buildQueue.peekFirst());
-                // System.out.println(trainQueue.peekFirst());
-//                System.out.println(workersRequired);
-//                System.out.println(factoriesRequired);
-                // System.out.println();
             }
-//            System.out.println(workersRequired);
-//            System.out.println(workersRequired);
-//            System.out.println(unitsInQueue[UnitType.Worker.ordinal()]);
-//            System.out.println(factoriesRequired);
-//            System.out.println(unitsInQueue[UnitType.Factory.ordinal()]);
-//            System.out.println(rocketsRequired);
-//            System.out.println(typeSortedUnitLists.get(UnitType.Rocket).size());
-//            System.out.println(unitsInQueue[UnitType.Rocket.ordinal()]);
-//            System.out.println();
 
             // Process units
             for (int i = 0; i < unitTypes.length; i++)

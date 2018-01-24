@@ -19,13 +19,13 @@ public class DecisionTree
         {
             builderFraction = 1;
         }
-        else if(currentRound > 650)
+        else if(currentRound > 300)
         {
             builderFraction = 1;
         }
         else
         {
-            builderFraction = Math.min(1, (((double) currentRound + 200) / 400) * (1 - 0.5 * ((double) karboniteLocations.size() / initialKarboniteLocationSize)));
+            builderFraction = Math.min(1, (((double) currentRound + 200) / 300) * (1 - 0.4 * ((double) karboniteLocations.size() / initialKarboniteLocationSize)));
         }
     }
 
