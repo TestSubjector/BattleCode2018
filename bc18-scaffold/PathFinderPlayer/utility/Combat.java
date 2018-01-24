@@ -4,8 +4,15 @@ import java.util.*;
 
 import bc.*;
 
+import static utility.FactoryBot.processFactory;
 import static utility.Globals.*;
+import static utility.HealerBot.processHealer;
+import static utility.KnightBot.processKnight;
+import static utility.MageBot.processMage;
 import static utility.Movement.*;
+import static utility.RangerBot.processRanger;
+import static utility.RocketBot.processRocket;
+import static utility.WorkerBot.processWorker;
 
 public class Combat
 {
@@ -353,6 +360,44 @@ public class Combat
         // One-shot kill
         return enemyUnitPriority;
     }
+    
+    // Overcharged Area
+    public static void overchargedUnitsExtraTurn(Unit overchargedUnit)
+    {
+        Location unitLocation = overchargedUnit.location();
+        // Process active unit only
+        if (!unitLocation.isInGarrison() && !unitLocation.isInSpace())
+        {
+            if (overchargedUnit.unitType() == UnitType.Worker)
+            {
+                processWorker(overchargedUnit, unitLocation);
+            }
+            if (overchargedUnit.unitType() == UnitType.Knight)
+            {
+                processKnight(overchargedUnit, unitLocation);
+            }
+            if (overchargedUnit.unitType() == UnitType.Ranger)
+            {
+                processRanger(overchargedUnit, unitLocation);
+            }
+            if (overchargedUnit.unitType() == UnitType.Mage)
+            {
+                processMage(overchargedUnit, unitLocation);
+            }
+            if (overchargedUnit.unitType() == UnitType.Healer)
+            {
+                processHealer(overchargedUnit, unitLocation);
+            }
+            if (overchargedUnit.unitType() == UnitType.Factory)
+            {
+                processFactory(overchargedUnit, unitLocation);
+            }
+            if (overchargedUnit.unitType() == UnitType.Rocket)
+            {
+                processRocket(overchargedUnit, unitLocation);
+            }
+        }
+    }
 
     // Multiple Units
     public static void doMicroRangers(Unit unit, MapLocation unitMapLocation, VecUnit nearbyEnemyUnits)
@@ -630,39 +675,76 @@ public class Combat
         int indexOfUnitWithLowestHealthInRange = -1;
         int indexOfUnitWithLowestHealthOutOfRange = -1;
 
-        if (unitFrozenByHeat(unit)) {
+        if (unitFrozenByHeat(unit))
+        {
             return;
         }
 
-        if (gc.isHealReady(unit.id())) {
+        // TODO - Give combat units priority over workers
+        if (gc.isHealReady(unit.id()))
+        {
             long heathMinimumInRange = 250;
             long heathMinimumOutOfRange = 250;
-            for (int j = 0; j < nearbyFriendlyUnits.size(); j++) {
+
+            for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
+            {
                 Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
+                if(nearbyFriendlyUnit.unitType() != UnitType.Factory && nearbyFriendlyUnit.unitType() != UnitType.Healer)
                 {
                     long friendlyUnitHealth = nearbyFriendlyUnit.health();
-                    if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id())) {
+                    if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()))
+                    {
                         if (friendlyUnitHealth < heathMinimumInRange && friendlyUnitHealth < nearbyFriendlyUnit.maxHealth())
                         {
                             heathMinimumInRange = friendlyUnitHealth;
                             indexOfUnitWithLowestHealthInRange = j;
                         }
                     }
-                    else {
-                        if (friendlyUnitHealth < nearbyFriendlyUnit.maxHealth())
+                    else
+                    {
+                        if (friendlyUnitHealth < heathMinimumOutOfRange && friendlyUnitHealth < nearbyFriendlyUnit.maxHealth())
                         {
+                            heathMinimumOutOfRange = friendlyUnitHealth;
                             indexOfUnitWithLowestHealthOutOfRange = j;
                         }
                     }
                 }
             }
-            if (indexOfUnitWithLowestHealthInRange != -1) {
-                gc.heal(unit.id(), nearbyFriendlyUnits.get(indexOfUnitWithLowestHealthInRange).id());
+            if (indexOfUnitWithLowestHealthInRange != -1)
+            {
+                int targetFriendlyUnitID = nearbyFriendlyUnits.get(indexOfUnitWithLowestHealthInRange).id();
+                gc.heal(unit.id(), targetFriendlyUnitID);
                 hasHealedThisTurn = true;
+                if(gc.isOverchargeReady(unit.id()))
+                {
+                    if(gc.canOvercharge(unit.id(), targetFriendlyUnitID))
+                    {
+                        gc.overcharge(unit.id(), targetFriendlyUnitID);
+                        overchargedUnitsExtraTurn(nearbyFriendlyUnits.get(indexOfUnitWithLowestHealthInRange));
+                    }
+                }
             }
-            else if (indexOfUnitWithLowestHealthOutOfRange != -1) {
-                moveUnitTo(unit, nearbyFriendlyUnits.get(indexOfUnitWithLowestHealthOutOfRange).location().mapLocation());
-                hasMovedThisTurn = true;
+            else if (indexOfUnitWithLowestHealthOutOfRange != -1)
+            {
+                Unit targetFriendlyUnit = nearbyFriendlyUnits.get(indexOfUnitWithLowestHealthOutOfRange);
+                int targetFriendlyUnitID = targetFriendlyUnit.id();
+                if(moveUnitTo(unit, targetFriendlyUnit.location().mapLocation()))
+                {
+                    hasMovedThisTurn = true;
+                }
+                if(gc.canHeal(unit.id(), targetFriendlyUnitID))
+                {
+                    gc.heal(unit.id(), targetFriendlyUnitID);
+                    hasHealedThisTurn = true;
+                }
+                if(gc.isOverchargeReady(unit.id()))
+                {
+                    if(gc.canOvercharge(unit.id(), targetFriendlyUnitID))
+                    {
+                        gc.overcharge(unit.id(), targetFriendlyUnitID);
+                        overchargedUnitsExtraTurn(targetFriendlyUnit);
+                    }
+                }
             }
         }
 
