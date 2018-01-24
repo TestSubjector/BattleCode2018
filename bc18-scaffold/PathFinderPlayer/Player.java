@@ -61,7 +61,6 @@ public class Player
 
             // Clear enemy hashmap
             enemyVecUnits.clear();
-            rocketPositions.clear();
             enemyHotspots.clear();
 
             // Fetch current units and sort by type

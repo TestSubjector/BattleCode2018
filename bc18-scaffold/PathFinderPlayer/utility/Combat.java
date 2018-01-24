@@ -529,6 +529,45 @@ public class Combat
         }
         else
         {
+            if(!rocketPositions.isEmpty())
+            {
+                long distanceFromUnit = 101;
+                MapLocation indexLocation = unitMapLocation;
+                Iterator<MapLocation> rmp = rocketPositions.iterator();
+                while(rmp.hasNext())
+                {
+                    MapLocation rocketMapLocation = rmp.next();
+                    long trialDistance = unitMapLocation.distanceSquaredTo(rocketMapLocation);
+                    if(unitMapLocation.isAdjacentTo(rocketMapLocation))
+                    {
+                        if(gc.hasUnitAtLocation(rocketMapLocation))
+                        {
+                            if(gc.senseUnitAtLocation(rocketMapLocation) != null)
+                            {
+                                if (gc.canLoad(gc.senseUnitAtLocation(rocketMapLocation).id(), unit.id()))
+                                {
+                                    gc.load(gc.senseUnitAtLocation(rocketMapLocation).id(), unit.id());
+                                }
+                            }
+                        }
+                        else
+                        {
+                            //Because dead
+                            rmp.remove();
+                        }
+                    }
+                    else if(trialDistance < distanceFromUnit)
+                    {
+                        distanceFromUnit = trialDistance;
+                        indexLocation = rocketMapLocation;
+                    }
+                }
+                if(moveUnitTo(unit, indexLocation))
+                {
+                    return;
+                }
+            }
+
             long nearestEnemyGridDistance = 100000L;
             MapLocation nearestEnemyMapLocation = null;
             for(QueuePair<Double, MapLocation> enemyHotspot : enemyHotspots)
@@ -637,6 +676,44 @@ public class Combat
         }
         else if(!hasHealedThisTurn)
         {
+            if(!rocketPositions.isEmpty())
+            {
+                long distanceFromUnit = 101;
+                MapLocation indexLocation = unitMapLocation;
+                Iterator<MapLocation> rmp = rocketPositions.iterator();
+                while(rmp.hasNext())
+                {
+                    MapLocation rocketMapLocation = rmp.next();
+                    long trialDistance = unitMapLocation.distanceSquaredTo(rocketMapLocation);
+                    if(unitMapLocation.isAdjacentTo(rocketMapLocation))
+                    {
+                        if(gc.hasUnitAtLocation(rocketMapLocation))
+                        {
+                            if(gc.senseUnitAtLocation(rocketMapLocation) != null)
+                            {
+                                if (gc.canLoad(gc.senseUnitAtLocation(rocketMapLocation).id(), unit.id()))
+                                {
+                                    gc.load(gc.senseUnitAtLocation(rocketMapLocation).id(), unit.id());
+                                }
+                            }
+                        }
+                        else
+                        {
+                            //Because dead
+                            rmp.remove();
+                        }
+                    }
+                    else if(trialDistance < distanceFromUnit)
+                    {
+                        distanceFromUnit = trialDistance;
+                        indexLocation = rocketMapLocation;
+                    }
+                }
+                if(moveUnitTo(unit, indexLocation))
+                {
+                    return;
+                }
+            }
             long nearestEnemyGridDistance = 100000L;
             MapLocation nearestEnemyMapLocation = null;
             for(QueuePair<Double, MapLocation> enemyHotspot : enemyHotspots)
@@ -731,6 +808,13 @@ public class Combat
                         }
                         if (bestTarget != null)
                         {
+                            if(gc.isJavelinReady(unit.id()))
+                            {
+                                if(gc.canJavelin(unit.id(), bestTarget.id()))
+                                {
+                                    gc.javelin(unit.id(), bestTarget.id());
+                                }
+                            }
                             if (gc.canAttack(unit.id(), bestTarget.id()))
                             {
                                 gc.attack(unit.id(), bestTarget.id());
@@ -741,6 +825,13 @@ public class Combat
                                 if (moveUnitTo(unit, bestTarget.location().mapLocation()) && gc.canAttack(unit.id(), bestTarget.id()))
                                 {
                                     gc.attack(unit.id(), bestTarget.id());
+                                    if(gc.isJavelinReady(unit.id()))
+                                    {
+                                        if(gc.canJavelin(unit.id(), bestTarget.id()))
+                                        {
+                                            gc.javelin(unit.id(), bestTarget.id());
+                                        }
+                                    }
                                     return;
                                 }
                             }
@@ -786,6 +877,44 @@ public class Combat
         }
         else
         {
+            if(!rocketPositions.isEmpty())
+            {
+                long distanceFromUnit = 101;
+                MapLocation indexLocation = unitMapLocation;
+                Iterator<MapLocation> rmp = rocketPositions.iterator();
+                while(rmp.hasNext())
+                {
+                    MapLocation rocketMapLocation = rmp.next();
+                    long trialDistance = unitMapLocation.distanceSquaredTo(rocketMapLocation);
+                    if(unitMapLocation.isAdjacentTo(rocketMapLocation))
+                    {
+                        if(gc.hasUnitAtLocation(rocketMapLocation))
+                        {
+                            if(gc.senseUnitAtLocation(rocketMapLocation) != null)
+                            {
+                                if (gc.canLoad(gc.senseUnitAtLocation(rocketMapLocation).id(), unit.id()))
+                                {
+                                    gc.load(gc.senseUnitAtLocation(rocketMapLocation).id(), unit.id());
+                                }
+                            }
+                        }
+                        else
+                        {
+                            //Because dead
+                            rmp.remove();
+                        }
+                    }
+                    else if(trialDistance < distanceFromUnit)
+                    {
+                        distanceFromUnit = trialDistance;
+                        indexLocation = rocketMapLocation;
+                    }
+                }
+                if(moveUnitTo(unit, indexLocation))
+                {
+                    return;
+                }
+            }
             long nearestEnemyGridDistance = 1000000L;
             MapLocation nearestEnemyMapLocation = null;
             for(QueuePair<Double, MapLocation> enemyHotspot : enemyHotspots)
