@@ -109,11 +109,13 @@ public class Pathfinding
         System.out.println("Edges: " + edges);
 
         // Find connected component sizes
+        numberOfConnectedComponents = 0;
         HashMap<MapLocation, Long> connectedComponentSize = new HashMap<MapLocation, Long>();
         for (MapLocation sourceWaypoint : waypoints)
         {
             if (!connectedComponentSize.containsKey(sourceWaypoint))
             {
+                numberOfConnectedComponents++;
                 for (MapLocation waypoint : waypoints)
                 {
                     visited.put(waypoint, false);

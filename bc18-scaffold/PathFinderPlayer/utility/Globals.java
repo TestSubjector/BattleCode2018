@@ -64,6 +64,7 @@ public class Globals
     public static HashMap<MapLocation, MapLocation> nearestUnobstructedWaypoints;
     public static HashMap<Pair<MapLocation, MapLocation>, MapLocation> nextBestWaypoint;
     public static HashMap<Integer, MapLocation> lastVisited;
+    public static int numberOfConnectedComponents;
 
     // Enemy locations
     public static Stack<MapLocation> initialEnemyWorkers;
