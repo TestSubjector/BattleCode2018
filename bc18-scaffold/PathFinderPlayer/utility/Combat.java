@@ -612,62 +612,71 @@ public class Combat
                     moveUnitTo(unit, indexLocation);
                 }
             }
-
-            long nearestEnemyGridDistance = 100000L;
-            MapLocation nearestEnemyMapLocation = null;
-            for(QueuePair<Double, MapLocation> enemyHotspot : enemyHotspots)
+            else
             {
-                MapLocation mapLocation = enemyHotspot.getSecond();
-                long enemyGridDistance = diagonalDistanceBetween(unitMapLocation, mapLocation);
-                if(enemyGridDistance < nearestEnemyGridDistance)
+                long nearestEnemyGridDistance = 100000L;
+                MapLocation nearestEnemyMapLocation = null;
+                for(QueuePair<Double, MapLocation> enemyHotspot : enemyHotspots)
                 {
-                    nearestEnemyMapLocation = mapLocation;
-                    nearestEnemyGridDistance = enemyGridDistance;
-                }
-            }
-            if(nearestEnemyMapLocation == null || !moveUnitTo(unit, nearestEnemyMapLocation))
-            {
-                long nearestEnemyFactoryDistance = 100000L;
-                MapLocation nearestEnemyFactoryLocation = null;
-                Iterator<MapLocation> it = enemyFactories.iterator();
-                while (it.hasNext())
-                {
-                    MapLocation factoryMapLocation = it.next();
-                    long enemyFactoryDistance = diagonalDistanceBetween(unitMapLocation, factoryMapLocation);
-                    if(enemyFactoryDistance < nearestEnemyFactoryDistance)
+                    MapLocation mapLocation = enemyHotspot.getSecond();
+                    long enemyGridDistance = diagonalDistanceBetween(unitMapLocation, mapLocation);
+                    if(enemyGridDistance < nearestEnemyGridDistance)
                     {
-                        nearestEnemyFactoryLocation = factoryMapLocation;
-                        nearestEnemyFactoryDistance = enemyFactoryDistance;
+                        nearestEnemyMapLocation = mapLocation;
+                        nearestEnemyGridDistance = enemyGridDistance;
                     }
                     if(nearestEnemyMapLocation != null && unit.visionRange() >= unitMapLocation.distanceSquaredTo(nearestEnemyMapLocation))
                     {
                         nearestEnemyMapLocation = null;
-                        enemyFactories.remove(it);
+                        // Since no enemy unit there and is a still a hotspot
+                        enemyHotspots.remove(enemyHotspot);
                     }
                 }
-                if (nearestEnemyFactoryLocation == null || !moveUnitTo(unit, nearestEnemyFactoryLocation))
+                if(nearestEnemyMapLocation == null || !moveUnitTo(unit, nearestEnemyMapLocation))
                 {
-                    if (homePlanet == Planet.Earth)
+                    long nearestEnemyFactoryDistance = 100000L;
+                    MapLocation nearestEnemyFactoryLocation = null;
+                    Iterator<MapLocation> it = enemyFactories.iterator();
+                    while (it.hasNext())
                     {
-                        if(moveUnitTo(unit, initialEnemyWorkers.peek()))
+                        MapLocation factoryMapLocation = it.next();
+                        long enemyFactoryDistance = diagonalDistanceBetween(unitMapLocation, factoryMapLocation);
+                        if(enemyFactoryDistance < nearestEnemyFactoryDistance)
                         {
-                            hasMovedThisTurn = true;
+                            nearestEnemyFactoryLocation = factoryMapLocation;
+                            nearestEnemyFactoryDistance = enemyFactoryDistance;
+                        }
+                        if(nearestEnemyMapLocation != null && unit.visionRange() >= unitMapLocation.distanceSquaredTo(nearestEnemyMapLocation))
+                        {
+                            nearestEnemyMapLocation = null;
+                            enemyFactories.remove(it);
                         }
                     }
-                    else
+                    if (nearestEnemyFactoryLocation == null || !moveUnitTo(unit, nearestEnemyFactoryLocation))
                     {
-                        moveUnitInRandomDirection(unit);
+                        if (homePlanet == Planet.Earth)
+                        {
+                            if(moveUnitTo(unit, initialEnemyWorkers.peek()))
+                            {
+                                hasMovedThisTurn = true;
+                            }
+                        }
+                        else
+                        {
+                            moveUnitInRandomDirection(unit);
+                        }
                     }
                 }
-            }
-            else if(!hasMovedThisTurn)
-            {
-                moveUnitInRandomDirection(unit);
-                hasMovedThisTurn = true;
+                else if(!hasMovedThisTurn)
+                {
+                    moveUnitInRandomDirection(unit);
+                    hasMovedThisTurn = true;
+                }
             }
         }
     }
 
+    // TODO - Make sure they don't cooldown units that aren't required to be overcharged
     public static void doMicroHealers(Unit unit, MapLocation unitMapLocation, VecUnit nearbyEnemyUnits, VecUnit nearbyFriendlyUnits)
     {
         boolean hasHealedThisTurn = false;
@@ -796,53 +805,62 @@ public class Combat
                     moveUnitTo(unit, indexLocation);
                 }
             }
-            long nearestEnemyGridDistance = 100000L;
-            MapLocation nearestEnemyMapLocation = null;
-            for(QueuePair<Double, MapLocation> enemyHotspot : enemyHotspots)
+            else
             {
-                MapLocation mapLocation = enemyHotspot.getSecond();
-                long enemyGridDistance = diagonalDistanceBetween(unitMapLocation, mapLocation);
-                if(enemyGridDistance < nearestEnemyGridDistance)
+                long nearestEnemyGridDistance = 100000L;
+                MapLocation nearestEnemyMapLocation = null;
+                for(QueuePair<Double, MapLocation> enemyHotspot : enemyHotspots)
                 {
-                    nearestEnemyMapLocation = mapLocation;
-                    nearestEnemyGridDistance = enemyGridDistance;
-                }
-            }
-            if(nearestEnemyMapLocation == null || !moveUnitTo(unit, nearestEnemyMapLocation))
-            {
-                long nearestEnemyFactoryDistance = 100000L;
-                MapLocation nearestEnemyFactoryLocation = null;
-                Iterator<MapLocation> it = enemyFactories.iterator();
-                while (it.hasNext())
-                {
-                    MapLocation factoryMapLocation = it.next();
-                    long enemyFactoryDistance = diagonalDistanceBetween(unitMapLocation, factoryMapLocation);
-                    if(enemyFactoryDistance < nearestEnemyFactoryDistance)
+                    MapLocation mapLocation = enemyHotspot.getSecond();
+                    long enemyGridDistance = diagonalDistanceBetween(unitMapLocation, mapLocation);
+                    if(enemyGridDistance < nearestEnemyGridDistance)
                     {
-                        nearestEnemyFactoryLocation = factoryMapLocation;
-                        nearestEnemyFactoryDistance = enemyFactoryDistance;
+                        nearestEnemyMapLocation = mapLocation;
+                        nearestEnemyGridDistance = enemyGridDistance;
                     }
                     if(nearestEnemyMapLocation != null && unit.visionRange() >= unitMapLocation.distanceSquaredTo(nearestEnemyMapLocation))
                     {
                         nearestEnemyMapLocation = null;
-                        enemyFactories.remove(it);
+                        // Since no enemy unit there and is a still a hotspot
+                        enemyHotspots.remove(enemyHotspot);
                     }
                 }
-                if (nearestEnemyFactoryLocation == null || !moveUnitTo(unit, nearestEnemyFactoryLocation))
+                if(nearestEnemyMapLocation == null || !moveUnitTo(unit, nearestEnemyMapLocation))
                 {
-                    if (homePlanet == Planet.Earth)
+                    long nearestEnemyFactoryDistance = 100000L;
+                    MapLocation nearestEnemyFactoryLocation = null;
+                    Iterator<MapLocation> it = enemyFactories.iterator();
+                    while (it.hasNext())
                     {
-                    	moveUnitTo(unit, initialEnemyWorkers.peek());
+                        MapLocation factoryMapLocation = it.next();
+                        long enemyFactoryDistance = diagonalDistanceBetween(unitMapLocation, factoryMapLocation);
+                        if(enemyFactoryDistance < nearestEnemyFactoryDistance)
+                        {
+                            nearestEnemyFactoryLocation = factoryMapLocation;
+                            nearestEnemyFactoryDistance = enemyFactoryDistance;
+                        }
+                        if(nearestEnemyMapLocation != null && unit.visionRange() >= unitMapLocation.distanceSquaredTo(nearestEnemyMapLocation))
+                        {
+                            nearestEnemyMapLocation = null;
+                            enemyFactories.remove(it);
+                        }
                     }
-                    else
+                    if (nearestEnemyFactoryLocation == null || !moveUnitTo(unit, nearestEnemyFactoryLocation))
                     {
-                        moveUnitInRandomDirection(unit);
+                        if (homePlanet == Planet.Earth)
+                        {
+                            moveUnitTo(unit, initialEnemyWorkers.peek());
+                        }
+                        else
+                        {
+                            moveUnitInRandomDirection(unit);
+                        }
                     }
                 }
-            }
-            else
-            {
-                moveUnitInRandomDirection(unit);
+                else
+                {
+                    moveUnitInRandomDirection(unit);
+                }
             }
         }
     }
@@ -997,62 +1015,66 @@ public class Combat
                     moveUnitTo(unit, indexLocation);
                 }
             }
-            long nearestEnemyGridDistance = 1000000L;
-            MapLocation nearestEnemyMapLocation = null;
-            for(QueuePair<Double, MapLocation> enemyHotspot : enemyHotspots)
+            else
             {
-                MapLocation mapLocation = enemyHotspot.getSecond();
-                long enemyGridDistance = diagonalDistanceBetween(unitMapLocation, mapLocation);
-                if(enemyGridDistance < nearestEnemyGridDistance)
+                long nearestEnemyGridDistance = 1000000L;
+                MapLocation nearestEnemyMapLocation = null;
+                for(QueuePair<Double, MapLocation> enemyHotspot : enemyHotspots)
                 {
-                    nearestEnemyMapLocation = mapLocation;
-                    nearestEnemyGridDistance = enemyGridDistance;
-                }
-                if(nearestEnemyMapLocation != null && unit.visionRange() >= unitMapLocation.distanceSquaredTo(nearestEnemyMapLocation))
-                {
-                    nearestEnemyMapLocation = null;
-                }
-            }
-            if(nearestEnemyMapLocation == null || !moveUnitTo(unit, nearestEnemyMapLocation))
-            {
-                long nearestEnemyFactoryDistance = 100000L;
-                MapLocation nearestEnemyFactoryLocation = null;
-                Iterator<MapLocation> it = enemyFactories.iterator();
-                while (it.hasNext())
-                {
-                    MapLocation factoryMapLocation = it.next();
-                    long enemyFactoryDistance = diagonalDistanceBetween(unitMapLocation, factoryMapLocation);
-                    if(enemyFactoryDistance < nearestEnemyFactoryDistance)
+                    MapLocation mapLocation = enemyHotspot.getSecond();
+                    long enemyGridDistance = diagonalDistanceBetween(unitMapLocation, mapLocation);
+                    if(enemyGridDistance < nearestEnemyGridDistance)
                     {
-                        nearestEnemyFactoryLocation = factoryMapLocation;
-                        nearestEnemyFactoryDistance = enemyFactoryDistance;
+                        nearestEnemyMapLocation = mapLocation;
+                        nearestEnemyGridDistance = enemyGridDistance;
+                    }
+                    if(nearestEnemyMapLocation != null && unit.visionRange() >= unitMapLocation.distanceSquaredTo(nearestEnemyMapLocation))
+                    {
+                        nearestEnemyMapLocation = null;
+                        // Since no enemy unit there and is a still a hotspot
+                        enemyHotspots.remove(enemyHotspot);
                     }
                 }
-                if (nearestEnemyFactoryLocation == null || !moveUnitTo(unit, nearestEnemyFactoryLocation))
+                if(nearestEnemyMapLocation == null || !moveUnitTo(unit, nearestEnemyMapLocation))
                 {
-                    if (homePlanet == Planet.Earth)
+                    long nearestEnemyFactoryDistance = 100000L;
+                    MapLocation nearestEnemyFactoryLocation = null;
+                    Iterator<MapLocation> it = enemyFactories.iterator();
+                    while (it.hasNext())
                     {
-                    	if(moveUnitTo(unit, initialEnemyWorkers.peek()))
+                        MapLocation factoryMapLocation = it.next();
+                        long enemyFactoryDistance = diagonalDistanceBetween(unitMapLocation, factoryMapLocation);
+                        if(enemyFactoryDistance < nearestEnemyFactoryDistance)
                         {
-                            hasMovedThisTurn = true;
+                            nearestEnemyFactoryLocation = factoryMapLocation;
+                            nearestEnemyFactoryDistance = enemyFactoryDistance;
                         }
                     }
-                    else
+                    if (nearestEnemyFactoryLocation == null || !moveUnitTo(unit, nearestEnemyFactoryLocation))
                     {
-                        moveUnitInRandomDirection(unit);
+                        if (homePlanet == Planet.Earth)
+                        {
+                            if(moveUnitTo(unit, initialEnemyWorkers.peek()))
+                            {
+                                hasMovedThisTurn = true;
+                            }
+                        }
+                        else
+                        {
+                            moveUnitInRandomDirection(unit);
+                        }
                     }
                 }
-            }
-            else if(!hasMovedThisTurn)
-            {
-                moveUnitInRandomDirection(unit);
-                hasMovedThisTurn = true;
+                else if(!hasMovedThisTurn)
+                {
+                    moveUnitInRandomDirection(unit);
+                    hasMovedThisTurn = true;
+                }
             }
         }
     }
     
     // Decides the incentive to attack an unit by Rangers
-    // TODO - Make it live rather fixed static values, if computation allows
     /*
     public static long setBountyScore(Unit unit, Unit enemyUnit)
     {
@@ -1082,7 +1104,6 @@ public class Combat
         {
             if (enemyUnitType == UnitType.Knight)
             {
-                // TODO - Add run away instructions later
                 //(6 * 4 * 40 / 2)
                 incentiveToHunt += 6 * (distanceBetweenUnitsSquared - 3) * 20;
             }
