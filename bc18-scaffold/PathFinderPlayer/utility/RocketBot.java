@@ -64,7 +64,7 @@ public class RocketBot
                     gc.load(unit.id(), nearbyUnit.id());
                 }
             }
-            if (unit.structureGarrison().size() >= unit.structureMaxCapacity() / 2)
+            if (unit.structureGarrison().size() >= 2 * unit.structureMaxCapacity() / 3)
             {
                 QueuePair<Long, MapLocation> destPair = potentialLandingSites.poll();
 //                System.out.println("potentialLandingSites head : " + destPair.toString());
