@@ -68,283 +68,281 @@ public class Combat
         }
     }
 
-//    public static boolean canWin1v1(Unit unit , Unit enemyUnit)
-//    {
-//        UnitType enemyUnitType = enemyUnit.unitType();
-//        // Non-attacking units
-//        if(enemyUnitType != UnitType.Ranger && enemyUnitType != UnitType.Knight && enemyUnitType != UnitType.Mage)
-//        {
-//            return true;
-//        }
-//
-//        // Our Unit Calculation
-//        long numberOfAttacksAfterFirstToKillEnemyUnit;
-//        if(enemyUnit.unitType() == UnitType.Knight)
-//        {
-//            numberOfAttacksAfterFirstToKillEnemyUnit = (long) (enemyUnit.health() - 0.001) / (unit.damage() - enemyUnit.knightDefense());
-//        }
-//        else
-//        {
-//            numberOfAttacksAfterFirstToKillEnemyUnit = (long) ((enemyUnit.health() - 0.001) / unit.damage());
-//        }
-//
-//        long turnsTillUnitCanAttack = unit.attackHeat() / 10;
-//        long effectiveAttackDelay = unit.attackCooldown() / 10;
-//        long turnsToKillEnemyUnit = turnsTillUnitCanAttack + effectiveAttackDelay * numberOfAttacksAfterFirstToKillEnemyUnit;
-//
-//        // Enemy Unit Calculation
-//        long numberOfAttacksAfterFirstForEnemyToKillUnit;
-//        if(unit.unitType() == UnitType.Knight)
-//        {
-//            numberOfAttacksAfterFirstForEnemyToKillUnit = (long) (unit.health() - 0.001) / (enemyUnit.damage() - unit.knightDefense());
-//        }
-//        else
-//        {
-//            numberOfAttacksAfterFirstForEnemyToKillUnit = (long) ((unit.health() - 0.001) / enemyUnit.damage());
-//        }
-//
-//        long turnsTillEnemyCanAttack = (long) enemyUnit.attackHeat()/ 10;
-//        long effectiveEnemyAttackDelay = (long) enemyUnit.attackCooldown()/10;
-//
-//        long turnsForEnemyToKillUnit = turnsTillEnemyCanAttack + effectiveEnemyAttackDelay * numberOfAttacksAfterFirstForEnemyToKillUnit;
-//
-//        return turnsToKillEnemyUnit <= turnsForEnemyToKillUnit;
-//    }
-//
-//    // TODO - Create function
-//    public static boolean canWin1v1AfterMovingTo(Unit unit , Unit enemyUnit, MapLocation unitMapLocation)
-//    {
-//        // I require the distance from the Maplocation in front of me to the enemy location
-//        return false;
-//    }
-//
-//    // TODO - Create function and use later to harass enemy
-//    public static void enemyUnitHarasser(Unit unit, Unit closestEnemyUnit, VecUnit nearbyEnemyUnits)
-//    {
-//
-//    }
-//
-//    // TODO - Implement in Workers for mining locations
-//    // Returns whether it's a good move to visit a certain location
-//    public static boolean isItSafeToMoveTo(Unit unit, MapLocation moveUnitToLocation, VecUnit nearbyEnemyUnits)
-//    {
-//        Unit loneAttacker = null;
-//        int numAttackers = 0;
-//        for (int j = 0; j < nearbyEnemyUnits.size(); j++)
-//        {
-//            Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
-//            UnitType enemyUnitType = nearbyEnemyUnit.unitType();
-//            if(enemyUnitType != UnitType.Ranger && enemyUnitType != UnitType.Knight && enemyUnitType != UnitType.Mage)
-//            {
-//                continue;
-//            }
-//            MapLocation nearbyEnemyUnitLocation = nearbyEnemyUnit.location().mapLocation();
-//            switch (nearbyEnemyUnit.unitType())
-//            {
-//                case Ranger:
-//                    if (moveUnitToLocation.distanceSquaredTo(nearbyEnemyUnitLocation) > 10)
-//                    {
-//                        return false;
-//                    }
-//                    break;
-//                default:
-//                    if (nearbyEnemyUnit.attackRange() >= moveUnitToLocation.distanceSquaredTo(nearbyEnemyUnitLocation))
-//                    {
-//                        numAttackers++;
-//                        if (numAttackers >= 2)
-//                        {
-//                            return false;
-//                        }
-//                        loneAttacker = nearbyEnemyUnit;
-//                    }
-//                break;
-//            }
-//        }
-//
-//        if (numAttackers == 0)
-//        {
-//            return true;
-//        }
-//        return canWin1v1(unit, loneAttacker);
-//    }
+    public static boolean canWin1v1(Unit unit , Unit enemyUnit)
+    {
+        UnitType enemyUnitType = enemyUnit.unitType();
+        // Non-attacking units
+        if(enemyUnitType != UnitType.Ranger && enemyUnitType != UnitType.Knight && enemyUnitType != UnitType.Mage)
+        {
+            return true;
+        }
 
-    // Find of number of units that can attack an location
-    // TODO - Find total damage they can deal
-//    public static int numberEnemyUnitsAimingAtLocation(MapLocation targetLocation, VecUnit nearbyEnemyUnits)
-//    {
-//        int locationExposure = 0;
-//        for (int j = 0; nearbyEnemyUnits != null && j < nearbyEnemyUnits.size(); j++)
-//        {
-//            Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
-//            UnitType enemyUnitType = nearbyEnemyUnit.unitType();
-//            if(enemyUnitType != UnitType.Ranger && enemyUnitType != UnitType.Knight && enemyUnitType != UnitType.Mage)
-//            {
-//                continue;
-//            }
-//            long distanceFromEnemyToLocation = targetLocation.distanceSquaredTo(nearbyEnemyUnit.location().mapLocation());
-//            if (nearbyEnemyUnit.unitType() == UnitType.Ranger)
-//            {
-//                if(distanceFromEnemyToLocation > 10 && distanceFromEnemyToLocation < 50)
-//                {
-//                    locationExposure++;
-//                }
-//            }
-//            else if (nearbyEnemyUnit.attackRange() >= distanceFromEnemyToLocation)
-//            {
-//                locationExposure++;
-//            }
-//        }
-//        return locationExposure;
-//    }
+        // Our Unit Calculation
+        long numberOfAttacksAfterFirstToKillEnemyUnit;
+        if(enemyUnit.unitType() == UnitType.Knight)
+        {
+            numberOfAttacksAfterFirstToKillEnemyUnit = (long) (enemyUnit.health() - 0.001) / (unit.damage() - enemyUnit.knightDefense());
+        }
+        else
+        {
+            numberOfAttacksAfterFirstToKillEnemyUnit = (long) ((enemyUnit.health() - 0.001) / unit.damage());
+        }
+
+        long turnsTillUnitCanAttack = unit.attackHeat() / 10;
+        long effectiveAttackDelay = unit.attackCooldown() / 10;
+        long turnsToKillEnemyUnit = turnsTillUnitCanAttack + effectiveAttackDelay * numberOfAttacksAfterFirstToKillEnemyUnit;
+
+        // Enemy Unit Calculation
+        long numberOfAttacksAfterFirstForEnemyToKillUnit;
+        if(unit.unitType() == UnitType.Knight)
+        {
+            numberOfAttacksAfterFirstForEnemyToKillUnit = (long) (unit.health() - 0.001) / (enemyUnit.damage() - unit.knightDefense());
+        }
+        else
+        {
+            numberOfAttacksAfterFirstForEnemyToKillUnit = (long) ((unit.health() - 0.001) / enemyUnit.damage());
+        }
+
+        long turnsTillEnemyCanAttack = (long) enemyUnit.attackHeat()/ 10;
+        long effectiveEnemyAttackDelay = (long) enemyUnit.attackCooldown()/10;
+
+        long turnsForEnemyToKillUnit = turnsTillEnemyCanAttack + effectiveEnemyAttackDelay * numberOfAttacksAfterFirstForEnemyToKillUnit;
+
+        return turnsToKillEnemyUnit <= turnsForEnemyToKillUnit;
+    }
+
+    // TODO - Create function
+    public static boolean canWin1v1AfterMovingTo(Unit unit , Unit enemyUnit, MapLocation unitMapLocation)
+    {
+        // I require the distance from the Maplocation in front of me to the enemy location
+        return false;
+    }
+
+    // TODO - Create function and use later to harass enemy
+    public static void enemyUnitHarasser(Unit unit, Unit closestEnemyUnit, VecUnit nearbyEnemyUnits)
+    {
+
+    }
+
+    // TODO - Implement in Workers for mining locations
+    // Returns whether it's a good move to visit a certain location
+    public static boolean isItSafeToMoveTo(Unit unit, MapLocation moveUnitToLocation, VecUnit nearbyEnemyUnits)
+    {
+        Unit loneAttacker = null;
+        int numAttackers = 0;
+        for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+        {
+            Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
+            UnitType enemyUnitType = nearbyEnemyUnit.unitType();
+            if(enemyUnitType != UnitType.Ranger && enemyUnitType != UnitType.Knight && enemyUnitType != UnitType.Mage)
+            {
+                continue;
+            }
+            MapLocation nearbyEnemyUnitLocation = nearbyEnemyUnit.location().mapLocation();
+            switch (nearbyEnemyUnit.unitType())
+            {
+                case Ranger:
+                    if (moveUnitToLocation.distanceSquaredTo(nearbyEnemyUnitLocation) > 10)
+                    {
+                        return false;
+                    }
+                    break;
+                default:
+                    if (nearbyEnemyUnit.attackRange() >= moveUnitToLocation.distanceSquaredTo(nearbyEnemyUnitLocation))
+                    {
+                        numAttackers++;
+                        if (numAttackers >= 2)
+                        {
+                            return false;
+                        }
+                        loneAttacker = nearbyEnemyUnit;
+                    }
+                break;
+            }
+        }
+
+        if (numAttackers == 0)
+        {
+            return true;
+        }
+        return canWin1v1(unit, loneAttacker);
+    }
+
+    public static int numberEnemyUnitsAimingAtLocation(MapLocation targetLocation, VecUnit nearbyEnemyUnits)
+    {
+        int locationExposure = 0;
+        for (int j = 0; nearbyEnemyUnits != null && j < nearbyEnemyUnits.size(); j++)
+        {
+            Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
+            UnitType enemyUnitType = nearbyEnemyUnit.unitType();
+            if(enemyUnitType != UnitType.Ranger && enemyUnitType != UnitType.Knight && enemyUnitType != UnitType.Mage)
+            {
+                continue;
+            }
+            long distanceFromEnemyToLocation = targetLocation.distanceSquaredTo(nearbyEnemyUnit.location().mapLocation());
+            if (nearbyEnemyUnit.unitType() == UnitType.Ranger)
+            {
+                if(distanceFromEnemyToLocation > 10 && distanceFromEnemyToLocation < 50)
+                {
+                    locationExposure++;
+                }
+            }
+            else if (nearbyEnemyUnit.attackRange() >= distanceFromEnemyToLocation)
+            {
+                locationExposure++;
+            }
+        }
+        return locationExposure;
+    }
 
 
-//    public static int numberFriendlyUnitsAimingAtLocation(MapLocation targetLocation, VecUnit nearbyFriendlyUnits)
-//    {
-//        int locationExposure = 0;
-//        for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
-//        {
-//            Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
-//            UnitType friendlyUnitType = nearbyFriendlyUnit.unitType();
-//            if(friendlyUnitType != UnitType.Ranger && friendlyUnitType != UnitType.Knight && friendlyUnitType != UnitType.Mage)
-//            {
-//                continue;
-//            }
-//            long distanceFromEnemyToLocation = targetLocation.distanceSquaredTo(nearbyFriendlyUnit.location().mapLocation());
-//            if (nearbyFriendlyUnit.unitType() == UnitType.Ranger)
-//            {
-//                if(distanceFromEnemyToLocation > 10 && distanceFromEnemyToLocation < 50)
-//                {
-//                    locationExposure++;
-//                }
-//            }
-//            else if (nearbyFriendlyUnit.attackRange() >= distanceFromEnemyToLocation)
-//            {
-//                locationExposure++;
-//            }
-//        }
-//        return locationExposure;
-//    }
-//
-//    public static boolean tryMoveToEngageEnemyAtLocationInOneTurnWithMaxEnemyExposure(Unit unit, MapLocation targetLocation, int maxEnemyExposure, VecUnit nearbyEnemyUnits)
-//    {
-//        Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
-//        Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
-//        for (Direction directionToMoveTo : tryDirection)
-//        {
-//            if (!gc.canMove(unit.id(), directionToMoveTo))
-//            {
-//                continue;
-//            }
-//            MapLocation moveLocation = unit.location().mapLocation().add(directionToMoveTo);
-//            if (unit.attackRange() < moveLocation.distanceSquaredTo(targetLocation))
-//            {
-//                continue; // must engage in one turn
-//            }
-//
-//            int enemyExposure = numberEnemyUnitsAimingAtLocation(moveLocation, nearbyEnemyUnits);
-//            if (enemyExposure <= maxEnemyExposure)
-//            {
-//                if(gc.isMoveReady(unit.id()))
-//                {
-//                    if(gc.canMove(unit.id(), directionToMoveTo))
-//                    {
-//                        gc.moveRobot(unit.id(), directionToMoveTo);
-//                        return true;
-//                    }
-//                }
-//            }
-//        }
-//        return false;
-//    }
-//
-//    public static boolean tryMoveToEngageEnemyAtLocationWithMaxEnemyExposure(Unit unit, MapLocation targetLocation, int maxEnemyExposure, VecUnit nearbyEnemyUnits)
-//    {
-//        Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
-//        Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
-//        for (Direction directionToMoveTo : tryDirection) {
-//            if (!gc.canMove(unit.id(), directionToMoveTo))
-//            {
-//                continue;
-//            }
-//            MapLocation moveLocation = unit.location().mapLocation().add(directionToMoveTo);
-//            int enemyExposure = numberEnemyUnitsAimingAtLocation(moveLocation, nearbyEnemyUnits);
-//            if (enemyExposure <= maxEnemyExposure)
-//            {
-//                if(unit.location().mapLocation().distanceSquaredTo(moveLocation) < 10 && unit.unitType() == UnitType.Ranger)
-//                {
-//                    continue;
-//                }
-//                else
-//                {
-//                    if(gc.isMoveReady(unit.id()))
-//                    {
-//                        if(gc.canMove(unit.id(), directionToMoveTo))
-//                        {
-//                            gc.moveRobot(unit.id(), directionToMoveTo);
-//                            return true;
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        return false;
-//    }
-//
-//    public static boolean tryMoveToEngageEnemyAtWithMaxEnemyExposure(Unit unit, MapLocation targetLocation, int maxEnemyExposure, VecUnit nearbyEnemyUnits)
-//    {
-//        Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
-//        Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
-//        for (Direction directionToMoveTo : tryDirection)
-//        {
-//            if (!gc.canMove(unit.id(), directionToMoveTo))
-//            {
-//                continue;
-//            }
-//            MapLocation moveLocation = unit.location().mapLocation().add(directionToMoveTo);
-//            int enemyExposure = numberEnemyUnitsAimingAtLocation(moveLocation, nearbyEnemyUnits);
-//            if (enemyExposure <= maxEnemyExposure)
-//            {
-//                gc.moveRobot(unit.id(), directionToMoveTo);
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
+    public static int numberFriendlyUnitsAimingAtLocation(MapLocation targetLocation, VecUnit nearbyFriendlyUnits)
+    {
+        int locationExposure = 0;
+        for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
+        {
+            Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
+            UnitType friendlyUnitType = nearbyFriendlyUnit.unitType();
+            if(friendlyUnitType != UnitType.Ranger && friendlyUnitType != UnitType.Knight && friendlyUnitType != UnitType.Mage)
+            {
+                continue;
+            }
+            long distanceFromEnemyToLocation = targetLocation.distanceSquaredTo(nearbyFriendlyUnit.location().mapLocation());
+            if (nearbyFriendlyUnit.unitType() == UnitType.Ranger)
+            {
+                if(distanceFromEnemyToLocation > 10 && distanceFromEnemyToLocation < 50)
+                {
+                    locationExposure++;
+                }
+            }
+            else if (nearbyFriendlyUnit.attackRange() >= distanceFromEnemyToLocation)
+            {
+                locationExposure++;
+            }
+        }
+        return locationExposure;
+    }
 
-//    // TODO - Factor in Cooldown
-//    private static int numberOfOtherAlliesInAttackRange(Unit unit, MapLocation targetLocation)
-//    {
-//        int allyAssistNumber = 0;
-//        VecUnit nearbyFriendlyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), unit.visionRange(), ourTeam);
-//        Unit nearbyFriendlyUnit;
-//        UnitType friendlyUnitType;
-//        long distanceToLocation;
-//        for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
-//        {
-//            nearbyFriendlyUnit  = nearbyFriendlyUnits.get(j);
-//            friendlyUnitType = nearbyFriendlyUnit.unitType();
-//            distanceToLocation = nearbyFriendlyUnit.location().mapLocation().distanceSquaredTo(targetLocation);
-//            if(friendlyUnitType != UnitType.Ranger && friendlyUnitType != UnitType.Knight && friendlyUnitType != UnitType.Mage)
-//            {
-//                continue;
-//            }
-//            else if(nearbyFriendlyUnit.attackRange() >= distanceToLocation)
-//            {
-//                if(friendlyUnitType == UnitType.Ranger)
-//                {
-//                    if(distanceToLocation >= 10)
-//                    {
-//                        allyAssistNumber++;
-//                    }
-//                }
-//                else
-//                {
-//                    allyAssistNumber++;
-//                }
-//            }
-//        }
-//        return allyAssistNumber;
-//    }
+    public static boolean tryMoveToEngageEnemyAtLocationInOneTurnWithMaxEnemyExposure(Unit unit, MapLocation targetLocation, int maxEnemyExposure, VecUnit nearbyEnemyUnits)
+    {
+        Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
+        Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
+        for (Direction directionToMoveTo : tryDirection)
+        {
+            if (!gc.canMove(unit.id(), directionToMoveTo))
+            {
+                continue;
+            }
+            MapLocation moveLocation = unit.location().mapLocation().add(directionToMoveTo);
+            if (unit.attackRange() < moveLocation.distanceSquaredTo(targetLocation))
+            {
+                continue; // must engage in one turn
+            }
+
+            int enemyExposure = numberEnemyUnitsAimingAtLocation(moveLocation, nearbyEnemyUnits);
+            if (enemyExposure <= maxEnemyExposure)
+            {
+                if(gc.isMoveReady(unit.id()))
+                {
+                    if(gc.canMove(unit.id(), directionToMoveTo))
+                    {
+                        gc.moveRobot(unit.id(), directionToMoveTo);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean tryMoveToEngageEnemyAtLocationWithMaxEnemyExposure(Unit unit, MapLocation targetLocation, int maxEnemyExposure, VecUnit nearbyEnemyUnits)
+    {
+        Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
+        Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
+        for (Direction directionToMoveTo : tryDirection) {
+            if (!gc.canMove(unit.id(), directionToMoveTo))
+            {
+                continue;
+            }
+            MapLocation moveLocation = unit.location().mapLocation().add(directionToMoveTo);
+            int enemyExposure = numberEnemyUnitsAimingAtLocation(moveLocation, nearbyEnemyUnits);
+            if (enemyExposure <= maxEnemyExposure)
+            {
+                if(unit.location().mapLocation().distanceSquaredTo(moveLocation) < 10 && unit.unitType() == UnitType.Ranger)
+                {
+                    continue;
+                }
+                else
+                {
+                    if(gc.isMoveReady(unit.id()))
+                    {
+                        if(gc.canMove(unit.id(), directionToMoveTo))
+                        {
+                            gc.moveRobot(unit.id(), directionToMoveTo);
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean tryMoveToEngageEnemyAtWithMaxEnemyExposure(Unit unit, MapLocation targetLocation, int maxEnemyExposure, VecUnit nearbyEnemyUnits)
+    {
+        Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
+        Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
+        for (Direction directionToMoveTo : tryDirection)
+        {
+            if (!gc.canMove(unit.id(), directionToMoveTo))
+            {
+                continue;
+            }
+            MapLocation moveLocation = unit.location().mapLocation().add(directionToMoveTo);
+            int enemyExposure = numberEnemyUnitsAimingAtLocation(moveLocation, nearbyEnemyUnits);
+            if (enemyExposure <= maxEnemyExposure)
+            {
+                gc.moveRobot(unit.id(), directionToMoveTo);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // TODO - Factor in Cooldown
+    private static int numberOfOtherAlliesInAttackRange(Unit unit, MapLocation targetLocation)
+    {
+        int allyAssistNumber = 0;
+        VecUnit nearbyFriendlyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), unit.visionRange(), ourTeam);
+        Unit nearbyFriendlyUnit;
+        UnitType friendlyUnitType;
+        long distanceToLocation;
+        for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
+        {
+            nearbyFriendlyUnit  = nearbyFriendlyUnits.get(j);
+            friendlyUnitType = nearbyFriendlyUnit.unitType();
+            distanceToLocation = nearbyFriendlyUnit.location().mapLocation().distanceSquaredTo(targetLocation);
+            if(friendlyUnitType != UnitType.Ranger && friendlyUnitType != UnitType.Knight && friendlyUnitType != UnitType.Mage)
+            {
+                continue;
+            }
+            else if(nearbyFriendlyUnit.attackRange() >= distanceToLocation)
+            {
+                if(friendlyUnitType == UnitType.Ranger)
+                {
+                    if(distanceToLocation >= 10)
+                    {
+                        allyAssistNumber++;
+                    }
+                }
+                else
+                {
+                    allyAssistNumber++;
+                }
+            }
+        }
+        return allyAssistNumber;
+    }
 
     public static double getEnemyUnitPriority(UnitType enemyUnit)
     {
@@ -499,51 +497,118 @@ public class Combat
                 }
                 else
                 {
-                    Unit bestTarget = null;
-                    long minimumEnemyDistance = 999999L;
-                    long enemyUnitHealth = 251;
-                    for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+                    if(sizeOfEnemy == 1)
                     {
-                        Unit enemyUnit = nearbyEnemyUnits.get(j);
-                        long enemyDistance = unitMapLocation.distanceSquaredTo(enemyUnit.location().mapLocation());
-                        if (enemyDistance < minimumEnemyDistance)
+                        Unit loneEnemyUnit = nearbyEnemyUnits.get(0);
+                        MapLocation loneEnemyUnitMapLocation = loneEnemyUnit.location().mapLocation();
+                        if(gc.canAttack(unit.id(), loneEnemyUnit.id()))
                         {
-                            enemyUnitHealth = enemyUnit.health();
-                            minimumEnemyDistance = enemyDistance;
-                            bestTarget = enemyUnit;
+                            if(canWin1v1(unit, loneEnemyUnit))
+                            {
+
+                                gc.attack(unit.id(), loneEnemyUnit.id());
+                                return;
+                            }
+                            else
+                            {
+                                boolean haveSupport = false;
+                                if(numberOfOtherAlliesInAttackRange(unit,loneEnemyUnitMapLocation ) > 0)
+                                {
+                                    haveSupport = true;
+                                }
+                                // Have ally help
+                                if(haveSupport)
+                                {
+                                    gc.attack(unit.id(), loneEnemyUnit.id());
+                                    return;
+                                }
+                                else
+                                {
+                                    // TODO - Retreat Function as we don't have backup
+                                    // Enemy can't fire. Shoot and retreat
+                                    if(loneEnemyUnit.attackCooldown() >= 20)
+                                    {
+
+                                        gc.attack(unit.id(), loneEnemyUnit.id());
+                                        return;
+                                    }
+                                    else
+                                    {
+                                        // If we can move, then try retreat
+                                        if(unit.movementHeat() <10)
+                                        {
+                                            // TODO - Retreat function here
+                                            if(moveUnitAwayFrom(unit, loneEnemyUnitMapLocation))
+                                            {
+                                                return;
+                                            }
+                                            else
+                                            {
+                                                // Desperate attack
+                                                gc.attack(unit.id(), loneEnemyUnit.id());
+                                                return;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            gc.attack(unit.id(), loneEnemyUnit.id());
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
                         }
-                        else if (enemyDistance == minimumEnemyDistance && enemyUnit.health() < enemyUnitHealth)
+                        else
                         {
-                            enemyUnitHealth = enemyUnit.health();
-                            minimumEnemyDistance = enemyDistance;
-                            bestTarget = enemyUnit;
+                            // Can't attack enemy unit
+                            if(unit.location().mapLocation().distanceSquaredTo(loneEnemyUnitMapLocation) > 10)
+                            {
+                                moveUnitTo(unit, loneEnemyUnit.location().mapLocation());
+                            }
+                            else
+                            {
+                                moveUnitAwayFrom(unit, loneEnemyUnitMapLocation);
+                            }
                         }
                     }
-                    if (bestTarget != null)
+                    // Multiple Units
+                    else
                     {
-//                    if(gc.isJavelinReady(unit.id()))
-//                    {
-//                        if(gc.canJavelin(unit.id(), bestTarget.id()))
-//                        {
-//                            gc.javelin(unit.id(), bestTarget.id());
-//                        }
-//                    }
-                        if (gc.canAttack(unit.id(), bestTarget.id()))
+                        Unit bestTarget = null;
+                        double bestTargetingMetric = 0;
+                        double maxAllyUnitsAttackingAnEnemy = 0;
+                        for (int j = 0; j < nearbyEnemyUnits.size(); j++)
                         {
-                            gc.attack(unit.id(), bestTarget.id());
+                            Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
+                            UnitType enemyUnitType = nearbyEnemyUnit.unitType();
+                            int attackNumber = numberOfOtherAlliesInAttackRange(unit, nearbyEnemyUnit.location().mapLocation());
+                            if(attackNumber > maxAllyUnitsAttackingAnEnemy)
+                            {
+                                maxAllyUnitsAttackingAnEnemy = attackNumber;
+                                double targetingMetric = getEnemyUnitPriority(enemyUnitType) * attackNumber/ nearbyEnemyUnit.health();
+                                if(targetingMetric > bestTargetingMetric)
+                                {
+                                    bestTargetingMetric = targetingMetric;
+                                    bestTarget = nearbyEnemyUnit;
+                                }
+                            }
                         }
-                        else if (unit.attackRange() < minimumEnemyDistance)
+                        if(bestTarget != null)
                         {
-                            if (moveUnitTo(unit, bestTarget.location().mapLocation()) && gc.canAttack(unit.id(), bestTarget.id()))
+                            if(gc.canAttack(unit.id(), bestTarget.id()))
                             {
                                 gc.attack(unit.id(), bestTarget.id());
-//                            if(gc.isJavelinReady(unit.id()))
-//                            {
-//                                if(gc.canJavelin(unit.id(), bestTarget.id()))
-//                                {
-//                                    gc.javelin(unit.id(), bestTarget.id());
-//                                }
-//                            }
+                                return;
+                            }
+                            else if(unit.attackRange() < unitMapLocation.distanceSquaredTo(bestTarget.location().mapLocation()))
+                            {
+                                // TODO - Retreat function here
+                                if(moveUnitTo(unit, bestTarget.location().mapLocation()) && gc.canAttack(unit.id(), bestTarget.id()))
+                                {
+                                    // Desperate attack
+                                    gc.attack(unit.id(), bestTarget.id());
+                                    return;
+                                }
                             }
                         }
                     }
@@ -552,28 +617,31 @@ public class Combat
             else if(unit.movementHeat() < 10)
             {
                 Unit bestTarget = null;
-                long minimumEnemyDistance = 99999L;
-                long enemyUnitHealth = 251;
+                double bestTargetingMetric = 0;
+                double maxAllyUnitsAttackingAnEnemy = 0;
                 for (int j = 0; j < nearbyEnemyUnits.size(); j++)
                 {
-                    Unit enemyUnit = nearbyEnemyUnits.get(j);
-                    long enemyDistance = unitMapLocation.distanceSquaredTo(enemyUnit.location().mapLocation());
-                    if (enemyDistance < minimumEnemyDistance)
+                    Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
+                    UnitType enemyUnitType = nearbyEnemyUnit.unitType();
+                    int attackNumber = numberOfOtherAlliesInAttackRange(unit, nearbyEnemyUnit.location().mapLocation());
+                    if(attackNumber > maxAllyUnitsAttackingAnEnemy)
                     {
-                        enemyUnitHealth = enemyUnit.health();
-                        minimumEnemyDistance = enemyDistance;
-                        bestTarget = enemyUnit;
-                    }
-                    else if (enemyDistance == minimumEnemyDistance && enemyUnit.health() < enemyUnitHealth)
-                    {
-                        enemyUnitHealth = enemyUnit.health();
-                        minimumEnemyDistance = enemyDistance;
-                        bestTarget = enemyUnit;
+                        maxAllyUnitsAttackingAnEnemy = attackNumber;
+                        double targetingMetric = getEnemyUnitPriority(enemyUnitType) * attackNumber/ nearbyEnemyUnit.health();
+                        if(targetingMetric > bestTargetingMetric)
+                        {
+                            bestTargetingMetric = targetingMetric;
+                            bestTarget = nearbyEnemyUnit;
+                        }
                     }
                 }
-                if(bestTarget != null)
+                if(bestTarget != null && unit.attackRange() < unitMapLocation.distanceSquaredTo(bestTarget.location().mapLocation()))
                 {
                     moveUnitTo(unit, bestTarget.location().mapLocation());
+                }
+                else
+                {
+                    moveUnitInRandomDirection(unit);
                 }
             }
         }
@@ -623,7 +691,12 @@ public class Combat
                 moveToEnemyBases(unit, unitMapLocation);
             }
         }
-        moveUnitInRandomDirection(unit);
+
+        // Lazying about
+        if(unit.attackHeat() < 10 && unit.abilityHeat() < 10)
+        {
+            moveUnitInRandomDirection(unit);
+        }
     }
 
     // TODO - Make sure they don't cooldown units that aren't required to be overcharged
@@ -865,9 +938,13 @@ public class Combat
                     }
                     else
                     {
+                        // Find first and second best target
                         Unit bestTarget = null;
+                        Unit secondBestTarget = null;
                         long minimumEnemyDistance = 999999L;
+                        long secondMinimumEnemyDistance = 1000000L;
                         long enemyUnitHealth = 251;
+                        long secondEnemyUnitHealth = 251;
                         for (int j = 0; j < nearbyEnemyUnits.size(); j++)
                         {
                             Unit enemyUnit = nearbyEnemyUnits.get(j);
@@ -880,30 +957,33 @@ public class Combat
                             }
                             else if (enemyDistance == minimumEnemyDistance && enemyUnit.health() < enemyUnitHealth)
                             {
+                                secondEnemyUnitHealth = enemyUnitHealth;
+                                secondMinimumEnemyDistance = minimumEnemyDistance;
+                                secondBestTarget = bestTarget;
                                 enemyUnitHealth = enemyUnit.health();
                                 minimumEnemyDistance = enemyDistance;
                                 bestTarget = enemyUnit;
                             }
+                            else if(enemyDistance < secondMinimumEnemyDistance)
+                            {
+                                secondEnemyUnitHealth = enemyUnit.health();
+                                secondMinimumEnemyDistance = enemyDistance;
+                                secondBestTarget = enemyUnit;
+                            }
+                            else if (enemyDistance == secondMinimumEnemyDistance && enemyUnit.health() < secondEnemyUnitHealth)
+                            {
+                                secondEnemyUnitHealth = enemyUnit.health();
+                                secondMinimumEnemyDistance = enemyDistance;
+                                secondBestTarget = enemyUnit;
+                            }
                         }
                         if (bestTarget != null)
                         {
-                            if(gc.isJavelinReady(unit.id()))
-                            {
-                                if(gc.canJavelin(unit.id(), bestTarget.id()))
-                                {
-                                    gc.javelin(unit.id(), bestTarget.id());
-                                }
-                            }
                             if (gc.canAttack(unit.id(), bestTarget.id()))
                             {
                                 gc.attack(unit.id(), bestTarget.id());
-                                return;
-                            }
-                            else if (unit.attackRange() < minimumEnemyDistance)
-                            {
-                                if (moveUnitTo(unit, bestTarget.location().mapLocation()) && gc.canAttack(unit.id(), bestTarget.id()))
+                                if(enemyUnitHealth > 60 || (bestTarget.unitType() == UnitType.Knight && enemyUnitHealth > 45))
                                 {
-                                    gc.attack(unit.id(), bestTarget.id());
                                     if(gc.isJavelinReady(unit.id()))
                                     {
                                         if(gc.canJavelin(unit.id(), bestTarget.id()))
@@ -911,7 +991,53 @@ public class Combat
                                             gc.javelin(unit.id(), bestTarget.id());
                                         }
                                     }
-                                    return;
+                                }
+                                else if(secondBestTarget != null)
+                                {
+                                    if(gc.isJavelinReady(unit.id()))
+                                    {
+                                        if(gc.canJavelin(unit.id(), secondBestTarget.id()))
+                                        {
+                                            gc.javelin(unit.id(), secondBestTarget.id());
+                                        }
+                                    }
+                                }
+                            }
+                            else if (unit.attackRange() < minimumEnemyDistance)
+                            {
+                                if (moveUnitTo(unit, bestTarget.location().mapLocation()))
+                                {
+                                    if(gc.canAttack(unit.id(), bestTarget.id()))
+                                    {
+                                        gc.attack(unit.id(), bestTarget.id());
+                                        if(enemyUnitHealth > 60 || (bestTarget.unitType() == UnitType.Knight && enemyUnitHealth > 45))
+                                        {
+                                            if(gc.isJavelinReady(unit.id()))
+                                            {
+                                                if(gc.canJavelin(unit.id(), bestTarget.id()))
+                                                {
+                                                    gc.javelin(unit.id(), bestTarget.id());
+                                                }
+                                            }
+                                        }
+                                        else if(secondBestTarget != null)
+                                        {
+                                            if(gc.isJavelinReady(unit.id()))
+                                            {
+                                                if(gc.canJavelin(unit.id(), secondBestTarget.id()))
+                                                {
+                                                    gc.javelin(unit.id(), secondBestTarget.id());
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else if(gc.isJavelinReady(unit.id()))
+                                    {
+                                        if(gc.canJavelin(unit.id(), bestTarget.id()))
+                                        {
+                                            gc.javelin(unit.id(), bestTarget.id());
+                                        }
+                                    }
                                 }
                             }
                         }
