@@ -252,11 +252,10 @@ public class DecisionTree
         }
     }
 
-    // Witch of Agnesi computation breaker
     public static boolean switchToPrimitiveMind(long currentRound, int timeLeft)
     {
-        // Give 5 secs to pathfinding
-        // Constant value by integrating (8*57^3)/(x^2 + 57^2) dx from x = -infinity to -375
-        return timeLeft < 18000 * (Math.tanh((currentRound - 375) / 57)) + 26500;
+        // Gives a leeway of 500 ms
+        // Constant value by integrating (8*57^3)/(x^2 + 57^2) dx from x = -infinity to -375 - Not anymore
+        return timeLeft < 501;
     }
 }

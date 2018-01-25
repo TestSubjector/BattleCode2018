@@ -167,6 +167,7 @@ public class Player
 //                System.out.println();
                 if (switchToPrimitiveMind(currentRound, timeLeftMs) && currentRound < 700)
                 {
+                    System.out.println("Switching to primitive mind");
                     botIntelligenceLevel = 0;
                 }
                 else

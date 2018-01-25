@@ -32,7 +32,7 @@ public class Combat
 
     public static void simpleCombat(Unit unit, VecUnit nearbyEnemyUnits)
     {
-        if(gc.isAttackReady(unit.id()))
+        if(gc.isAttackReady(unit.id()) && nearbyEnemyUnits != null)
         {
             for (int j = 0; nearbyEnemyUnits != null && j < nearbyEnemyUnits.size(); j++)
             {
@@ -49,105 +49,124 @@ public class Combat
         }
     }
 
-    public static boolean canWin1v1(Unit unit , Unit enemyUnit)
+    public static void simpleHeal(Unit unit, VecUnit nearbyFriendlyUnits)
     {
-        UnitType enemyUnitType = enemyUnit.unitType();
-        // Non-attacking units
-        if(enemyUnitType != UnitType.Ranger && enemyUnitType != UnitType.Knight && enemyUnitType != UnitType.Mage)
+        if(gc.isHealReady(unit.id()) && nearbyFriendlyUnits != null)
         {
-            return true;
-        }
-
-        // Our Unit Calculation
-        long numberOfAttacksAfterFirstToKillEnemyUnit;
-        if(enemyUnit.unitType() == UnitType.Knight)
-        {
-            numberOfAttacksAfterFirstToKillEnemyUnit = (long) (enemyUnit.health() - 0.001) / (unit.damage() - enemyUnit.knightDefense());
-        }
-        else
-        {
-            numberOfAttacksAfterFirstToKillEnemyUnit = (long) ((enemyUnit.health() - 0.001) / unit.damage());
-        }
-
-        long turnsTillUnitCanAttack = unit.attackHeat() / 10;
-        long effectiveAttackDelay = unit.attackCooldown() / 10;
-        long turnsToKillEnemyUnit = turnsTillUnitCanAttack + effectiveAttackDelay * numberOfAttacksAfterFirstToKillEnemyUnit;
-
-        // Enemy Unit Calculation
-        long numberOfAttacksAfterFirstForEnemyToKillUnit;
-        if(unit.unitType() == UnitType.Knight)
-        {
-            numberOfAttacksAfterFirstForEnemyToKillUnit = (long) (unit.health() - 0.001) / (enemyUnit.damage() - unit.knightDefense());
-        }
-        else
-        {
-            numberOfAttacksAfterFirstForEnemyToKillUnit = (long) ((unit.health() - 0.001) / enemyUnit.damage());
-        }
-
-        long turnsTillEnemyCanAttack = (long) enemyUnit.attackHeat()/ 10;
-        long effectiveEnemyAttackDelay = (long) enemyUnit.attackCooldown()/10;
-
-        long turnsForEnemyToKillUnit = turnsTillEnemyCanAttack + effectiveEnemyAttackDelay * numberOfAttacksAfterFirstForEnemyToKillUnit;
-
-        return turnsToKillEnemyUnit <= turnsForEnemyToKillUnit;
-    }
-
-    // TODO - Create function
-    public static boolean canWin1v1AfterMovingTo(Unit unit , Unit enemyUnit, MapLocation unitMapLocation)
-    {
-        // I require the distance from the Maplocation in front of me to the enemy location
-        return false;
-    }
-
-    // TODO - Create function and use later to harass enemy
-    public static void enemyUnitHarasser(Unit unit, Unit closestEnemyUnit, VecUnit nearbyEnemyUnits)
-    {
-
-    }
-
-    // TODO - Implement in Workers for mining locations
-    // Returns whether it's a good move to visit a certain location
-    public static boolean isItSafeToMoveTo(Unit unit, MapLocation moveUnitToLocation, VecUnit nearbyEnemyUnits)
-    {
-        Unit loneAttacker = null;
-        int numAttackers = 0;
-        for (int j = 0; nearbyEnemyUnits != null && j < nearbyEnemyUnits.size(); j++)
-        {
-            Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
-            UnitType enemyUnitType = nearbyEnemyUnit.unitType();
-            if(enemyUnitType != UnitType.Ranger && enemyUnitType != UnitType.Knight && enemyUnitType != UnitType.Mage)
+            for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
             {
-                continue;
-            }
-            MapLocation nearbyEnemyUnitLocation = nearbyEnemyUnit.location().mapLocation();
-            switch (nearbyEnemyUnit.unitType())
-            {
-                case Ranger:
-                    if (moveUnitToLocation.distanceSquaredTo(nearbyEnemyUnitLocation) > 10)
-                    {
-                        return false;
-                    }
+                if (gc.canHeal(unit.id(), nearbyFriendlyUnits.get(j).id()))
+                {
+                    gc.heal(unit.id(), nearbyFriendlyUnits.get(j).id());
                     break;
-                default:
-                    if (nearbyEnemyUnit.attackRange() >= moveUnitToLocation.distanceSquaredTo(nearbyEnemyUnitLocation))
-                    {
-                        numAttackers++;
-                        if (numAttackers >= 2)
-                        {
-                            return false;
-                        }
-                        loneAttacker = nearbyEnemyUnit;
-                    }
-                break;
+                }
             }
         }
-
-        if (numAttackers == 0)
+        else
         {
-            return true;
+            moveUnitTowards(unit, nearbyFriendlyUnits.get(0).location().mapLocation());
         }
-        return canWin1v1(unit, loneAttacker);
     }
+
+//    public static boolean canWin1v1(Unit unit , Unit enemyUnit)
+//    {
+//        UnitType enemyUnitType = enemyUnit.unitType();
+//        // Non-attacking units
+//        if(enemyUnitType != UnitType.Ranger && enemyUnitType != UnitType.Knight && enemyUnitType != UnitType.Mage)
+//        {
+//            return true;
+//        }
+//
+//        // Our Unit Calculation
+//        long numberOfAttacksAfterFirstToKillEnemyUnit;
+//        if(enemyUnit.unitType() == UnitType.Knight)
+//        {
+//            numberOfAttacksAfterFirstToKillEnemyUnit = (long) (enemyUnit.health() - 0.001) / (unit.damage() - enemyUnit.knightDefense());
+//        }
+//        else
+//        {
+//            numberOfAttacksAfterFirstToKillEnemyUnit = (long) ((enemyUnit.health() - 0.001) / unit.damage());
+//        }
+//
+//        long turnsTillUnitCanAttack = unit.attackHeat() / 10;
+//        long effectiveAttackDelay = unit.attackCooldown() / 10;
+//        long turnsToKillEnemyUnit = turnsTillUnitCanAttack + effectiveAttackDelay * numberOfAttacksAfterFirstToKillEnemyUnit;
+//
+//        // Enemy Unit Calculation
+//        long numberOfAttacksAfterFirstForEnemyToKillUnit;
+//        if(unit.unitType() == UnitType.Knight)
+//        {
+//            numberOfAttacksAfterFirstForEnemyToKillUnit = (long) (unit.health() - 0.001) / (enemyUnit.damage() - unit.knightDefense());
+//        }
+//        else
+//        {
+//            numberOfAttacksAfterFirstForEnemyToKillUnit = (long) ((unit.health() - 0.001) / enemyUnit.damage());
+//        }
+//
+//        long turnsTillEnemyCanAttack = (long) enemyUnit.attackHeat()/ 10;
+//        long effectiveEnemyAttackDelay = (long) enemyUnit.attackCooldown()/10;
+//
+//        long turnsForEnemyToKillUnit = turnsTillEnemyCanAttack + effectiveEnemyAttackDelay * numberOfAttacksAfterFirstForEnemyToKillUnit;
+//
+//        return turnsToKillEnemyUnit <= turnsForEnemyToKillUnit;
+//    }
+//
+//    // TODO - Create function
+//    public static boolean canWin1v1AfterMovingTo(Unit unit , Unit enemyUnit, MapLocation unitMapLocation)
+//    {
+//        // I require the distance from the Maplocation in front of me to the enemy location
+//        return false;
+//    }
+//
+//    // TODO - Create function and use later to harass enemy
+//    public static void enemyUnitHarasser(Unit unit, Unit closestEnemyUnit, VecUnit nearbyEnemyUnits)
+//    {
+//
+//    }
+//
+//    // TODO - Implement in Workers for mining locations
+//    // Returns whether it's a good move to visit a certain location
+//    public static boolean isItSafeToMoveTo(Unit unit, MapLocation moveUnitToLocation, VecUnit nearbyEnemyUnits)
+//    {
+//        Unit loneAttacker = null;
+//        int numAttackers = 0;
+//        for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+//        {
+//            Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
+//            UnitType enemyUnitType = nearbyEnemyUnit.unitType();
+//            if(enemyUnitType != UnitType.Ranger && enemyUnitType != UnitType.Knight && enemyUnitType != UnitType.Mage)
+//            {
+//                continue;
+//            }
+//            MapLocation nearbyEnemyUnitLocation = nearbyEnemyUnit.location().mapLocation();
+//            switch (nearbyEnemyUnit.unitType())
+//            {
+//                case Ranger:
+//                    if (moveUnitToLocation.distanceSquaredTo(nearbyEnemyUnitLocation) > 10)
+//                    {
+//                        return false;
+//                    }
+//                    break;
+//                default:
+//                    if (nearbyEnemyUnit.attackRange() >= moveUnitToLocation.distanceSquaredTo(nearbyEnemyUnitLocation))
+//                    {
+//                        numAttackers++;
+//                        if (numAttackers >= 2)
+//                        {
+//                            return false;
+//                        }
+//                        loneAttacker = nearbyEnemyUnit;
+//                    }
+//                break;
+//            }
+//        }
+//
+//        if (numAttackers == 0)
+//        {
+//            return true;
+//        }
+//        return canWin1v1(unit, loneAttacker);
+//    }
 
     // Find of number of units that can attack an location
     // TODO - Find total damage they can deal
@@ -628,7 +647,11 @@ public class Combat
         // TODO - Give combat units priority over workers
         if (gc.isHealReady(unit.id()))
         {
-            if(nearbyFriendlyUnits != null && nearbyFriendlyUnits.size() != 0)
+            if(botIntelligenceLevel == 0)
+            {
+                simpleHeal(unit, nearbyFriendlyUnits);
+            }
+            else if(nearbyFriendlyUnits != null && nearbyFriendlyUnits.size() != 0)
             {
                 long heathMinimumInRange = 250;
                 long heathMinimumOutOfRange = 250;
@@ -911,11 +934,11 @@ public class Combat
             {
                 if(nearbyEnemyUnits.size() != 0)
                 {
-//                    if (botIntelligenceLevel == 0)
-//                    {
-//                        simpleCombat(unit, nearbyEnemyUnits);
-//                    }
-//                    else
+                    if (botIntelligenceLevel == 0)
+                    {
+                        simpleCombat(unit, nearbyEnemyUnits);
+                    }
+                    else
                     {
                         Unit bestTarget = null;
                         long minimumEnemyDistance = 999999L;
