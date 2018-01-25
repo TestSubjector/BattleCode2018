@@ -111,203 +111,202 @@ public class Combat
         return turnsToKillEnemyUnit <= turnsForEnemyToKillUnit;
     }
 
-    // TODO - Create function
-    public static boolean canWin1v1AfterMovingTo(Unit unit , Unit enemyUnit, MapLocation unitMapLocation)
-    {
-        // I require the distance from the Maplocation in front of me to the enemy location
-        return false;
-    }
+//    // TODO - Create function
+//    public static boolean canWin1v1AfterMovingTo(Unit unit , Unit enemyUnit, MapLocation unitMapLocation)
+//    {
+//        // I require the distance from the Maplocation in front of me to the enemy location
+//        return false;
+//    }
+//
+//    public static int numberEnemyUnitsAimingAtLocation(MapLocation targetLocation, VecUnit nearbyEnemyUnits)
+//    {
+//        int locationExposure = 0;
+//        for (int j = 0; nearbyEnemyUnits != null && j < nearbyEnemyUnits.size(); j++)
+//        {
+//            Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
+//            UnitType enemyUnitType = nearbyEnemyUnit.unitType();
+//            if(enemyUnitType != UnitType.Ranger && enemyUnitType != UnitType.Knight && enemyUnitType != UnitType.Mage)
+//            {
+//                continue;
+//            }
+//            long distanceFromEnemyToLocation = targetLocation.distanceSquaredTo(nearbyEnemyUnit.location().mapLocation());
+//            if (nearbyEnemyUnit.unitType() == UnitType.Ranger)
+//            {
+//                if(distanceFromEnemyToLocation > 10 && distanceFromEnemyToLocation < 50)
+//                {
+//                    locationExposure++;
+//                }
+//            }
+//            else if (nearbyEnemyUnit.attackRange() >= distanceFromEnemyToLocation)
+//            {
+//                locationExposure++;
+//            }
+//        }
+//        return locationExposure;
+//    }
 
-    // TODO - Create function and use later to harass enemy
-    public static void enemyUnitHarasser(Unit unit, Unit closestEnemyUnit, VecUnit nearbyEnemyUnits)
-    {
-
-    }
-
-    // TODO - Implement in Workers for mining locations
-    // Returns whether it's a good move to visit a certain location
-    public static boolean isItSafeToMoveTo(Unit unit, MapLocation moveUnitToLocation, VecUnit nearbyEnemyUnits)
-    {
-        Unit loneAttacker = null;
-        int numAttackers = 0;
-        for (int j = 0; j < nearbyEnemyUnits.size(); j++)
-        {
-            Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
-            UnitType enemyUnitType = nearbyEnemyUnit.unitType();
-            if(enemyUnitType != UnitType.Ranger && enemyUnitType != UnitType.Knight && enemyUnitType != UnitType.Mage)
-            {
-                continue;
-            }
-            MapLocation nearbyEnemyUnitLocation = nearbyEnemyUnit.location().mapLocation();
-            switch (nearbyEnemyUnit.unitType())
-            {
-                case Ranger:
-                    if (moveUnitToLocation.distanceSquaredTo(nearbyEnemyUnitLocation) > 10)
-                    {
-                        return false;
-                    }
-                    break;
-                default:
-                    if (nearbyEnemyUnit.attackRange() >= moveUnitToLocation.distanceSquaredTo(nearbyEnemyUnitLocation))
-                    {
-                        numAttackers++;
-                        if (numAttackers >= 2)
-                        {
-                            return false;
-                        }
-                        loneAttacker = nearbyEnemyUnit;
-                    }
-                break;
-            }
-        }
-
-        if (numAttackers == 0)
-        {
-            return true;
-        }
-        return canWin1v1(unit, loneAttacker);
-    }
-
-    public static int numberEnemyUnitsAimingAtLocation(MapLocation targetLocation, VecUnit nearbyEnemyUnits)
-    {
-        int locationExposure = 0;
-        for (int j = 0; nearbyEnemyUnits != null && j < nearbyEnemyUnits.size(); j++)
-        {
-            Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
-            UnitType enemyUnitType = nearbyEnemyUnit.unitType();
-            if(enemyUnitType != UnitType.Ranger && enemyUnitType != UnitType.Knight && enemyUnitType != UnitType.Mage)
-            {
-                continue;
-            }
-            long distanceFromEnemyToLocation = targetLocation.distanceSquaredTo(nearbyEnemyUnit.location().mapLocation());
-            if (nearbyEnemyUnit.unitType() == UnitType.Ranger)
-            {
-                if(distanceFromEnemyToLocation > 10 && distanceFromEnemyToLocation < 50)
-                {
-                    locationExposure++;
-                }
-            }
-            else if (nearbyEnemyUnit.attackRange() >= distanceFromEnemyToLocation)
-            {
-                locationExposure++;
-            }
-        }
-        return locationExposure;
-    }
-
-
-    public static int numberFriendlyUnitsAimingAtLocation(MapLocation targetLocation, VecUnit nearbyFriendlyUnits)
-    {
-        int locationExposure = 0;
-        for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
-        {
-            Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
-            UnitType friendlyUnitType = nearbyFriendlyUnit.unitType();
-            if(friendlyUnitType != UnitType.Ranger && friendlyUnitType != UnitType.Knight && friendlyUnitType != UnitType.Mage)
-            {
-                continue;
-            }
-            long distanceFromEnemyToLocation = targetLocation.distanceSquaredTo(nearbyFriendlyUnit.location().mapLocation());
-            if (nearbyFriendlyUnit.unitType() == UnitType.Ranger)
-            {
-                if(distanceFromEnemyToLocation > 10 && distanceFromEnemyToLocation < 50)
-                {
-                    locationExposure++;
-                }
-            }
-            else if (nearbyFriendlyUnit.attackRange() >= distanceFromEnemyToLocation)
-            {
-                locationExposure++;
-            }
-        }
-        return locationExposure;
-    }
-
-    public static boolean tryMoveToEngageEnemyAtLocationInOneTurnWithMaxEnemyExposure(Unit unit, MapLocation targetLocation, int maxEnemyExposure, VecUnit nearbyEnemyUnits)
-    {
-        Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
-        Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
-        for (Direction directionToMoveTo : tryDirection)
-        {
-            if (!gc.canMove(unit.id(), directionToMoveTo))
-            {
-                continue;
-            }
-            MapLocation moveLocation = unit.location().mapLocation().add(directionToMoveTo);
-            if (unit.attackRange() < moveLocation.distanceSquaredTo(targetLocation))
-            {
-                continue; // must engage in one turn
-            }
-
-            int enemyExposure = numberEnemyUnitsAimingAtLocation(moveLocation, nearbyEnemyUnits);
-            if (enemyExposure <= maxEnemyExposure)
-            {
-                if(gc.isMoveReady(unit.id()))
-                {
-                    if(gc.canMove(unit.id(), directionToMoveTo))
-                    {
-                        gc.moveRobot(unit.id(), directionToMoveTo);
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    public static boolean tryMoveToEngageEnemyAtLocationWithMaxEnemyExposure(Unit unit, MapLocation targetLocation, int maxEnemyExposure, VecUnit nearbyEnemyUnits)
-    {
-        Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
-        Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
-        for (Direction directionToMoveTo : tryDirection) {
-            if (!gc.canMove(unit.id(), directionToMoveTo))
-            {
-                continue;
-            }
-            MapLocation moveLocation = unit.location().mapLocation().add(directionToMoveTo);
-            int enemyExposure = numberEnemyUnitsAimingAtLocation(moveLocation, nearbyEnemyUnits);
-            if (enemyExposure <= maxEnemyExposure)
-            {
-                if(unit.location().mapLocation().distanceSquaredTo(moveLocation) < 10 && unit.unitType() == UnitType.Ranger)
-                {
-                    continue;
-                }
-                else
-                {
-                    if(gc.isMoveReady(unit.id()))
-                    {
-                        if(gc.canMove(unit.id(), directionToMoveTo))
-                        {
-                            gc.moveRobot(unit.id(), directionToMoveTo);
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    public static boolean tryMoveToEngageEnemyAtWithMaxEnemyExposure(Unit unit, MapLocation targetLocation, int maxEnemyExposure, VecUnit nearbyEnemyUnits)
-    {
-        Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
-        Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
-        for (Direction directionToMoveTo : tryDirection)
-        {
-            if (!gc.canMove(unit.id(), directionToMoveTo))
-            {
-                continue;
-            }
-            MapLocation moveLocation = unit.location().mapLocation().add(directionToMoveTo);
-            int enemyExposure = numberEnemyUnitsAimingAtLocation(moveLocation, nearbyEnemyUnits);
-            if (enemyExposure <= maxEnemyExposure)
-            {
-                gc.moveRobot(unit.id(), directionToMoveTo);
-                return true;
-            }
-        }
-        return false;
-    }
+//    // TODO - Implement in Workers for mining locations
+//    // Returns whether it's a good move to visit a certain location
+//    // TODO - Create function and use later to harass enemy
+//    public static void enemyUnitHarasser(Unit unit, Unit closestEnemyUnit, VecUnit nearbyEnemyUnits)
+//    {
+//
+//    }
+//
+//    public static boolean isItSafeToMoveTo(Unit unit, MapLocation moveUnitToLocation, VecUnit nearbyEnemyUnits)
+//    {
+//        Unit loneAttacker = null;
+//        int numAttackers = 0;
+//        for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+//        {
+//            Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
+//            UnitType enemyUnitType = nearbyEnemyUnit.unitType();
+//            if(enemyUnitType != UnitType.Ranger && enemyUnitType != UnitType.Knight && enemyUnitType != UnitType.Mage)
+//            {
+//                continue;
+//            }
+//            MapLocation nearbyEnemyUnitLocation = nearbyEnemyUnit.location().mapLocation();
+//            switch (nearbyEnemyUnit.unitType())
+//            {
+//                case Ranger:
+//                    if (moveUnitToLocation.distanceSquaredTo(nearbyEnemyUnitLocation) > 10)
+//                    {
+//                        return false;
+//                    }
+//                    break;
+//                default:
+//                    if (nearbyEnemyUnit.attackRange() >= moveUnitToLocation.distanceSquaredTo(nearbyEnemyUnitLocation))
+//                    {
+//                        numAttackers++;
+//                        if (numAttackers >= 2)
+//                        {
+//                            return false;
+//                        }
+//                        loneAttacker = nearbyEnemyUnit;
+//                    }
+//                break;
+//            }
+//        }
+//
+//        if (numAttackers == 0)
+//        {
+//            return true;
+//        }
+//        return canWin1v1(unit, loneAttacker);
+//    }
+//
+//    public static int numberFriendlyUnitsAimingAtLocation(MapLocation targetLocation, VecUnit nearbyFriendlyUnits)
+//    {
+//        int locationExposure = 0;
+//        for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
+//        {
+//            Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
+//            UnitType friendlyUnitType = nearbyFriendlyUnit.unitType();
+//            if(friendlyUnitType != UnitType.Ranger && friendlyUnitType != UnitType.Knight && friendlyUnitType != UnitType.Mage)
+//            {
+//                continue;
+//            }
+//            long distanceFromEnemyToLocation = targetLocation.distanceSquaredTo(nearbyFriendlyUnit.location().mapLocation());
+//            if (nearbyFriendlyUnit.unitType() == UnitType.Ranger)
+//            {
+//                if(distanceFromEnemyToLocation > 10 && distanceFromEnemyToLocation < 50)
+//                {
+//                    locationExposure++;
+//                }
+//            }
+//            else if (nearbyFriendlyUnit.attackRange() >= distanceFromEnemyToLocation)
+//            {
+//                locationExposure++;
+//            }
+//        }
+//        return locationExposure;
+//    }
+//
+//    public static boolean tryMoveToEngageEnemyAtLocationInOneTurnWithMaxEnemyExposure(Unit unit, MapLocation targetLocation, int maxEnemyExposure, VecUnit nearbyEnemyUnits)
+//    {
+//        Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
+//        Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
+//        for (Direction directionToMoveTo : tryDirection)
+//        {
+//            if (!gc.canMove(unit.id(), directionToMoveTo))
+//            {
+//                continue;
+//            }
+//            MapLocation moveLocation = unit.location().mapLocation().add(directionToMoveTo);
+//            if (unit.attackRange() < moveLocation.distanceSquaredTo(targetLocation))
+//            {
+//                continue; // must engage in one turn
+//            }
+//
+//            int enemyExposure = numberEnemyUnitsAimingAtLocation(moveLocation, nearbyEnemyUnits);
+//            if (enemyExposure <= maxEnemyExposure)
+//            {
+//                if(gc.isMoveReady(unit.id()))
+//                {
+//                    if(gc.canMove(unit.id(), directionToMoveTo))
+//                    {
+//                        gc.moveRobot(unit.id(), directionToMoveTo);
+//                        return true;
+//                    }
+//                }
+//            }
+//        }
+//        return false;
+//    }
+//
+//    public static boolean tryMoveToEngageEnemyAtLocationWithMaxEnemyExposure(Unit unit, MapLocation targetLocation, int maxEnemyExposure, VecUnit nearbyEnemyUnits)
+//    {
+//        Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
+//        Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
+//        for (Direction directionToMoveTo : tryDirection) {
+//            if (!gc.canMove(unit.id(), directionToMoveTo))
+//            {
+//                continue;
+//            }
+//            MapLocation moveLocation = unit.location().mapLocation().add(directionToMoveTo);
+//            int enemyExposure = numberEnemyUnitsAimingAtLocation(moveLocation, nearbyEnemyUnits);
+//            if (enemyExposure <= maxEnemyExposure)
+//            {
+//                if(unit.location().mapLocation().distanceSquaredTo(moveLocation) < 10 && unit.unitType() == UnitType.Ranger)
+//                {
+//                    continue;
+//                }
+//                else
+//                {
+//                    if(gc.isMoveReady(unit.id()))
+//                    {
+//                        if(gc.canMove(unit.id(), directionToMoveTo))
+//                        {
+//                            gc.moveRobot(unit.id(), directionToMoveTo);
+//                            return true;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return false;
+//    }
+//
+//    public static boolean tryMoveToEngageEnemyAtWithMaxEnemyExposure(Unit unit, MapLocation targetLocation, int maxEnemyExposure, VecUnit nearbyEnemyUnits)
+//    {
+//        Direction toTargetLocation = unit.location().mapLocation().directionTo(targetLocation);
+//        Direction[] tryDirection = {toTargetLocation, directions[(toTargetLocation.ordinal() + 1) % 8], directions[(toTargetLocation.ordinal() + 7) % 8]};
+//        for (Direction directionToMoveTo : tryDirection)
+//        {
+//            if (!gc.canMove(unit.id(), directionToMoveTo))
+//            {
+//                continue;
+//            }
+//            MapLocation moveLocation = unit.location().mapLocation().add(directionToMoveTo);
+//            int enemyExposure = numberEnemyUnitsAimingAtLocation(moveLocation, nearbyEnemyUnits);
+//            if (enemyExposure <= maxEnemyExposure)
+//            {
+//                gc.moveRobot(unit.id(), directionToMoveTo);
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     // TODO - Factor in Cooldown
     private static int numberOfOtherAlliesInAttackRange(Unit unit, MapLocation targetLocation)
