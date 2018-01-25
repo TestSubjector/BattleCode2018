@@ -97,7 +97,7 @@ public class Globals
     // Research queue
     // 25+25+100+100+100+25+75+100+25+75+100+25+75+100+25+75
     public final static UnitType[] RESEARCH_QUEUE_HARD = {UnitType.Knight, UnitType.Knight, UnitType.Rocket,
-            UnitType.Healer, UnitType.Healer, UnitType.Knight, UnitType.Healer, UnitType.Rocket, UnitType.Rocket,
+            UnitType.Healer, UnitType.Healer, UnitType.Healer, UnitType.Knight, UnitType.Rocket, UnitType.Rocket,
             UnitType.Worker, UnitType.Worker, UnitType.Worker,  UnitType.Mage, UnitType.Mage, UnitType.Mage,
             UnitType.Knight, UnitType.Ranger};
 

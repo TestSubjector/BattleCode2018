@@ -185,7 +185,14 @@ public class DecisionTree
         }
         if(homeMapSize <= 600)
         {
-            knightsRequired = (int) (1 + ((double) currentRound / 75) * (double) homeMapSize / 900);
+            if(currentRound < 75)
+            {
+                knightsRequired = (int) (4 + ((double) currentRound / 75) * (double) homeMapSize / 900);
+            }
+            else
+            {
+                knightsRequired = (int) (1 + ((double) currentRound / 75) * (double) homeMapSize / 900);
+            }
         }
         else if (currentRound <= 75)
         {

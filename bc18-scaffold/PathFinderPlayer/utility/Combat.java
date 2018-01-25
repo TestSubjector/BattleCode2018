@@ -690,10 +690,7 @@ public class Combat
                 {
                     Unit targetFriendlyUnit = nearbyFriendlyUnits.get(indexOfUnitWithLowestHealthOutOfRange);
                     int targetFriendlyUnitID = targetFriendlyUnit.id();
-                    if(moveUnitTo(unit, targetFriendlyUnit.location().mapLocation()))
-                    {
-                        hasMovedThisTurn = true;
-                    }
+                    moveUnitTo(unit, targetFriendlyUnit.location().mapLocation());
                     if(gc.canHeal(unit.id(), targetFriendlyUnitID))
                     {
                         gc.heal(unit.id(), targetFriendlyUnitID);
@@ -802,10 +799,7 @@ public class Combat
         // TODO - Implement Running/Retreating Function
         if (nearbyEnemyUnits != null && nearbyEnemyUnits.size() != 0)
         {
-            if(!hasMovedThisTurn)
-            {
-                moveUnitAwayFromMultipleUnits(unit, nearbyEnemyUnits);
-            }
+            moveUnitAwayFromMultipleUnits(unit, nearbyEnemyUnits);
         }
         else if(!hasHealedThisTurn)
         {
