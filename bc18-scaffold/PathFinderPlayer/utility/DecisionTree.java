@@ -66,52 +66,70 @@ public class DecisionTree
 
     public static void setWorkersRequired()
     {
-        if (homeMapSize <= 600)
+        if (currentRound <= 300)
         {
-            if (initialTotalKarbonite > 2000)
+            if (homeMapSize <= 600)
             {
-                workersRequired = 12;
+                if (karboniteLocations.size() > 150)
+                {
+                    workersRequired = 12;
+                }
+                else if (karboniteLocations.size() > 100)
+                {
+                    workersRequired = 10;
+                }
+                else
+                {
+                    workersRequired = 8;
+                }
             }
-            else if (initialTotalKarbonite > 1000)
+            else if (homeMapSize <= 1200)
             {
-                workersRequired = 10;
+                if (karboniteLocations.size() > 180)
+                {
+                    workersRequired = 15;
+                }
+                else if (karboniteLocations.size() > 130)
+                {
+                    workersRequired = 12;
+                }
+                else
+                {
+                    workersRequired = 10;
+                }
             }
             else
             {
-                workersRequired = 7;
-            }
-        }
-        else if (homeMapSize <= 1200)
-        {
-            if (initialTotalKarbonite > 2000)
-            {
-                workersRequired = 15;
-            }
-            else if (initialTotalKarbonite > 1000)
-            {
-                workersRequired = 12;
-            }
-            else
-            {
-                workersRequired = 10;
+                if (karboniteLocations.size() > 200)
+                {
+                    workersRequired = 18;
+                }
+                else if (karboniteLocations.size() > 150)
+                {
+                    workersRequired = 15;
+                }
+                else
+                {
+                    workersRequired = 12;
+                }
             }
         }
         else
         {
-            if (initialTotalKarbonite > 2000)
+            if (homeMapSize <= 600)
             {
-                workersRequired = 20;
+                workersRequired = 6;
             }
-            else if (initialTotalKarbonite > 1000)
+            else if (homeMapSize <= 1200)
             {
-                workersRequired = 15;
+                workersRequired = 10;
             }
             else
             {
                 workersRequired = 12;
             }
         }
-        workersRequired = (int) (Math.min(1, (double) (currentRound + 125) / 400) * workersRequired);
+        workersRequired = 2 + (int) (Math.min(1, Math.sqrt((double) (currentRound + 100) / 400)) * workersRequired);
     }
 
     public static void setFactoriesRequired()

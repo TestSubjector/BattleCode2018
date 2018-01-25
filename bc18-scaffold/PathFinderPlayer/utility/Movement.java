@@ -15,7 +15,7 @@ public class Movement
         if (gc.isMoveReady(unit.id()))
         {
             int delta = 1;
-            while (!gc.canMove(unit.id(), candidateDirection) && Math.abs(delta) <= 1)
+            while (!gc.canMove(unit.id(), candidateDirection) && Math.abs(delta) <= 2)
             {
                 candidateDirection = directions[(((directionIndex + delta) % 8) + 8) % 8];
                 delta = -delta;

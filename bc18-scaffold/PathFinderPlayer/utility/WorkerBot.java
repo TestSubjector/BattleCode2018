@@ -124,7 +124,7 @@ public class WorkerBot
                 }
             }
         }
-        if (currentRound < 250)
+        if (homeMapSize > 600 && currentRound < 250)
         {
             processMiner(unit, unitLocation, unitMapLocation);
         }
