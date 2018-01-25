@@ -124,8 +124,14 @@ public class WorkerBot
                 }
             }
         }
-        processMiner(unit, unitLocation, unitMapLocation);
-        moveUnitInRandomDirection(unit);
+        if (currentRound < 250)
+        {
+            processMiner(unit, unitLocation, unitMapLocation);
+        }
+        else
+        {
+            moveUnitInRandomDirection(unit);
+        }
     }
 
     private static void processMiner(Unit unit, Location unitLocation, MapLocation unitMapLocation)
@@ -159,6 +165,10 @@ public class WorkerBot
                     initialKarboniteLocationSize--;
                     karboniteLocations.remove(nearestMineMapLocation);
                 }
+            }
+            else
+            {
+                moveUnitInRandomDirection(unit);
             }
         }
     }

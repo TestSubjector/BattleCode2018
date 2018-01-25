@@ -40,27 +40,15 @@ public class Player
                 }
             }
         }
-        String time = "";
-        int lastTime = gc.getTimeLeftMs();
 
         while (true)
         {
             currentRound = gc.round();
             int timeLeftMs = gc.getTimeLeftMs();
-            if (currentRound > 1)
-            {
-                // time += "Time taken in round " + (currentRound - 1) + " : " + (lastTime - timeLeftMs) + "\n";
-            }
-            lastTime = timeLeftMs + 50;
             if (currentRound % 50 == 0)
             {
                 System.runFinalization();
                 System.gc();
-            }
-            if (currentRound % 150 == 2)
-            {
-                //System.out.println(time);
-                // time = "";
             }
 
             if (homePlanet == Planet.Mars)
@@ -114,9 +102,6 @@ public class Player
                 {
                     VecUnit visibleEnemyUnits = gc.senseNearbyUnitsByTeam(unitLocation.mapLocation(), unit.visionRange(), theirTeam);
                     enemyVecUnits.put(unit.id(), visibleEnemyUnits);
-                    // VecUnit visibleFriendlyUnits = gc.senseNearbyUnitsByTeam(unitLocation.mapLocation(), unit.visionRange(), ourTeam);
-                    // friendlyVecUnits.put(unit.id(), visibleFriendlyUnits);
-
                     if (visibleEnemyUnits.size() != 0)
                     {
                         double xAverage = 0;
@@ -173,8 +158,7 @@ public class Player
             // Maintain a total of the number of combat/non-combat units we have
             totalCombatUnits = typeSortedUnitLists.get(UnitType.Ranger).size() + typeSortedUnitLists.get(UnitType.Healer).size() +
                     typeSortedUnitLists.get(UnitType.Knight).size() + typeSortedUnitLists.get(UnitType.Mage).size();
-            totalUnits = totalCombatUnits + typeSortedUnitLists.get(UnitType.Worker).size() +
-                    typeSortedUnitLists.get(UnitType.Factory).size() + typeSortedUnitLists.get(UnitType.Rocket).size();
+            totalUnits = totalCombatUnits + typeSortedUnitLists.get(UnitType.Worker).size();
 
             if (currentRound % 10 == 0)
             {
@@ -194,7 +178,6 @@ public class Player
             // Process build and train queues
             int workerCost = 30;
             int structureCosts = 0;
-            int buildQueueSize = 0;
             if (homePlanet == Planet.Earth)
             {
                 setFactoriesRequired();
@@ -207,7 +190,7 @@ public class Player
                 {
                     addUnitToBuildQueue(UnitType.Rocket);
                 }
-                buildQueueSize = buildQueue.size();
+                int buildQueueSize = buildQueue.size();
                 for (int j = 0; j < buildQueueSize; j++)
                 {
                     structureCosts += (buildQueue.peekFirst() == UnitType.Factory) ? 100 : 75;
@@ -249,7 +232,8 @@ public class Player
                 }
             }
             setWorkersRequired();
-            while (typeSortedUnitLists.get(UnitType.Factory).size() * 20 + workerCost + structureCosts <= gc.karbonite())
+            while (typeSortedUnitLists.get(UnitType.Factory).size() * 20 + workerCost + structureCosts <= gc.karbonite() &&
+                    shouldQueueWorker())
             {
                 addUnitToTrainQueueUrgently(UnitType.Worker);
                 workerCost += 30;

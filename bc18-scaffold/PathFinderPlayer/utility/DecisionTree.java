@@ -9,26 +9,6 @@ import static utility.Combat.*;
 
 public class DecisionTree
 {
-    public static void setBuilderFraction()
-    {
-        if (homePlanet == Planet.Mars)
-        {
-            builderFraction = 0;
-        }
-        if (karboniteLocations.size() == 0)
-        {
-            builderFraction = 1;
-        }
-        else if(currentRound > 300)
-        {
-            builderFraction = 1;
-        }
-        else
-        {
-            builderFraction = Math.min(1, (((double) currentRound + 200) / 300) * (1 - 0.4 * ((double) karboniteLocations.size() / initialKarboniteLocationSize)));
-        }
-    }
-
     public static boolean shouldQueueWorker()
     {
         return typeSortedUnitLists.get(UnitType.Worker).size() + unitsInTrainQueue[UnitType.Worker.ordinal()] < workersRequired;
@@ -64,98 +44,74 @@ public class DecisionTree
         return currentRound > 100 && typeSortedUnitLists.get(UnitType.Rocket).size() + unitsInBuildQueue[UnitType.Rocket.ordinal()] < rocketsRequired;
     }
 
-    // This is not very good, needs an overhaul
+    public static void setBuilderFraction()
+    {
+        if (homePlanet == Planet.Mars)
+        {
+            builderFraction = 0;
+        }
+        if (karboniteLocations.size() == 0)
+        {
+            builderFraction = 1;
+        }
+        else if(currentRound > 300)
+        {
+            builderFraction = 1;
+        }
+        else
+        {
+            builderFraction = Math.min(1, (((double) currentRound + 200) / 300) * (1 - 0.4 * ((double) karboniteLocations.size() / initialKarboniteLocationSize)));
+        }
+    }
+
     public static void setWorkersRequired()
     {
-        if (homeMapSize <= 500)
+        if (homeMapSize <= 600)
         {
-            if (currentRound < 75)
+            if (initialTotalKarbonite > 2000)
             {
-                if (initialTotalKarbonite > 1000)
-                {
-                    workersRequired = 14;
-                }
-                else if (initialTotalKarbonite > 750)
-                {
-                    workersRequired = 11;
-                }
-                else if (initialTotalKarbonite < 100)
-                {
-                    workersRequired = 6;
-                }
+                workersRequired = 12;
+            }
+            else if (initialTotalKarbonite > 1000)
+            {
+                workersRequired = 10;
             }
             else
             {
                 workersRequired = 7;
             }
         }
-        else if (homeMapSize <= 900)
+        else if (homeMapSize <= 1200)
         {
-            if (currentRound < 85)
+            if (initialTotalKarbonite > 2000)
             {
-                if (initialTotalKarbonite > 1000)
-                {
-                    workersRequired = 20;
-                }
-                else if (initialTotalKarbonite > 750)
-                {
-                    workersRequired = 15;
-                }
-                else if (initialTotalKarbonite < 100)
-                {
-                    workersRequired = 7;
-                }
+                workersRequired = 15;
+            }
+            else if (initialTotalKarbonite > 1000)
+            {
+                workersRequired = 12;
             }
             else
             {
-                if (initialTotalKarbonite < 500)
-                {
-                    workersRequired = 12;
-                }
-                else if (initialTotalKarbonite > 1000)
-                {
-                    workersRequired = 20;
-                }
-                else
-                {
-                    workersRequired = 15;
-                }
+                workersRequired = 10;
             }
         }
         else
         {
-            if (currentRound < 75)
+            if (initialTotalKarbonite > 2000)
             {
-                if (initialTotalKarbonite > 3000)
-                {
-                    workersRequired = 30;
-                }
-                else if (initialTotalKarbonite > 1000)
-                {
-                    workersRequired = 20;
-                }
-                else
-                {
-                    workersRequired = 10;
-                }
+                workersRequired = 20;
+            }
+            else if (initialTotalKarbonite > 1000)
+            {
+                workersRequired = 15;
             }
             else
             {
-                if (initialTotalKarbonite < 500)
-                {
-                    workersRequired = 10;
-                }
-                else if (initialTotalKarbonite > 1500)
-                {
-                    workersRequired = 25;
-                }
-                else
-                {
-                    workersRequired = 15;
-                }
+                workersRequired = 12;
             }
         }
-        workersRequired = (int) (Math.min(1, (double) (currentRound + 200) / 400) * workersRequired);
+        workersRequired = (int) (Math.min(1, (double) (currentRound + 125) / 400) * workersRequired);
     }
 
     public static void setFactoriesRequired()
