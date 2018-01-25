@@ -497,10 +497,6 @@ public class Combat
                 {
                     moveUnitTo(unit, bestTarget.location().mapLocation());
                 }
-                else
-                {
-                    moveUnitInRandomDirection(unit);
-                }
             }
         }
         else
@@ -609,18 +605,11 @@ public class Combat
                                 moveUnitTo(unit, nearestEnemyHomeBase);
                             }
                         }
-                        else
-                        {
-                            moveUnitInRandomDirection(unit);
-                        }
                     }
-                }
-                else
-                {
-                    moveUnitInRandomDirection(unit);
                 }
             }
         }
+        moveUnitInRandomDirection(unit);
     }
 
     // TODO - Make sure they don't cooldown units that aren't required to be overcharged
@@ -900,18 +889,11 @@ public class Combat
                                 moveUnitTo(unit, nearestEnemyHomeBase);
                             }
                         }
-                        else
-                        {
-                            moveUnitInRandomDirection(unit);
-                        }
                     }
-                }
-                else
-                {
-                    moveUnitInRandomDirection(unit);
                 }
             }
         }
+        moveUnitInRandomDirection(unit);
     }
 
     public static void doMicroKnight(Unit unit, MapLocation unitMapLocation, VecUnit nearbyEnemyUnits)
@@ -1013,10 +995,6 @@ public class Combat
                 if(bestTarget != null)
                 {
                     moveUnitTo(unit, bestTarget.location().mapLocation());
-                }
-                else
-                {
-                    moveUnitInRandomDirection(unit);
                 }
             }
         }
@@ -1121,18 +1099,11 @@ public class Combat
                                 moveUnitTo(unit, nearestEnemyHomeBase);
                             }
                         }
-                        else
-                        {
-                            moveUnitInRandomDirection(unit);
-                        }
                     }
-                }
-                else
-                {
-                    moveUnitInRandomDirection(unit);
                 }
             }
         }
+        moveUnitInRandomDirection(unit);
     }
     
     // Decides the incentive to attack an unit by Rangers
