@@ -161,19 +161,20 @@ public class DecisionTree
     public static void setFactoriesRequired()
     {
         factoriesRequired = 1 + (int) ((Math.min(1, Math.sqrt((double) currentRound / 400))) *
-                (Math.round(3 + ((double) homeMapHeight + homeMapWidth) / 10) +
-                        (double) initialTotalKarbonite / 1500));
+                (Math.round(2 + ((double) homeMapHeight + homeMapWidth) / 10) +
+                        (double) initialTotalKarbonite / 2000));
     }
 
     public static void setRocketsRequired()
     {
-        if (enemyVecUnits.size() == 0 && currentRound > 500)
+        if (enemyVecUnits.size() == 0)
         {
-            rocketsRequired = 25;
+            rocketsRequired = 10;
         }
         else
         {
-            rocketsRequired = (int) ((Math.min(2, (double) (currentRound * currentRound) / (300 * 300))) * Math.round((double) totalUnits / 5));
+            rocketsRequired = (int) ((Math.min(1, (double) ((currentRound - 100) * (currentRound - 100)) / (500 * 500))) *
+                    Math.round((double) totalUnits / 20));
         }
     }
 

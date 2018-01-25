@@ -178,7 +178,6 @@ public class Pathfinding
                     }
                 }
             }
-            // System.out.println(repeats);
         }
     }
 

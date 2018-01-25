@@ -25,7 +25,7 @@ public class Player
         // Queue researches
         if (gc.planet() == Planet.Mars)
         {
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < RESEARCH_QUEUE_HARD.length; i++)
             {
                 gc.queueResearch(RESEARCH_QUEUE_HARD[i]);
             }
@@ -84,7 +84,14 @@ public class Player
 
             // Clear enemy hashmap
             enemyVecUnits.clear();
-            enemyHotspots.clear();
+            removeObsoleteMines();
+            if (homePlanet == Planet.Earth)
+            {
+                removeObsoleteBlueprints();
+                removeObsoleteBuilders();
+                removeObsoleteEnemyFactories();
+                removeObsoleteEnemyHotspots();
+            }
 
             // Fetch current units and sort by type
             VecUnit units = gc.myUnits();
@@ -118,24 +125,35 @@ public class Player
                             yAverage += visibleEnemyUnit.location().mapLocation().getY();
                             priority += getEnemyUnitPriority(visibleEnemyUnit.unitType());
                         }
-                        QueuePair<Double, MapLocation> minQP = null;
-                        double minPriority = 10000;
-                        for (QueuePair<Double, MapLocation> enemyHotspot : enemyHotspots)
-                        {
-                            if (minPriority > enemyHotspot.getFirst())
-                            {
-                                minPriority = enemyHotspot.getFirst();
-                                minQP = enemyHotspot;
-                            }
-                        }
-                        if (minPriority < priority)
+                        if (enemyHotspots.size() < 5)
                         {
                             xAverage /= visibleEnemyUnits.size();
                             yAverage /= visibleEnemyUnits.size();
                             MapLocation enemyLocationAverage = mapLocationAt[(int) xAverage][(int) yAverage];
                             QueuePair<Double, MapLocation> qp = new QueuePair<Double, MapLocation>(priority, enemyLocationAverage);
-                            enemyHotspots.remove(minQP);
                             enemyHotspots.add(qp);
+                        }
+                        else
+                        {
+                            QueuePair<Double, MapLocation> minQP = null;
+                            double minPriority = 10000;
+                            for (QueuePair<Double, MapLocation> enemyHotspot : enemyHotspots)
+                            {
+                                if (minPriority > enemyHotspot.getFirst())
+                                {
+                                    minPriority = enemyHotspot.getFirst();
+                                    minQP = enemyHotspot;
+                                }
+                            }
+                            if (minPriority < priority)
+                            {
+                                xAverage /= visibleEnemyUnits.size();
+                                yAverage /= visibleEnemyUnits.size();
+                                MapLocation enemyLocationAverage = mapLocationAt[(int) xAverage][(int) yAverage];
+                                QueuePair<Double, MapLocation> qp = new QueuePair<Double, MapLocation>(priority, enemyLocationAverage);
+                                enemyHotspots.remove(minQP);
+                                enemyHotspots.add(qp);
+                            }
                         }
                     }
                 }
@@ -148,23 +166,9 @@ public class Player
             totalUnits = totalCombatUnits + typeSortedUnitLists.get(UnitType.Worker).size() +
                     typeSortedUnitLists.get(UnitType.Factory).size() + typeSortedUnitLists.get(UnitType.Rocket).size();
 
-
-            removeObsoleteMines();
-            if (homePlanet == Planet.Earth)
-            {
-                removeObsoleteBlueprints();
-                removeObsoleteBuilders();
-                removeObsoleteEnemyFactories();
-            }
-
             if (currentRound % 10 == 0)
             {
                 setBuilderFraction();
-//                System.out.println(currentRound);
-//                System.out.println(builderFraction);
-//                System.out.println(builderSet.size());
-//                System.out.println(typeSortedUnitLists.get(UnitType.Worker).size());
-//                System.out.println();
                 if (switchToPrimitiveMind(currentRound, timeLeftMs) && currentRound < 700)
                 {
                     System.out.println("Switching to primitive mind");
@@ -178,75 +182,63 @@ public class Player
 
             // TODO - add stagnation
             // Process build and train queues
+            int workerCost = 30;
+            int structureCosts = 0;
+            int buildQueueSize = 0;
             if (homePlanet == Planet.Earth)
             {
-                if (currentRound == 650)
+                setFactoriesRequired();
+                while (shouldQueueFactory())
                 {
-                    trainQueue.clear();
-                    buildQueue.clear();
+                    addUnitToBuildQueue(UnitType.Factory);
                 }
-                if (currentRound >= 650)
+                setRocketsRequired();
+                while (shouldQueueRocket())
                 {
-                    setRocketsRequired();
-                    while (shouldQueueRocket())
-                    {
-                        addUnitToBuildQueue(UnitType.Rocket);
-                        // System.out.println("Roc");
-                    }
+                    addUnitToBuildQueue(UnitType.Rocket);
                 }
-                else
+                buildQueueSize = buildQueue.size();
+                for (int j = 0; j < buildQueueSize; j++)
+                {
+                    structureCosts += (buildQueue.peekFirst() == UnitType.Factory) ? 100 : 75;
+                    buildQueue.addLast(buildQueue.removeFirst());
+                }
+                if (structureCosts <= gc.karbonite())
                 {
                     setKnightsRequired();
                     while (shouldQueueKnight())
                     {
                         addUnitToTrainQueue(UnitType.Knight);
-                        // System.out.println("Kni");
                     }
                     setRangersRequired();
                     while (shouldQueueRanger())
                     {
                         addUnitToTrainQueue(UnitType.Ranger);
-                        // System.out.println("Ran");
                     }
                     setMagesRequired();
                     while (shouldQueueMage())
                     {
                         addUnitToTrainQueue(UnitType.Mage);
-                        // System.out.println("Mag");
                     }
                     setHealersRequired();
                     while (shouldQueueHealer())
                     {
                         addUnitToTrainQueue(UnitType.Healer);
-                        // System.out.println("Heal");
                     }
-                    setFactoriesRequired();
-                    while (shouldQueueFactory())
+                    if (currentRound < 650 && trainQueue.isEmpty())
                     {
-                        addUnitToBuildQueue(UnitType.Factory);
-                        // System.out.println("Fac");
-                    }
-                    setRocketsRequired();
-                    while (shouldQueueRocket())
-                    {
-                        addUnitToBuildQueue(UnitType.Rocket);
-                        // System.out.println("Roc");
-                    }
-                    if (trainQueue.isEmpty())
-                    {
-                        addUnitToTrainQueue(UnitType.Ranger);
+                        UnitType[] emptyQueueFillers = {UnitType.Ranger, UnitType.Healer, UnitType.Knight};
+                        int i = 0;
+                        int factories = typeSortedUnitLists.get(UnitType.Factory).size();
+                        for (int j = 0; j < factories; j++)
+                        {
+                            addUnitToTrainQueue(emptyQueueFillers[i]);
+                            i = (i + 1) % 3;
+                        }
                     }
                 }
             }
             setWorkersRequired();
-            int workerCost = 30;
-            int structureCosts = 0;
-            int buildQueueSize = buildQueue.size();
-            for (int j = 0; j < buildQueueSize; j++)
-            {
-                structureCosts += (buildQueue.peekFirst() == UnitType.Factory) ? 100 : 75;
-                buildQueue.addLast(buildQueue.removeFirst());
-            }
             while (typeSortedUnitLists.get(UnitType.Factory).size() * 20 + workerCost + structureCosts <= gc.karbonite())
             {
                 addUnitToTrainQueueUrgently(UnitType.Worker);

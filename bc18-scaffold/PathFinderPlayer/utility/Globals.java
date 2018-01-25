@@ -97,7 +97,7 @@ public class Globals
     // Research queue
     // 25+25+100+100+100+25+75+100+25+75+100+25+75+100+25+75
     public final static UnitType[] RESEARCH_QUEUE_HARD = {UnitType.Knight, UnitType.Knight, UnitType.Rocket,
-            UnitType.Healer, UnitType.Healer, UnitType.Healer, UnitType.Knight, UnitType.Rocket, UnitType.Rocket,
+            UnitType.Healer, UnitType.Healer, UnitType.Knight, UnitType.Healer, UnitType.Rocket, UnitType.Rocket,
             UnitType.Worker, UnitType.Worker, UnitType.Worker,  UnitType.Mage, UnitType.Mage, UnitType.Mage,
             UnitType.Knight, UnitType.Ranger};
 
@@ -477,6 +477,60 @@ public class Globals
         for (MapLocation obsoleteEnemyFactory : obsoleteEnemyFactories)
         {
             enemyFactories.remove(obsoleteEnemyFactory);
+        }
+    }
+
+    public static void removeObsoleteEnemyHotspots()
+    {
+        // Remove obsolete enemy hotspots
+        LinkedList<QueuePair<Double, MapLocation>> obsoleteEnemyHotspots = new LinkedList<QueuePair<Double, MapLocation>>();
+        for (QueuePair<Double, MapLocation> enemyHotspot : enemyHotspots)
+        {
+            MapLocation enemyHotspotMapLocation = enemyHotspot.getSecond();
+            boolean noEnemiesInSight = true;
+            if (gc.canSenseLocation(enemyHotspotMapLocation))
+            {
+                for (int i = 0; i < directions.length - 1; i++)
+                {
+                    MapLocation oneBlockAway = enemyHotspotMapLocation.add(directions[i]);
+                    MapLocation twoBlocksAway = enemyHotspotMapLocation.addMultiple(directions[i], 2);
+                    if (gc.canSenseLocation(oneBlockAway) && gc.hasUnitAtLocation(oneBlockAway))
+                    {
+                        Unit unit = gc.senseUnitAtLocation(oneBlockAway);
+                        if (unit.team() == theirTeam)
+                        {
+                            noEnemiesInSight = false;
+                            break;
+                        }
+                    }
+                    if (gc.canSenseLocation(twoBlocksAway) && gc.hasUnitAtLocation(twoBlocksAway))
+                    {
+                        Unit unit = gc.senseUnitAtLocation(twoBlocksAway);
+                        if (unit.team() == theirTeam)
+                        {
+                            noEnemiesInSight = false;
+                            break;
+                        }
+                    }
+                }
+                if (gc.canSenseLocation(enemyHotspotMapLocation) && gc.hasUnitAtLocation(enemyHotspotMapLocation))
+                {
+                    Unit unit = gc.senseUnitAtLocation(enemyHotspotMapLocation);
+                    if (unit.team() == theirTeam)
+                    {
+                        noEnemiesInSight = false;
+                        break;
+                    }
+                }
+            }
+            if (noEnemiesInSight)
+            {
+                obsoleteEnemyHotspots.add(enemyHotspot);
+            }
+        }
+        for (QueuePair<Double, MapLocation> obsoleteEnemyHotspot : obsoleteEnemyHotspots)
+        {
+            enemyHotspots.remove(obsoleteEnemyHotspot);
         }
     }
 }
