@@ -433,12 +433,6 @@ public class Combat
                 nearestEnemyMapLocation = mapLocation;
                 nearestEnemyGridDistance = enemyGridDistance;
             }
-            if(nearestEnemyMapLocation != null && unit.visionRange() >= unitMapLocation.distanceSquaredTo(nearestEnemyMapLocation))
-            {
-                nearestEnemyMapLocation = null;
-                // Since no enemy unit there and is a still a hotspot
-                enemyHotspots.remove(enemyHotspot);
-            }
         }
         if(nearestEnemyMapLocation == null || !moveUnitTo(unit, nearestEnemyMapLocation))
         {
