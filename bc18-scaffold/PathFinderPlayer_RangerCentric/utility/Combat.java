@@ -34,7 +34,7 @@ public class Combat
     {
         if(gc.isAttackReady(unit.id()) && nearbyEnemyUnits != null)
         {
-            for (int j = 0; nearbyEnemyUnits != null && j < nearbyEnemyUnits.size(); j++)
+            for (int j = 0; j < nearbyEnemyUnits.size(); j++)
             {
                 if (gc.canAttack(unit.id(), nearbyEnemyUnits.get(j).id()))
                 {
@@ -170,33 +170,32 @@ public class Combat
 
     // Find of number of units that can attack an location
     // TODO - Find total damage they can deal
-//    public static int numberEnemyUnitsAimingAtLocation(MapLocation targetLocation, VecUnit nearbyEnemyUnits)
-//    {
-//        int locationExposure = 0;
-//        for (int j = 0; nearbyEnemyUnits != null && j < nearbyEnemyUnits.size(); j++)
-//        {
-//            Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
-//            UnitType enemyUnitType = nearbyEnemyUnit.unitType();
-//            if(enemyUnitType != UnitType.Ranger && enemyUnitType != UnitType.Knight && enemyUnitType != UnitType.Mage)
-//            {
-//                continue;
-//            }
-//            long distanceFromEnemyToLocation = targetLocation.distanceSquaredTo(nearbyEnemyUnit.location().mapLocation());
-//            if (nearbyEnemyUnit.unitType() == UnitType.Ranger)
-//            {
-//                if(distanceFromEnemyToLocation > 10 && distanceFromEnemyToLocation < 50)
-//                {
-//                    locationExposure++;
-//                }
-//            }
-//            else if (nearbyEnemyUnit.attackRange() >= distanceFromEnemyToLocation)
-//            {
-//                locationExposure++;
-//            }
-//        }
-//        return locationExposure;
-//    }
-
+    public static int numberEnemyUnitsAimingAtLocation(MapLocation targetLocation, VecUnit nearbyEnemyUnits)
+    {
+        int locationExposure = 0;
+        for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+        {
+            Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
+            UnitType enemyUnitType = nearbyEnemyUnit.unitType();
+            if(enemyUnitType != UnitType.Ranger && enemyUnitType != UnitType.Knight && enemyUnitType != UnitType.Mage)
+            {
+                continue;
+            }
+            long distanceFromEnemyToLocation = targetLocation.distanceSquaredTo(nearbyEnemyUnit.location().mapLocation());
+            if (nearbyEnemyUnit.unitType() == UnitType.Ranger)
+            {
+                if(distanceFromEnemyToLocation > 10 && distanceFromEnemyToLocation < 50)
+                {
+                    locationExposure++;
+                }
+            }
+            else if (nearbyEnemyUnit.attackRange() >= distanceFromEnemyToLocation)
+            {
+                locationExposure++;
+            }
+        }
+        return locationExposure;
+    }
 
 //    public static int numberFriendlyUnitsAimingAtLocation(MapLocation targetLocation, VecUnit nearbyFriendlyUnits)
 //    {
@@ -311,40 +310,40 @@ public class Combat
 //        return false;
 //    }
 
-//    // TODO - Factor in Cooldown
-//    private static int numberOfOtherAlliesInAttackRange(Unit unit, MapLocation targetLocation)
-//    {
-//        int allyAssistNumber = 0;
-//        VecUnit nearbyFriendlyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), unit.visionRange(), ourTeam);
-//        Unit nearbyFriendlyUnit;
-//        UnitType friendlyUnitType;
-//        long distanceToLocation;
-//        for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
-//        {
-//            nearbyFriendlyUnit  = nearbyFriendlyUnits.get(j);
-//            friendlyUnitType = nearbyFriendlyUnit.unitType();
-//            distanceToLocation = nearbyFriendlyUnit.location().mapLocation().distanceSquaredTo(targetLocation);
-//            if(friendlyUnitType != UnitType.Ranger && friendlyUnitType != UnitType.Knight && friendlyUnitType != UnitType.Mage)
-//            {
-//                continue;
-//            }
-//            else if(nearbyFriendlyUnit.attackRange() >= distanceToLocation)
-//            {
-//                if(friendlyUnitType == UnitType.Ranger)
-//                {
-//                    if(distanceToLocation >= 10)
-//                    {
-//                        allyAssistNumber++;
-//                    }
-//                }
-//                else
-//                {
-//                    allyAssistNumber++;
-//                }
-//            }
-//        }
-//        return allyAssistNumber;
-//    }
+    // TODO - Factor in Cooldown
+    private static int numberOfOtherAlliesInAttackRange(Unit unit, MapLocation targetLocation)
+    {
+        int allyAssistNumber = 0;
+        VecUnit nearbyFriendlyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), unit.visionRange(), ourTeam);
+        Unit nearbyFriendlyUnit;
+        UnitType friendlyUnitType;
+        long distanceToLocation;
+        for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
+        {
+            nearbyFriendlyUnit  = nearbyFriendlyUnits.get(j);
+            friendlyUnitType = nearbyFriendlyUnit.unitType();
+            distanceToLocation = nearbyFriendlyUnit.location().mapLocation().distanceSquaredTo(targetLocation);
+            if(friendlyUnitType != UnitType.Ranger && friendlyUnitType != UnitType.Knight && friendlyUnitType != UnitType.Mage)
+            {
+                continue;
+            }
+            else if(nearbyFriendlyUnit.attackRange() >= distanceToLocation)
+            {
+                if(friendlyUnitType == UnitType.Ranger)
+                {
+                    if(distanceToLocation >= 10)
+                    {
+                        allyAssistNumber++;
+                    }
+                }
+                else
+                {
+                    allyAssistNumber++;
+                }
+            }
+        }
+        return allyAssistNumber;
+    }
 
     public static double getEnemyUnitPriority(UnitType enemyUnit)
     {
@@ -487,8 +486,7 @@ public class Combat
     // Multiple Units
     public static void doMicroRangers(Unit unit, MapLocation unitMapLocation, VecUnit nearbyEnemyUnits)
     {
-        long sizeOfEnemy = (nearbyEnemyUnits != null) ? nearbyEnemyUnits.size() : 0;
-
+        long sizeOfEnemy = nearbyEnemyUnits.size();
         if(sizeOfEnemy != 0)
         {
             // Must be refined later with movement code above this
@@ -858,8 +856,7 @@ public class Combat
 
     public static void doMicroKnight(Unit unit, MapLocation unitMapLocation, VecUnit nearbyEnemyUnits)
     {
-
-        long sizeOfEnemy = (nearbyEnemyUnits != null) ? nearbyEnemyUnits.size() : 0;
+        long sizeOfEnemy = nearbyEnemyUnits.size();
         if(sizeOfEnemy != 0)
         {
             if (unitFrozenByHeat(unit))
@@ -869,7 +866,7 @@ public class Combat
 
             if(gc.isAttackReady(unit.id()))
             {
-                if(nearbyEnemyUnits.size() != 0)
+                if(nearbyEnemyUnits != null && nearbyEnemyUnits.size() != 0)
                 {
                     if (botIntelligenceLevel == 0)
                     {
