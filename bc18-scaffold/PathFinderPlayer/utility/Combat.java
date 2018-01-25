@@ -34,7 +34,7 @@ public class Combat
     {
         if(gc.isAttackReady(unit.id()))
         {
-            for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+            for (int j = 0; nearbyEnemyUnits != null && j < nearbyEnemyUnits.size(); j++)
             {
                 if (gc.canAttack(unit.id(), nearbyEnemyUnits.get(j).id()))
                 {
@@ -111,7 +111,7 @@ public class Combat
     {
         Unit loneAttacker = null;
         int numAttackers = 0;
-        for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+        for (int j = 0; nearbyEnemyUnits != null && j < nearbyEnemyUnits.size(); j++)
         {
             Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
             UnitType enemyUnitType = nearbyEnemyUnit.unitType();
@@ -154,7 +154,7 @@ public class Combat
     public static int numberEnemyUnitsAimingAtLocation(MapLocation targetLocation, VecUnit nearbyEnemyUnits)
     {
         int locationExposure = 0;
-        for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+        for (int j = 0; nearbyEnemyUnits != null && j < nearbyEnemyUnits.size(); j++)
         {
             Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
             UnitType enemyUnitType = nearbyEnemyUnit.unitType();
@@ -181,7 +181,7 @@ public class Combat
     public static int numberFriendlyUnitsAimingAtLocation(MapLocation targetLocation, VecUnit nearbyFriendlyUnits)
     {
         int locationExposure = 0;
-        for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
+        for (int j = 0; nearbyFriendlyUnits != null && j < nearbyFriendlyUnits.size(); j++)
         {
             Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
             UnitType friendlyUnitType = nearbyFriendlyUnit.unitType();
@@ -402,7 +402,7 @@ public class Combat
     // Multiple Units
     public static void doMicroRangers(Unit unit, MapLocation unitMapLocation, VecUnit nearbyEnemyUnits)
     {
-        long sizeOfEnemy = nearbyEnemyUnits.size();
+        long sizeOfEnemy = (nearbyEnemyUnits != null) ? nearbyEnemyUnits.size() : 0;
         boolean hasMovedThisTurn = false;
         if(sizeOfEnemy != 0)
         {
@@ -830,7 +830,7 @@ public class Combat
         }
 
         // TODO - Implement Running/Retreating Function
-        if (nearbyEnemyUnits.size() != 0)
+        if (nearbyEnemyUnits != null && nearbyEnemyUnits.size() != 0)
         {
             if(!hasMovedThisTurn)
             {
@@ -940,7 +940,7 @@ public class Combat
 
     public static void doMicroKnight(Unit unit, MapLocation unitMapLocation, VecUnit nearbyEnemyUnits)
     {
-        long sizeOfEnemy = nearbyEnemyUnits.size();
+        long sizeOfEnemy = (nearbyEnemyUnits != null) ? nearbyEnemyUnits.size() : 0;
         boolean hasMovedThisTurn = false;
         if(sizeOfEnemy != 0)
         {
