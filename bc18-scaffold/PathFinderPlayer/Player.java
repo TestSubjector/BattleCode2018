@@ -45,6 +45,11 @@ public class Player
         {
             currentRound = gc.round();
             int timeLeftMs = gc.getTimeLeftMs();
+            if (currentRound > 1)
+            {
+                // System.out.println("Time to reach is " + rocketConstant);
+                // time += "Time taken in round " + (currentRound - 1) + " : " + (lastTime - timeLeftMs) + "\n";
+            }
             if (currentRound % 50 == 0)
             {
                 System.runFinalization();

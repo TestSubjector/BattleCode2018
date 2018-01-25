@@ -243,8 +243,27 @@ public class DecisionTree
 
     public static long timeToIdealRocketLaunch()
     {
-        long center;
-        return 0;
+        OrbitPattern currentOrbitPattern =  gc.orbitPattern();
+        long currentTimeToReachMars = currentOrbitPattern.duration(currentRound);
+        long idealTimeToLaunch = currentTimeToReachMars;
+        long indexFromCurrentRound = 0;
+        if(currentOrbitPattern.duration(currentRound + 1) > currentTimeToReachMars)
+        {
+            return currentRound;
+        }
+        for(long j = currentRound + 2; j < currentRound + 16; j++)
+        {
+            if(currentOrbitPattern.duration(j) < currentOrbitPattern.duration(j-1) + 1)
+            {
+                idealTimeToLaunch = currentOrbitPattern.duration(j);
+                indexFromCurrentRound = j;
+            }
+            else
+            {
+                break;
+            }
+        }
+        System.out.println("Current round + " + indexFromCurrentRound);
+        return  currentRound + indexFromCurrentRound;
     }
-
 }

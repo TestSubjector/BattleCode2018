@@ -65,6 +65,7 @@ public class Globals
     public static HashMap<MapLocation, MapLocation> nearestUnobstructedWaypoints;
     public static HashMap<Pair<MapLocation, MapLocation>, MapLocation> nextBestWaypoint;
     public static HashMap<Integer, MapLocation> lastVisited;
+    public static HashMap<Integer, Long> rocketLaunchTime;
     public static int numberOfConnectedComponents;
 
     // Enemy locations
@@ -228,6 +229,7 @@ public class Globals
         nearestUnobstructedWaypoints = new HashMap<MapLocation, MapLocation>();
         nextBestWaypoint = new HashMap<Pair<MapLocation, MapLocation>, MapLocation>();
         lastVisited = new HashMap<Integer, MapLocation>();
+        rocketLaunchTime = new HashMap<Integer, Long>();
         computeShortestPathTrees();
 
         attackRange = new HashMap<UnitType, Long>();

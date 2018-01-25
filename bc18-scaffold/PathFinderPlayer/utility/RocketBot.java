@@ -6,6 +6,7 @@ import bc.*;
 
 import static utility.Globals.*;
 import static utility.FactoryBot.*;
+import static utility.DecisionTree.*;
 
 public class RocketBot
 {
@@ -54,6 +55,7 @@ public class RocketBot
         if (unit.structureIsBuilt() == 1)
         {
             rocketPositions.add(unitLocation.mapLocation());
+            rocketLaunchTime.put(unit.id(), timeToIdealRocketLaunch());
             // Check all adjacent squares
             VecUnit nearbyUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 2, ourTeam);
             for (int j = 0; j < nearbyUnits.size(); j++)
@@ -64,7 +66,8 @@ public class RocketBot
                     gc.load(unit.id(), nearbyUnit.id());
                 }
             }
-            if ((unit.structureGarrison().size() >= 2 * unit.structureMaxCapacity() / 3 ) || currentRound > 748)
+            if (((unit.health() < 200) || (unit.structureGarrison().size() == 8) || currentRound > 748) ||
+                    (unit.structureGarrison().size() >= 2 * unit.structureMaxCapacity() / 3 ) && (currentRound >= rocketLaunchTime.get(unit.id())))
             {
                 QueuePair<Long, MapLocation> destPair = potentialLandingSites.poll();
 //                System.out.println("potentialLandingSites head : " + destPair.toString());
@@ -94,6 +97,7 @@ public class RocketBot
                 {
 //                    System.out.println("Final launch choice : " + destPair.toString());
                     gc.launchRocket(unit.id(), dest);
+                    rocketLaunchTime.remove(unit.id());
                     rocketPositions.remove(unitLocation.mapLocation());
                     updateSurroundingAppeal(destPair);
                 }
