@@ -112,7 +112,7 @@ public class Movement
         if (startWaypoint == null)
         {
             // We are stuck
-            return false;
+            return true;
         }
         if (endWaypoint == null)
         {

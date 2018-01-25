@@ -107,6 +107,14 @@ public class WorkerBot
                 if (minDiagonalDistance != 1)
                 {
                     moveUnitTo(unit, nearestStructureMapLocation);
+                    if (homeMapSize > 600 && currentRound < 250)
+                    {
+                        processMiner(unit, unitLocation, unitMapLocation);
+                    }
+                    else
+                    {
+                        moveUnitInRandomDirection(unit);
+                    }
                 }
                 else
                 {
@@ -124,14 +132,6 @@ public class WorkerBot
                 }
             }
         }
-        if (homeMapSize > 600 && currentRound < 250)
-        {
-            processMiner(unit, unitLocation, unitMapLocation);
-        }
-        else
-        {
-            moveUnitInRandomDirection(unit);
-        }
     }
 
     private static void processMiner(Unit unit, Location unitLocation, MapLocation unitMapLocation)
@@ -145,14 +145,18 @@ public class WorkerBot
                 long minSquaredDistance = 1000000L;
                 for (MapLocation karboniteMapLocation : karboniteLocations)
                 {
-                    long squaredDistanceToMine = karboniteMapLocation.distanceSquaredTo(unitMapLocation);
-                    if (squaredDistanceToMine < minSquaredDistance)
+                    if (!(karboniteLocationBlacklists.containsKey(unit.id()) &&
+                            karboniteLocationBlacklists.get(unit.id()).contains(karboniteMapLocation)))
                     {
-                        nearestMineMapLocation = karboniteMapLocation;
-                        minSquaredDistance = squaredDistanceToMine;
-                        if (minSquaredDistance <= 1)
+                        long squaredDistanceToMine = karboniteMapLocation.distanceSquaredTo(unitMapLocation);
+                        if (squaredDistanceToMine < minSquaredDistance)
                         {
-                            break;
+                            nearestMineMapLocation = karboniteMapLocation;
+                            minSquaredDistance = squaredDistanceToMine;
+                            if (minSquaredDistance <= 1)
+                            {
+                                break;
+                            }
                         }
                     }
                 }
@@ -162,12 +166,12 @@ public class WorkerBot
                 }
                 else if (!moveUnitTo(unit, nearestMineMapLocation))
                 {
-                    initialKarboniteLocationSize--;
-                    karboniteLocations.remove(nearestMineMapLocation);
+                    if (!karboniteLocationBlacklists.containsKey(unit.id()))
+                    {
+                        karboniteLocationBlacklists.put(unit.id(), new HashSet<MapLocation>());
+                    }
+                    karboniteLocationBlacklists.get(unit.id()).add(nearestMineMapLocation);
                 }
-            }
-            else
-            {
                 moveUnitInRandomDirection(unit);
             }
         }
