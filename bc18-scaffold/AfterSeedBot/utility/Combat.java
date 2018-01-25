@@ -34,7 +34,7 @@ public class Combat
     {
         if(gc.isAttackReady(unit.id()))
         {
-            for (int j = 0; nearbyEnemyUnits != null && j < nearbyEnemyUnits.size(); j++)
+            for (int j = 0; j < nearbyEnemyUnits.size(); j++)
             {
                 if (gc.canAttack(unit.id(), nearbyEnemyUnits.get(j).id()))
                 {
@@ -111,7 +111,7 @@ public class Combat
     {
         Unit loneAttacker = null;
         int numAttackers = 0;
-        for (int j = 0; nearbyEnemyUnits != null && j < nearbyEnemyUnits.size(); j++)
+        for (int j = 0; j < nearbyEnemyUnits.size(); j++)
         {
             Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
             UnitType enemyUnitType = nearbyEnemyUnit.unitType();
@@ -154,7 +154,7 @@ public class Combat
     public static int numberEnemyUnitsAimingAtLocation(MapLocation targetLocation, VecUnit nearbyEnemyUnits)
     {
         int locationExposure = 0;
-        for (int j = 0; nearbyEnemyUnits != null && j < nearbyEnemyUnits.size(); j++)
+        for (int j = 0; j < nearbyEnemyUnits.size(); j++)
         {
             Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
             UnitType enemyUnitType = nearbyEnemyUnit.unitType();
@@ -177,7 +177,6 @@ public class Combat
         }
         return locationExposure;
     }
-
 
 //    public static int numberFriendlyUnitsAimingAtLocation(MapLocation targetLocation, VecUnit nearbyFriendlyUnits)
 //    {
@@ -403,8 +402,8 @@ public class Combat
     // Multiple Units
     public static void doMicroRangers(Unit unit, MapLocation unitMapLocation, VecUnit nearbyEnemyUnits)
     {
-        long sizeOfEnemy = (nearbyEnemyUnits != null) ? nearbyEnemyUnits.size() : 0;
-
+        long sizeOfEnemy = nearbyEnemyUnits.size();
+        boolean hasMovedThisTurn = false;
         if(sizeOfEnemy != 0)
         {
             // Must be refined later with movement code above this
@@ -421,51 +420,118 @@ public class Combat
                 }
                 else
                 {
-                    Unit bestTarget = null;
-                    long minimumEnemyDistance = 999999L;
-                    long enemyUnitHealth = 251;
-                    for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+                    if(sizeOfEnemy == 1)
                     {
-                        Unit enemyUnit = nearbyEnemyUnits.get(j);
-                        long enemyDistance = unitMapLocation.distanceSquaredTo(enemyUnit.location().mapLocation());
-                        if (enemyDistance < minimumEnemyDistance)
+                        Unit loneEnemyUnit = nearbyEnemyUnits.get(0);
+                        MapLocation loneEnemyUnitMapLocation = loneEnemyUnit.location().mapLocation();
+                        if(gc.canAttack(unit.id(), loneEnemyUnit.id()))
                         {
-                            enemyUnitHealth = enemyUnit.health();
-                            minimumEnemyDistance = enemyDistance;
-                            bestTarget = enemyUnit;
+                            if(canWin1v1(unit, loneEnemyUnit))
+                            {
+
+                                gc.attack(unit.id(), loneEnemyUnit.id());
+                                return;
+                            }
+                            else
+                            {
+                                boolean haveSupport = false;
+                                if(numberOfOtherAlliesInAttackRange(unit,loneEnemyUnitMapLocation ) > 0)
+                                {
+                                    haveSupport = true;
+                                }
+                                // Have ally help
+                                if(haveSupport)
+                                {
+                                    gc.attack(unit.id(), loneEnemyUnit.id());
+                                    return;
+                                }
+                                else
+                                {
+                                    // TODO - Retreat Function as we don't have backup
+                                    // Enemy can't fire. Shoot and retreat
+                                    if(loneEnemyUnit.attackCooldown() >= 20)
+                                    {
+
+                                        gc.attack(unit.id(), loneEnemyUnit.id());
+                                        return;
+                                    }
+                                    else
+                                    {
+                                        // If we can move, then try retreat
+                                        if(unit.movementHeat() <10)
+                                        {
+                                            // TODO - Retreat function here
+                                            if(moveUnitAwayFrom(unit, loneEnemyUnitMapLocation))
+                                            {
+                                                return;
+                                            }
+                                            else
+                                            {
+                                                // Desperate attack
+                                                gc.attack(unit.id(), loneEnemyUnit.id());
+                                                return;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            gc.attack(unit.id(), loneEnemyUnit.id());
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
                         }
-                        else if (enemyDistance == minimumEnemyDistance && enemyUnit.health() < enemyUnitHealth)
+                        else
                         {
-                            enemyUnitHealth = enemyUnit.health();
-                            minimumEnemyDistance = enemyDistance;
-                            bestTarget = enemyUnit;
+                            // Can't attack enemy unit
+                            if(unit.location().mapLocation().distanceSquaredTo(loneEnemyUnitMapLocation) > 10)
+                            {
+                                moveUnitTo(unit, loneEnemyUnit.location().mapLocation());
+                            }
+                            else
+                            {
+                                moveUnitAwayFrom(unit, loneEnemyUnitMapLocation);
+                            }
                         }
                     }
-                    if (bestTarget != null)
+                    // Multiple Units
+                    else
                     {
-//                    if(gc.isJavelinReady(unit.id()))
-//                    {
-//                        if(gc.canJavelin(unit.id(), bestTarget.id()))
-//                        {
-//                            gc.javelin(unit.id(), bestTarget.id());
-//                        }
-//                    }
-                        if (gc.canAttack(unit.id(), bestTarget.id()))
+                        Unit bestTarget = null;
+                        double bestTargetingMetric = 0;
+                        double maxAllyUnitsAttackingAnEnemy = 0;
+                        for (int j = 0; j < nearbyEnemyUnits.size(); j++)
                         {
-                            gc.attack(unit.id(), bestTarget.id());
+                            Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
+                            UnitType enemyUnitType = nearbyEnemyUnit.unitType();
+                            int attackNumber = numberOfOtherAlliesInAttackRange(unit, nearbyEnemyUnit.location().mapLocation());
+                            if(attackNumber > maxAllyUnitsAttackingAnEnemy)
+                            {
+                                maxAllyUnitsAttackingAnEnemy = attackNumber;
+                                double targetingMetric = getEnemyUnitPriority(enemyUnitType) * attackNumber/ nearbyEnemyUnit.health();
+                                if(targetingMetric > bestTargetingMetric)
+                                {
+                                    bestTargetingMetric = targetingMetric;
+                                    bestTarget = nearbyEnemyUnit;
+                                }
+                            }
                         }
-                        else if (unit.attackRange() < minimumEnemyDistance)
+                        if(bestTarget != null)
                         {
-                            if (moveUnitTo(unit, bestTarget.location().mapLocation()) && gc.canAttack(unit.id(), bestTarget.id()))
+                            if(gc.canAttack(unit.id(), bestTarget.id()))
                             {
                                 gc.attack(unit.id(), bestTarget.id());
-//                            if(gc.isJavelinReady(unit.id()))
-//                            {
-//                                if(gc.canJavelin(unit.id(), bestTarget.id()))
-//                                {
-//                                    gc.javelin(unit.id(), bestTarget.id());
-//                                }
-//                            }
+                                return;
+                            }
+                            else if(unit.attackRange() < unitMapLocation.distanceSquaredTo(bestTarget.location().mapLocation()))
+                            {
+                                // TODO - Retreat function here
+                                if(moveUnitTo(unit, bestTarget.location().mapLocation()) && gc.canAttack(unit.id(), bestTarget.id()))
+                                {
+                                    // Desperate attack
+                                    gc.attack(unit.id(), bestTarget.id());
+                                    return;
+                                }
                             }
                         }
                     }
@@ -474,32 +540,35 @@ public class Combat
             else if(unit.movementHeat() < 10)
             {
                 Unit bestTarget = null;
-                long minimumEnemyDistance = 99999L;
-                long enemyUnitHealth = 251;
+                double bestTargetingMetric = 0;
+                double maxAllyUnitsAttackingAnEnemy = 0;
                 for (int j = 0; j < nearbyEnemyUnits.size(); j++)
                 {
-                    Unit enemyUnit = nearbyEnemyUnits.get(j);
-                    long enemyDistance = unitMapLocation.distanceSquaredTo(enemyUnit.location().mapLocation());
-                    if (enemyDistance < minimumEnemyDistance)
+                    Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
+                    UnitType enemyUnitType = nearbyEnemyUnit.unitType();
+                    int attackNumber = numberOfOtherAlliesInAttackRange(unit, nearbyEnemyUnit.location().mapLocation());
+                    if(attackNumber > maxAllyUnitsAttackingAnEnemy)
                     {
-                        enemyUnitHealth = enemyUnit.health();
-                        minimumEnemyDistance = enemyDistance;
-                        bestTarget = enemyUnit;
-                    }
-                    else if (enemyDistance == minimumEnemyDistance && enemyUnit.health() < enemyUnitHealth)
-                    {
-                        enemyUnitHealth = enemyUnit.health();
-                        minimumEnemyDistance = enemyDistance;
-                        bestTarget = enemyUnit;
+                        maxAllyUnitsAttackingAnEnemy = attackNumber;
+                        double targetingMetric = getEnemyUnitPriority(enemyUnitType) * attackNumber/ nearbyEnemyUnit.health();
+                        if(targetingMetric > bestTargetingMetric)
+                        {
+                            bestTargetingMetric = targetingMetric;
+                            bestTarget = nearbyEnemyUnit;
+                        }
                     }
                 }
-                if(bestTarget != null)
+                if(bestTarget != null && unit.attackRange() < unitMapLocation.distanceSquaredTo(bestTarget.location().mapLocation()))
                 {
-                    moveUnitTo(unit, bestTarget.location().mapLocation());
+                    if(moveUnitTo(unit, bestTarget.location().mapLocation()))
+                    {
+                        hasMovedThisTurn = true;
+                    }
                 }
-                else
+                else if(!hasMovedThisTurn)
                 {
                     moveUnitInRandomDirection(unit);
+                    hasMovedThisTurn = true;
                 }
             }
         }
@@ -639,53 +708,50 @@ public class Combat
         // TODO - Give combat units priority over workers
         if (gc.isHealReady(unit.id()))
         {
-            if(nearbyFriendlyUnits != null && nearbyFriendlyUnits.size() != 0)
-            {
-                long heathMinimumInRange = 250;
-                long heathMinimumOutOfRange = 250;
+            long heathMinimumInRange = 250;
+            long heathMinimumOutOfRange = 250;
 
-                for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
+            for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
+            {
+                Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
+                if(nearbyFriendlyUnit.unitType() != UnitType.Factory && nearbyFriendlyUnit.unitType() != UnitType.Rocket)
                 {
-                    Unit nearbyFriendlyUnit = nearbyFriendlyUnits.get(j);
-                    if(nearbyFriendlyUnit.unitType() != UnitType.Factory && nearbyFriendlyUnit.unitType() != UnitType.Rocket)
+                    long friendlyUnitHealth = nearbyFriendlyUnit.health();
+                    if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()))
                     {
-                        long friendlyUnitHealth = nearbyFriendlyUnit.health();
-                        if (gc.canHeal(unit.id(), nearbyFriendlyUnit.id()))
+                        if (friendlyUnitHealth < heathMinimumInRange && friendlyUnitHealth < nearbyFriendlyUnit.maxHealth())
                         {
-                            if (friendlyUnitHealth < heathMinimumInRange && friendlyUnitHealth < nearbyFriendlyUnit.maxHealth())
-                            {
-                                heathMinimumInRange = friendlyUnitHealth;
-                                indexOfUnitWithLowestHealthInRange = j;
-                            }
+                            heathMinimumInRange = friendlyUnitHealth;
+                            indexOfUnitWithLowestHealthInRange = j;
                         }
-                        else
+                    }
+                    else
+                    {
+                        if (friendlyUnitHealth < heathMinimumOutOfRange && friendlyUnitHealth < nearbyFriendlyUnit.maxHealth())
                         {
-                            if (friendlyUnitHealth < heathMinimumOutOfRange && friendlyUnitHealth < nearbyFriendlyUnit.maxHealth())
-                            {
-                                heathMinimumOutOfRange = friendlyUnitHealth;
-                                indexOfUnitWithLowestHealthOutOfRange = j;
-                            }
+                            heathMinimumOutOfRange = friendlyUnitHealth;
+                            indexOfUnitWithLowestHealthOutOfRange = j;
                         }
                     }
                 }
-                if (indexOfUnitWithLowestHealthInRange != -1)
+            }
+            if (indexOfUnitWithLowestHealthInRange != -1)
+            {
+                gc.heal(unit.id(), nearbyFriendlyUnits.get(indexOfUnitWithLowestHealthInRange).id());
+                hasHealedThisTurn = true;
+            }
+            else if (indexOfUnitWithLowestHealthOutOfRange != -1)
+            {
+                Unit targetFriendlyUnit = nearbyFriendlyUnits.get(indexOfUnitWithLowestHealthOutOfRange);
+                int targetFriendlyUnitID = targetFriendlyUnit.id();
+                if(moveUnitTo(unit, targetFriendlyUnit.location().mapLocation()))
                 {
-                    gc.heal(unit.id(), nearbyFriendlyUnits.get(indexOfUnitWithLowestHealthInRange).id());
+                    hasMovedThisTurn = true;
+                }
+                if(gc.canHeal(unit.id(), targetFriendlyUnitID))
+                {
+                    gc.heal(unit.id(), targetFriendlyUnitID);
                     hasHealedThisTurn = true;
-                }
-                else if (indexOfUnitWithLowestHealthOutOfRange != -1)
-                {
-                    Unit targetFriendlyUnit = nearbyFriendlyUnits.get(indexOfUnitWithLowestHealthOutOfRange);
-                    int targetFriendlyUnitID = targetFriendlyUnit.id();
-                    if(moveUnitTo(unit, targetFriendlyUnit.location().mapLocation()))
-                    {
-                        hasMovedThisTurn = true;
-                    }
-                    if(gc.canHeal(unit.id(), targetFriendlyUnitID))
-                    {
-                        gc.heal(unit.id(), targetFriendlyUnitID);
-                        hasHealedThisTurn = true;
-                    }
                 }
             }
         }
@@ -693,12 +759,12 @@ public class Combat
         // Overcharging Category
         if(gc.isOverchargeReady(unit.id()))
         {
-            if(nearbyFriendlyUnits != null && nearbyFriendlyUnits.size() != 0)
+            if(nearbyFriendlyUnits.size() != 0)
             {
                 long overChargedUnitIndexInRange = -1;
-                long potentialOverchargedUnitPriorityInRange = 0;
+                long potentialOverchargedUnitPriorityInRange = -1;
                 long overChargedUnitIndexOutOfRange = -1;
-                long potentialOverchargedUnitPriorityOutOfRange = 0;
+                long potentialOverchargedUnitPriorityOutOfRange = -1;
 
                 for (int j = 0; j < nearbyFriendlyUnits.size(); j++)
                 {
@@ -764,22 +830,20 @@ public class Combat
 
                 if(overChargedUnitIndexInRange != -1)
                 {
-                    Unit friendlyUnitToBeOverCharged = nearbyFriendlyUnits.get(overChargedUnitIndexInRange);
-                    if(gc.canOvercharge(unit.id(), friendlyUnitToBeOverCharged.id()))
+                    if(gc.canOvercharge(unit.id(), nearbyFriendlyUnits.get(overChargedUnitIndexInRange).id()))
                     {
-                        gc.overcharge(unit.id(), friendlyUnitToBeOverCharged.id());
+                        gc.overcharge(unit.id(), nearbyFriendlyUnits.get(overChargedUnitIndexInRange).id());
                         overchargedUnitsExtraTurn(nearbyFriendlyUnits.get(overChargedUnitIndexInRange));
                     }
                 }
                 else if(overChargedUnitIndexOutOfRange != -1)
                 {
-                    Unit friendlyUnitToBeOverCharged = nearbyFriendlyUnits.get(overChargedUnitIndexOutOfRange);
-                    if(moveUnitTo(unit, friendlyUnitToBeOverCharged.location().mapLocation()))
+                    if(moveUnitTo(unit, nearbyFriendlyUnits.get(overChargedUnitIndexOutOfRange).location().mapLocation()))
                     {
-                        if(gc.canOvercharge(unit.id(), friendlyUnitToBeOverCharged.id()))
+                        if(gc.canOvercharge(unit.id(), nearbyFriendlyUnits.get(overChargedUnitIndexOutOfRange).id()))
                         {
-                            gc.overcharge(unit.id(), friendlyUnitToBeOverCharged.id());
-                            overchargedUnitsExtraTurn(friendlyUnitToBeOverCharged);
+                            gc.overcharge(unit.id(), nearbyFriendlyUnits.get(overChargedUnitIndexOutOfRange).id());
+                            overchargedUnitsExtraTurn(nearbyFriendlyUnits.get(overChargedUnitIndexOutOfRange));
                         }
                     }
                 }
@@ -787,7 +851,7 @@ public class Combat
         }
 
         // TODO - Implement Running/Retreating Function
-        if (nearbyEnemyUnits != null && nearbyEnemyUnits.size() != 0)
+        if (nearbyEnemyUnits.size() != 0)
         {
             if(!hasMovedThisTurn)
             {
@@ -916,8 +980,8 @@ public class Combat
 
     public static void doMicroKnight(Unit unit, MapLocation unitMapLocation, VecUnit nearbyEnemyUnits)
     {
-
-        long sizeOfEnemy = (nearbyEnemyUnits != null) ? nearbyEnemyUnits.size() : 0;
+        long sizeOfEnemy = nearbyEnemyUnits.size();
+        boolean hasMovedThisTurn = false;
         if(sizeOfEnemy != 0)
         {
             if (unitFrozenByHeat(unit))
@@ -1012,11 +1076,15 @@ public class Combat
                 }
                 if(bestTarget != null)
                 {
-                    moveUnitTo(unit, bestTarget.location().mapLocation());
+                    if(moveUnitTo(unit, bestTarget.location().mapLocation()))
+                    {
+                        hasMovedThisTurn = true;
+                    }
                 }
-                else
+                else if(!hasMovedThisTurn)
                 {
                     moveUnitInRandomDirection(unit);
+                    hasMovedThisTurn = true;
                 }
             }
         }
