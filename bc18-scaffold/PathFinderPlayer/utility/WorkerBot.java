@@ -107,14 +107,7 @@ public class WorkerBot
                 if (minDiagonalDistance != 1)
                 {
                     moveUnitTo(unit, nearestStructureMapLocation);
-                    if (homeMapSize > 600 && currentRound < 250)
-                    {
-                        processMiner(unit, unitLocation, unitMapLocation);
-                    }
-                    else
-                    {
-                        moveUnitInRandomDirection(unit);
-                    }
+                    processMiner(unit, unitLocation, unitMapLocation);
                 }
                 else
                 {
