@@ -263,7 +263,6 @@ public class DecisionTree
                 break;
             }
         }
-        System.out.println("Current round + " + indexFromCurrentRound);
         return  currentRound + indexFromCurrentRound;
     }
 }

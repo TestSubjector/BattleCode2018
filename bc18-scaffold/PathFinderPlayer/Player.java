@@ -87,6 +87,7 @@ public class Player
 
             // Clear enemy hashmap
             enemyVecUnits.clear();
+            sniperRoost.clear();
             removeObsoleteMines();
             if (homePlanet == Planet.Earth)
             {
@@ -291,7 +292,7 @@ public class Player
                     }
                 }
             }
-
+            processSnipe();
             // Submit the actions we've done, and wait for our next turn.
             gc.nextTurn();
         }

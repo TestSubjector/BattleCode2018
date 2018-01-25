@@ -475,10 +475,48 @@ public class Combat
         }
     }
 
+    public static void processSnipe()
+    {
+        int grandCounterForFactories = 0;
+        Iterator<Integer> sniperID = sniperRoost.iterator();
+        for(Iterator<MapLocation> fp = enemyFactories.iterator(); fp.hasNext();)
+        {
+            MapLocation enemyMapLocation = fp.next();
+            System.out.println("Sniping at area" + enemyMapLocation);
+            while(sniperID.hasNext())
+            {
+                int theSniperID = sniperID.next();
+                if(gc.canBeginSnipe(theSniperID, enemyMapLocation))
+                {
+                    gc.beginSnipe(theSniperID, enemyMapLocation);
+                    grandCounterForFactories++;
+                }
+                if(grandCounterForFactories == 7)
+                {
+                    break;
+                }
+            }
+        }
+        if(sniperID.hasNext() == true && initialEnemyWorkers.size() != 0)
+        {
+            int theSniperID = sniperID.next();
+            if(gc.canBeginSnipe(theSniperID, initialEnemyWorkers.get(0)))
+            {
+                gc.beginSnipe(theSniperID, initialEnemyWorkers.get(0));
+
+            }
+        }
+    }
+
     // Multiple Units
     public static void doMicroRangers(Unit unit, MapLocation unitMapLocation, VecUnit nearbyEnemyUnits)
     {
         long sizeOfEnemy = (nearbyEnemyUnits != null) ? nearbyEnemyUnits.size() : 0;
+
+        if(unit.rangerIsSniping() == 1)
+        {
+            return;
+        }
 
         if(sizeOfEnemy != 0)
         {
@@ -646,6 +684,11 @@ public class Combat
         }
         else
         {
+            // Have to do this here because otherwise enemy will kill non-attacking ranger
+            if(unit.abilityHeat() < 10 && gc.isBeginSnipeReady(unit.id()))
+            {
+                sniperRoost.add(unit.id());
+            }
             if(!rocketPositions.isEmpty())
             {
                 long distanceFromUnit = 100000L;
@@ -690,7 +733,6 @@ public class Combat
                 moveToEnemyBases(unit, unitMapLocation);
             }
         }
-
         // Lazying about
         if(unit.attackHeat() < 10 && unit.abilityHeat() < 10)
         {
