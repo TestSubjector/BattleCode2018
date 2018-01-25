@@ -81,7 +81,7 @@ public class DecisionTree
                 }
                 else if (initialTotalKarbonite < 100)
                 {
-                    workersRequired = 7;
+                    workersRequired = 6;
                 }
             }
             else
@@ -266,4 +266,11 @@ public class DecisionTree
         // Constant value by integrating (8*57^3)/(x^2 + 57^2) dx from x = -infinity to -375 - Not anymore
         return timeLeft < 501;
     }
+
+    public static long timeToIdealRocketLaunch()
+    {
+        long center;
+        return 0;
+    }
+
 }

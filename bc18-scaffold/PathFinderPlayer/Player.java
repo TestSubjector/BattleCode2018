@@ -25,9 +25,19 @@ public class Player
         // Queue researches
         if (gc.planet() == Planet.Mars)
         {
-            for (int i = 0; i < RESEARCH_QUEUE_HARD.length; i++)
+            if(homeMapSize <= 625)
             {
-                gc.queueResearch(RESEARCH_QUEUE_HARD[i]);
+                for (int i = 0; i < RESEARCH_QUEUE_HARD_SMALL_MAPS.length; i++)
+                {
+                    gc.queueResearch(RESEARCH_QUEUE_HARD_SMALL_MAPS[i]);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < RESEARCH_QUEUE_HARD_LARGE_MAPS.length; i++)
+                {
+                    gc.queueResearch(RESEARCH_QUEUE_HARD_LARGE_MAPS[i]);
+                }
             }
         }
         String time = "";
