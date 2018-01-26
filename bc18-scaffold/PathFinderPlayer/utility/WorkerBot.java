@@ -31,16 +31,19 @@ public class WorkerBot
             }
             if (nearestLocation != null)
             {
-                if (diagonalDistanceBetween(unitMapLocation, nearestLocation) < 4 && gc.senseNearbyUnitsByType(nearestLocation, 5, UnitType.Factory).size() > 0)
+                if (diagonalDistanceBetween(unitMapLocation, nearestLocation) < 2 && gc.senseNearbyUnitsByType(nearestLocation, 30, UnitType.Factory).size() > 0)
                 {
                     primeFactoryLocations.remove(nearestLocation);
-                    System.out.println("Removed " + nearestLocation);
                 }
                 if (diagonalDistanceBetween(unitMapLocation, nearestLocation) > 2)
                 {
                     moveUnitTo(unit, nearestLocation);
                 }
             }
+        }
+        else
+        {
+            processMiner(unit, unit.location(), unitMapLocation);
         }
     }
 
@@ -49,11 +52,11 @@ public class WorkerBot
         if (unit.movementHeat() < 10)
         {
             // Move towards nearest blueprint
-            Unit nearestStructure = null;
+            MapLocation nearestStructure = null;
             long minDiagonalDistance = 1000L;
-            for (Unit blueprint : unfinishedBlueprints)
+            for (MapLocation blueprint : unfinishedBlueprints)
             {
-                long diagonalDistanceToStructure = diagonalDistanceBetween(blueprint.location().mapLocation(), unitMapLocation);
+                long diagonalDistanceToStructure = diagonalDistanceBetween(blueprint, unitMapLocation);
                 if (diagonalDistanceToStructure < minDiagonalDistance)
                 {
                     nearestStructure = blueprint;
@@ -66,17 +69,16 @@ public class WorkerBot
             }
             if (nearestStructure != null)
             {
-                MapLocation nearestStructureMapLocation = nearestStructure.location().mapLocation();
                 if (minDiagonalDistance != 1)
                 {
-                    moveUnitTo(unit, nearestStructureMapLocation);
+                    moveUnitTo(unit, nearestStructure);
                 }
                 else
                 {
                     int k = random.nextInt(8);
                     for (int j = 0; j < directions.length - 1; j++)
                     {
-                        MapLocation adjacentSpace = nearestStructureMapLocation.add(directions[(k++) % 8]);
+                        MapLocation adjacentSpace = nearestStructure.add(directions[(k++) % 8]);
                         if (homeMap.onMap(adjacentSpace) &&
                                 homeMap.isPassableTerrainAt(adjacentSpace) == 1 &&
                                 !gc.hasUnitAtLocation(adjacentSpace))
@@ -87,7 +89,11 @@ public class WorkerBot
                 }
             }
         }
+        unitLocation = unit.location();
+        unitMapLocation = unitLocation.mapLocation();
         moveBuilderToDesirableLocation(unit, unitMapLocation);
+        unitLocation = unit.location();
+        unitMapLocation = unitLocation.mapLocation();
         if (unit.workerHasActed() == 0)
         {
             // Blueprint structures
@@ -159,19 +165,16 @@ public class WorkerBot
                         }
                     }
                     moveUnitTo(unit, blueprintMapLocation);
+                    unitLocation = unit.location();
+                    unitMapLocation = unitLocation.mapLocation();
                 }
                 else
                 {
                     if (gc.canBlueprint(unit.id(), blueprintType, blueprintDirection))
                     {
-                        MapLocation blueprintMapLocation = unitMapLocation.add(blueprintDirection);
+                        MapLocation blueprintMapLocation = getConstantMapLocationRepresentation(unitMapLocation.add(blueprintDirection));
                         gc.blueprint(unit.id(), blueprintType, blueprintDirection);
-                        if (gc.hasUnitAtLocation(blueprintMapLocation))
-                        {
-                            Unit newBlueprint = gc.senseUnitAtLocation(blueprintMapLocation);
-                            unfinishedBlueprints.add(newBlueprint);
-                            typeSortedUnitLists.get(blueprintType).add(newBlueprint);
-                        }
+                        unfinishedBlueprints.add(blueprintMapLocation);
                         removeUnitFromBuildQueue();
                     }
                 }
@@ -217,7 +220,11 @@ public class WorkerBot
                     }
                     karboniteLocationBlacklists.get(unit.id()).add(nearestMineMapLocation);
                 }
+                unitLocation = unit.location();
+                unitMapLocation = unitLocation.mapLocation();
                 moveUnitInRandomDirection(unit);
+                unitLocation = unit.location();
+                unitMapLocation = unitLocation.mapLocation();
             }
         }
     }
@@ -243,6 +250,24 @@ public class WorkerBot
                     gc.repair(unit.id(), adjacentUnit.id());
                     break;
                 }
+            }
+        }
+
+        VecUnit nearbyEnemies = enemyVecUnits.get(unit.id());
+        if (nearbyEnemies != null)
+        {
+            int dangerousEnemies = 0;
+            for (int j = 0; j < nearbyEnemies.size(); j++)
+            {
+                UnitType unitType = nearbyEnemies.get(j).unitType();
+                if (unitType != UnitType.Worker && unitType != UnitType.Factory && unitType != UnitType.Rocket)
+                {
+                    dangerousEnemies++;
+                }
+            }
+            if (dangerousEnemies > 1)
+            {
+                moveUnitAwayFromMultipleUnits(unit, nearbyEnemies);
             }
         }
 
