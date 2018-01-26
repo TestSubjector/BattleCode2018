@@ -728,7 +728,7 @@ public class Combat
                         indexLocation = rocketMapLocation;
                     }
                 }
-                if(currentRound < 750 && (distanceFromUnit < 40 || (currentRound > 650 && distanceFromUnit < 170) ||
+                if(currentRound < 750 && (distanceFromUnit < 40 || (currentRound > 630 && distanceFromUnit < 170) ||
                         (currentRound > 690  && distanceFromUnit < 677)))
                 {
                     moveUnitTo(unit, indexLocation);
@@ -950,7 +950,7 @@ public class Combat
                         indexLocation = rocketMapLocation;
                     }
                 }
-                if(currentRound < 750 && (distanceFromUnit < 40 || (currentRound > 650 && distanceFromUnit < 170) ||
+                if(currentRound < 750 && (distanceFromUnit < 40 || (currentRound > 630 && distanceFromUnit < 170) ||
                         (currentRound > 690  && distanceFromUnit < 677)))
                 {
                     moveUnitTo(unit, indexLocation);
@@ -1154,7 +1154,7 @@ public class Combat
                         indexLocation = rocketMapLocation;
                     }
                 }
-                if(currentRound < 750 && (distanceFromUnit < 40 || (currentRound > 650 && distanceFromUnit < 170) ||
+                if(currentRound < 750 && (distanceFromUnit < 40 || (currentRound > 630 && distanceFromUnit < 170) ||
                         (currentRound > 690  && distanceFromUnit < 677)))
                 {
                     moveUnitTo(unit, indexLocation);
