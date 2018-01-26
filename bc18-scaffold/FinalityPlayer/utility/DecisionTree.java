@@ -105,8 +105,7 @@ public class DecisionTree
                     workersRequired = 5;
                 }
             }
-
-            workersRequired = 2 + (int) (Math.min(1, Math.sqrt((double) (currentRound + 125) / 400)) * workersRequired);
+            workersRequired = 3 + (int) (Math.min(1, Math.sqrt((double) (currentRound + 125) / 400)) * workersRequired);
         }
         else if(homeMapSize <= 1000)
         {
@@ -118,17 +117,18 @@ public class DecisionTree
             {
                 if (karboniteLocations.size() > 180)
                 {
-                    workersRequired = 20;
+                    workersRequired = 15;
                 }
                 else if (karboniteLocations.size() > 130)
                 {
-                    workersRequired = 15;
+                    workersRequired = 11;
                 }
                 else
                 {
-                    workersRequired = 10;
+                    workersRequired = 9;
                 }
             }
+            workersRequired = 3 + (int) (Math.min(1, Math.sqrt((double) (currentRound + 125) / 400)) * workersRequired);
         }
         else if(homeMapSize <= 1600)
         {
@@ -154,7 +154,7 @@ public class DecisionTree
         else if(homeMapSize <= 1000)
         {
             factoriesRequired = 1 + (int) ((Math.min(1, Math.sqrt((double) currentRound / 400))) *
-                    (Math.ceil(((double) homeMapHeight + homeMapWidth) / 20) + initialTotalKarbonite/600));
+                    (Math.round(((double) homeMapHeight + homeMapWidth) / 15)));
         }
         else if(homeMapSize <= 1600)
         {
@@ -179,7 +179,7 @@ public class DecisionTree
         else
         {
             rocketsRequired = (int) ((Math.min(1, (double) ((currentRound - 100) * (currentRound - 100)) / (250 * 250))) *
-                        Math.round((double) totalUnits / 10));
+                    Math.round((double) totalUnits / 10));
         }
     }
 
@@ -191,7 +191,14 @@ public class DecisionTree
         }
         else if(homeMapSize <= 1000)
         {
-
+            if(currentRound < 75)
+            {
+                knightsRequired = (int) (4 + ((double) currentRound / 75) * (double) homeMapSize / 900);
+            }
+            else
+            {
+                knightsRequired = 2 * (int) (((double) currentRound * (600 + homeMapSize) * passableTerrain) / (12000 * homeMapSize));
+            }
         }
         else if(homeMapSize <= 1600)
         {
@@ -215,10 +222,10 @@ public class DecisionTree
         }
         else if(homeMapSize <= 1000)
         {
-
+            rangersRequired = (int) (6 + ((double) currentRound / 75) * (double) homeMapSize / 100);
         }
         else if(homeMapSize <= 1600)
-        {
+       {
 
         }
         else if(homeMapSize <= 2100)
@@ -246,7 +253,14 @@ public class DecisionTree
         }
         else if(homeMapSize <= 1000)
         {
-
+            if (currentRound <= 75)
+            {
+                healersRequired = (int) (2 + ((double) currentRound / 75) * (double) homeMapSize / 300);
+            }
+            else
+            {
+                healersRequired = (int) (Math.round((rangersRequired + 2 * knightsRequired) / 5));
+            }
         }
         else if(homeMapSize <= 1600)
         {
@@ -261,147 +275,6 @@ public class DecisionTree
 
         }
     }
-
-//    public static void setWorkersRequired()
-//    {
-//        if (currentRound <= 300)
-//        {
-//            if (homeMapSize <= 600)
-//            {
-//                if (karboniteLocations.size() > 150)
-//                {
-//                    workersRequired = 12;
-//                }
-//                else if (karboniteLocations.size() > 100)
-//                {
-//                    workersRequired = 10;
-//                }
-//                else
-//                {
-//                    workersRequired = 8;
-//                }
-//            }
-//            else if (homeMapSize <= 1200)
-//            {
-//                if (karboniteLocations.size() > 180)
-//                {
-//                    workersRequired = 15;
-//                }
-//                else if (karboniteLocations.size() > 130)
-//                {
-//                    workersRequired = 12;
-//                }
-//                else
-//                {
-//                    workersRequired = 10;
-//                }
-//            }
-//            else
-//            {
-//                if (karboniteLocations.size() > 250)
-//                {
-//                    workersRequired = 24;
-//                }
-//                else if (karboniteLocations.size() > 200)
-//                {
-//                    workersRequired = 20;
-//                }
-//                else if (karboniteLocations.size() > 150)
-//                {
-//                    workersRequired = 15;
-//                }
-//                else
-//                {
-//                    workersRequired = 12;
-//                }
-//            }
-//        }
-//        else
-//        {
-//            if (homeMapSize <= 600)
-//            {
-//                workersRequired = 6;
-//            }
-//            else if (homeMapSize <= 1200)
-//            {
-//                workersRequired = 10;
-//            }
-//            else
-//            {
-//                workersRequired = 12;
-//            }
-//        }
-//        workersRequired = 2 + (int) (Math.min(1, Math.sqrt((double) (currentRound + 100) / 400)) * workersRequired);
-//    }
-
-//    public static void setFactoriesRequired()
-//    {
-//        factoriesRequired = 1 + (int) ((Math.min(1, Math.sqrt((double) currentRound / 400))) *
-//                (Math.round(((double) homeMapHeight + homeMapWidth) / 15) +
-//                        (double) initialTotalKarbonite / 2000));
-//    }
-
-//    public static void setRocketsRequired()
-//    {
-//        if (enemyVecUnits.size() == 0)
-//        {
-//            rocketsRequired = 10;
-//        }
-//        else
-//        {
-//            rocketsRequired = (int) ((Math.min(1, (double) ((currentRound - 100) * (currentRound - 100)) / (500 * 500))) *
-//                    Math.round((double) totalUnits / 15));
-//        }
-//    }
-
-//    public static void setKnightsRequired()
-//    {
-//        if (typeSortedUnitLists.get(UnitType.Factory).size() < 1 || shouldQueueWorker() || shouldQueueFactory())
-//        {
-//            return;
-//        }
-//        if(homeMapSize <= 600)
-//        {
-//            if(currentRound < 75)
-//            {
-//                knightsRequired = (int) (4 + ((double) currentRound / 75) * (double) homeMapSize / 900);
-//            }
-//            else
-//            {
-//                knightsRequired = (int) (1 + ((double) currentRound / 75) * (double) homeMapSize / 900);
-//            }
-//        }
-//        else if (currentRound <= 75)
-//        {
-//            knightsRequired = (int) (4 + ((double) currentRound / 75) * (double) homeMapSize / 300);
-//        }
-//        else
-//        {
-//            knightsRequired = 2 * (int) (((double) currentRound * (600 + homeMapSize) * passableTerrain) / (12000 * homeMapSize));
-//        }
-//    }
-
-//    public static void setRangersRequired()
-//    {
-//        if (typeSortedUnitLists.get(UnitType.Factory).size() < 1 || shouldQueueWorker() || shouldQueueFactory())
-//        {
-//            return;
-//        }
-//        if(homeMapSize <= 600)
-//        {
-//            rangersRequired = (int) (6 + ((double) currentRound / 75) * (double) homeMapSize / 100);
-//        }
-//        else if (currentRound <= 75)
-//        {
-//            rangersRequired = (int) (2 + ((double) currentRound / 75) * (double) homeMapSize / 300);
-//        }
-//        else
-//        {
-//            rangersRequired = 2 * (int) Math.round(Math.min(1, Math.sqrt((double) currentRound / 450)) *
-//                    ((homeMapSize - passableTerrain) / homeMapSize) *
-//                    (23 + (homeMapSize - 400) * (23 / 2100)));
-//        }
-//    }
 
     public static void setMagesRequired()
     {
@@ -419,22 +292,6 @@ public class DecisionTree
 //            magesRequired = (int) (((double) currentRound * (600 + homeMapSize) * passableTerrain) / (12000 * homeMapSize));
 //        }
     }
-
-//    public static void setHealersRequired()
-//    {
-//        if (typeSortedUnitLists.get(UnitType.Factory).size() < 1 || shouldQueueWorker() || shouldQueueFactory())
-//        {
-//            return;
-//        }
-//        if (currentRound <= 75)
-//        {
-//            healersRequired = (int) (2 + ((double) currentRound / 75) * (double) homeMapSize / 300);
-//        }
-//        else
-//        {
-//            healersRequired = (int) (Math.round((rangersRequired + 1.8 * knightsRequired + 0.3 * magesRequired) / 5));
-//        }
-//    }
 
     public static boolean switchToPrimitiveMind(long currentRound, int timeLeft)
     {

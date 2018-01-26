@@ -181,6 +181,7 @@ public class Pathfinding
     private static void computeStartingPaths(HashMap<MapLocation, HashMap<MapLocation, Long>> distances)
     {
         primeFactoryLocations = new HashSet<MapLocation>();
+        rangerMeta = true;
         for (int i = 0; i < initialWorkers.size(); i++)
         {
             MapLocation us = initialWorkers.get(i).location().mapLocation();
@@ -189,13 +190,13 @@ public class Pathfinding
             {
                 MapLocation them = initialEnemyWorkers.get(j);
                 MapLocation theirWaypoint = findNearestUnobstructedWaypoint(them);
-                if (ourWaypoint == null || theirWaypoint == null || !constructPathBetween(ourWaypoint, theirWaypoint))
-                {
-                    workersInDifferentComponents = true;
-                }
-                else
+                if (ourWaypoint != null && theirWaypoint != null && constructPathBetween(ourWaypoint, theirWaypoint))
                 {
                     long fullDistance = distances.get(ourWaypoint).get(theirWaypoint);
+                    if (fullDistance < 2.5 * diagonalDistanceBetween(ourWaypoint, theirWaypoint))
+                    {
+                        rangerMeta = false;
+                    }
                     MapLocation currentWaypoint = ourWaypoint;
                     while (distances.get(ourWaypoint).get(currentWaypoint) < 0.5 * fullDistance)
                     {
