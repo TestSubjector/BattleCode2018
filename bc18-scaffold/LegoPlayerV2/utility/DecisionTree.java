@@ -47,65 +47,65 @@ public class DecisionTree
 
     public static void maintainArmyRatio()
     {
-        if(rangerMeta)
+        if (rangerMeta)
         {
             // 2:1
             long numberOfHealers = typeSortedUnitLists.get(UnitType.Healer).size();
             long numberOfRangers = typeSortedUnitLists.get(UnitType.Ranger).size();
-            if( numberOfRangers < 2 * numberOfHealers)
+            if (numberOfRangers < 2 * numberOfHealers)
             {
                 addUnitToTrainQueueUrgently(UnitType.Ranger);
             }
-            else if(numberOfHealers < 0.5 * numberOfRangers)
+            else
             {
                 addUnitToTrainQueueUrgently(UnitType.Healer);
             }
         }
         else
         {
-            if(homeMapSize <= 500)
+            if (homeMapSize <= 500)
             {
                 // 2.5 : 1
                 long numberOfKnights = typeSortedUnitLists.get(UnitType.Knight).size();
                 long numberOfHealers = typeSortedUnitLists.get(UnitType.Healer).size();
-                if( numberOfKnights < 2.5 * numberOfHealers)
+                if (numberOfKnights < 2.5 * numberOfHealers)
                 {
                     addUnitToTrainQueueUrgently(UnitType.Knight);
                 }
-                else if(numberOfHealers < 2/5 * numberOfKnights)
+                else if (numberOfHealers < 2 / 5 * numberOfKnights)
                 {
                     addUnitToTrainQueueUrgently(UnitType.Healer);
                 }
             }
-            else if(homeMapSize <= 1000)
+            else if (homeMapSize <= 1000)
             {
                 // 2: 1: 1
                 long numberOfKnights = typeSortedUnitLists.get(UnitType.Knight).size();
                 long numberOfHealers = typeSortedUnitLists.get(UnitType.Healer).size();
                 long numberOfRangers = typeSortedUnitLists.get(UnitType.Ranger).size();
-                if(numberOfKnights < numberOfHealers + numberOfRangers )
+                if (numberOfKnights < numberOfHealers + numberOfRangers)
                 {
                     addUnitToTrainQueueUrgently(UnitType.Knight);
                 }
-                else if(numberOfHealers < numberOfRangers)
+                else if (numberOfHealers < numberOfRangers)
                 {
                     addUnitToTrainQueueUrgently(UnitType.Healer);
                 }
-                else if(numberOfRangers < numberOfHealers)
+                else if (numberOfRangers < numberOfHealers)
                 {
                     addUnitToTrainQueueUrgently(UnitType.Ranger);
                 }
             }
-            else if(homeMapSize <= 1600)
+            else if (homeMapSize <= 1600)
             {
                 // 2 : 1
                 long numberOfKnights = typeSortedUnitLists.get(UnitType.Knight).size();
                 long numberOfHealers = typeSortedUnitLists.get(UnitType.Healer).size();
-                if(numberOfKnights < 2 * numberOfHealers)
+                if (numberOfKnights < 2 * numberOfHealers)
                 {
                     addUnitToTrainQueueUrgently(UnitType.Knight);
                 }
-                else if(numberOfHealers < 0.5 * numberOfKnights)
+                else if (numberOfHealers < 0.5 * numberOfKnights)
                 {
                     addUnitToTrainQueueUrgently(UnitType.Healer);
                 }
@@ -115,11 +115,11 @@ public class DecisionTree
                 // 3 : 2
                 long numberOfKnights = typeSortedUnitLists.get(UnitType.Knight).size();
                 long numberOfHealers = typeSortedUnitLists.get(UnitType.Healer).size();
-                if(numberOfKnights < 3/2 * numberOfHealers)
+                if (numberOfKnights < 3 / 2 * numberOfHealers)
                 {
                     addUnitToTrainQueueUrgently(UnitType.Knight);
                 }
-                else if(numberOfHealers < 2/3 * numberOfKnights)
+                else if (numberOfHealers < 2 / 3 * numberOfKnights)
                 {
                     addUnitToTrainQueueUrgently(UnitType.Healer);
                 }
@@ -129,9 +129,9 @@ public class DecisionTree
 
     public static void setWorkersRequired()
     {
-        if(homeMapSize <= 500)
+        if (homeMapSize <= 500)
         {
-            if(currentRound > 300)
+            if (currentRound > 300)
             {
                 workersRequired = 6;
             }
@@ -152,9 +152,9 @@ public class DecisionTree
             }
             workersRequired -= 2;
         }
-        else if(homeMapSize <= 1000)
+        else if (homeMapSize <= 1000)
         {
-            if(currentRound > 300)
+            if (currentRound > 300)
             {
                 workersRequired = 9;
             }
@@ -174,9 +174,9 @@ public class DecisionTree
                 }
             }
         }
-        else if(homeMapSize <= 1600)
+        else if (homeMapSize <= 1600)
         {
-            if(currentRound > 300)
+            if (currentRound > 300)
             {
                 workersRequired = 11;
             }
@@ -184,25 +184,25 @@ public class DecisionTree
             {
                 if (karboniteLocations.size() > 250)
                 {
-                    workersRequired = 24;
+                    workersRequired = 26;
                 }
                 else if (karboniteLocations.size() > 200)
                 {
-                    workersRequired = 20;
+                    workersRequired = 22;
                 }
                 else if (karboniteLocations.size() > 150)
                 {
-                    workersRequired = 15;
+                    workersRequired = 17;
                 }
                 else
                 {
-                    workersRequired = 12;
+                    workersRequired = 14;
                 }
             }
         }
         else
         {
-            if(currentRound > 300)
+            if (currentRound > 300)
             {
                 workersRequired = 10;
             }
@@ -210,19 +210,19 @@ public class DecisionTree
             {
                 if (karboniteLocations.size() > 250)
                 {
-                    workersRequired = 24;
+                    workersRequired = 26;
                 }
                 else if (karboniteLocations.size() > 200)
                 {
-                    workersRequired = 20;
+                    workersRequired = 22;
                 }
                 else if (karboniteLocations.size() > 150)
                 {
-                    workersRequired = 15;
+                    workersRequired = 17;
                 }
                 else
                 {
-                    workersRequired = 12;
+                    workersRequired = 14;
                 }
             }
         }
@@ -231,20 +231,20 @@ public class DecisionTree
 
     public static void setFactoriesRequired()
     {
-        if(homeMapSize <= 500)
+        if (homeMapSize <= 500)
         {
             factoriesRequired = (int) ((Math.min(1, Math.sqrt((double) currentRound / 450))) *
-                    (Math.ceil(((double) homeMapHeight + homeMapWidth) / 15) + initialTotalKarbonite/400));
+                    (Math.ceil(((double) homeMapHeight + homeMapWidth) / 15) + initialTotalKarbonite / 400));
         }
-        else if(homeMapSize <= 1000)
+        else if (homeMapSize <= 1000)
         {
             factoriesRequired = (int) ((Math.min(1, Math.sqrt((double) currentRound / 400))) *
                     (Math.round(((double) homeMapHeight + homeMapWidth) / 30)));
         }
-        else if(homeMapSize <= 1600)
+        else if (homeMapSize <= 1600)
         {
             factoriesRequired = (int) ((Math.min(1, Math.sqrt((double) currentRound / 400))) *
-                    (Math.round(((double) homeMapHeight + homeMapWidth))) / 15 + initialTotalKarbonite/4000);
+                    (Math.round(((double) homeMapHeight + homeMapWidth))) / 15 + initialTotalKarbonite / 4000);
         }
         else
         {
@@ -272,9 +272,9 @@ public class DecisionTree
 
     public static void setKnightsRequired()
     {
-        if(homeMapSize <= 500)
+        if (homeMapSize <= 500)
         {
-            if(currentRound < 75)
+            if (currentRound < 75)
             {
                 knightsRequired = (int) (4 + ((double) currentRound / 75) * (double) homeMapSize / 900);
             }
@@ -283,9 +283,9 @@ public class DecisionTree
                 knightsRequired = (int) (1 + ((double) currentRound / 75) * (double) homeMapSize / 900);
             }
         }
-        else if(homeMapSize <= 1000)
+        else if (homeMapSize <= 1000)
         {
-            if(currentRound < 75)
+            if (currentRound < 75)
             {
                 knightsRequired = (int) (4 + ((double) currentRound / 75) * (double) homeMapSize / 300);
             }
@@ -294,9 +294,9 @@ public class DecisionTree
                 knightsRequired = 2 * (int) (((double) currentRound * (600 + homeMapSize) * passableTerrain) / (12000 * homeMapSize));
             }
         }
-        else if(homeMapSize <= 1600)
+        else if (homeMapSize <= 1600)
         {
-            if(currentRound < 75)
+            if (currentRound < 75)
             {
                 knightsRequired = (int) (4 + ((double) currentRound / 75) * (double) homeMapSize / 300);
             }
@@ -307,7 +307,7 @@ public class DecisionTree
         }
         else
         {
-            if(currentRound < 75)
+            if (currentRound < 75)
             {
                 knightsRequired = (int) (4 + ((double) currentRound / 75) * (double) homeMapSize / 300);
             }
@@ -317,7 +317,7 @@ public class DecisionTree
             }
         }
 
-        if(rangerMeta)
+        if (rangerMeta)
         {
             knightsRequired = 0;
         }
@@ -326,7 +326,7 @@ public class DecisionTree
 
     public static void setRangersRequired()
     {
-        if(homeMapSize <= 500)
+        if (homeMapSize <= 500)
         {
             if (currentRound <= 75)
             {
@@ -337,7 +337,7 @@ public class DecisionTree
                 rangersRequired = (int) (6 + ((double) currentRound / 75) * (double) homeMapSize / 100);
             }
         }
-        else if(homeMapSize <= 1000)
+        else if (homeMapSize <= 1000)
         {
             if (currentRound <= 75)
             {
@@ -350,7 +350,7 @@ public class DecisionTree
                         (23 + (homeMapSize - 400) * (23 / 2100)));
             }
         }
-        else if(homeMapSize <= 1600)
+        else if (homeMapSize <= 1600)
         {
             if (currentRound <= 75)
             {
@@ -380,7 +380,7 @@ public class DecisionTree
 
     public static void setHealersRequired()
     {
-        if(homeMapSize <= 500)
+        if (homeMapSize <= 500)
         {
             if (currentRound <= 75)
             {
@@ -391,7 +391,7 @@ public class DecisionTree
                 healersRequired = (int) (Math.round((rangersRequired + 3 * knightsRequired) / 7));
             }
         }
-        else if(homeMapSize <= 1000)
+        else if (homeMapSize <= 1000)
         {
             if (currentRound <= 75)
             {
@@ -402,7 +402,7 @@ public class DecisionTree
                 healersRequired = (int) (Math.round((rangersRequired + 1.8 * knightsRequired + 0.3 * magesRequired) / 5));
             }
         }
-        else if(homeMapSize <= 1600)
+        else if (homeMapSize <= 1600)
         {
             if (currentRound <= 75)
             {
@@ -440,17 +440,17 @@ public class DecisionTree
 
     public static long timeToIdealRocketLaunch()
     {
-        OrbitPattern currentOrbitPattern =  gc.orbitPattern();
+        OrbitPattern currentOrbitPattern = gc.orbitPattern();
         long currentTimeToReachMars = currentOrbitPattern.duration(currentRound);
         long idealTimeToLaunch = currentTimeToReachMars;
         long indexFromCurrentRound = 0;
-        if(currentOrbitPattern.duration(currentRound + 1) > currentTimeToReachMars)
+        if (currentOrbitPattern.duration(currentRound + 1) > currentTimeToReachMars)
         {
             return currentRound;
         }
-        for(long j = currentRound + 2; j < currentRound + 16; j++)
+        for (long j = currentRound + 2; j < currentRound + 16; j++)
         {
-            if(currentOrbitPattern.duration(j) < currentOrbitPattern.duration(j-1) + 1)
+            if (currentOrbitPattern.duration(j) < currentOrbitPattern.duration(j - 1) + 1)
             {
                 idealTimeToLaunch = currentOrbitPattern.duration(j);
                 indexFromCurrentRound = j;
@@ -460,6 +460,6 @@ public class DecisionTree
                 break;
             }
         }
-        return  currentRound + indexFromCurrentRound;
+        return currentRound + indexFromCurrentRound;
     }
 }

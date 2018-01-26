@@ -193,6 +193,10 @@ public class Pathfinding
                 if (ourWaypoint != null && theirWaypoint != null && constructPathBetween(ourWaypoint, theirWaypoint))
                 {
                     long fullDistance = distances.get(ourWaypoint).get(theirWaypoint);
+                    if (pathDistanceToEnemy == 0 || pathDistanceToEnemy > fullDistance)
+                    {
+                        pathDistanceToEnemy = fullDistance;
+                    }
                     if (fullDistance < 2.5 * diagonalDistanceBetween(ourWaypoint, theirWaypoint))
                     {
                         rangerMeta = false;
@@ -206,6 +210,7 @@ public class Pathfinding
                 }
             }
         }
+        System.out.println(pathDistanceToEnemy);
     }
 
     public static MapLocation findNearestUnobstructedWaypoint(MapLocation mapLocation)

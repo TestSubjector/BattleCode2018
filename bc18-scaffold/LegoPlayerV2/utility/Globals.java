@@ -66,6 +66,7 @@ public class Globals
     public static HashMap<Integer, MapLocation> lastVisited;
     public static HashMap<Integer, Long> rocketLaunchTime;
     public static int numberOfConnectedComponents;
+    public static long pathDistanceToEnemy;
     public static HashSet<MapLocation> primeFactoryLocations; // hehehe
 
     // Enemy locations
@@ -175,6 +176,7 @@ public class Globals
 
         VecUnit allInitialWorkers = homeMap.getInitial_units();
         initialWorkers = new ArrayList<Unit>();
+        pathDistanceToEnemy = 0;
 
         enemyVecUnits = new HashMap<Integer, VecUnit>();
         initialEnemyWorkers = new ArrayList<MapLocation>();

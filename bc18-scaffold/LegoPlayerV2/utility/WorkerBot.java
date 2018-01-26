@@ -183,7 +183,7 @@ public class WorkerBot
                         MapLocation blueprintMapLocation = getConstantMapLocationRepresentation(unitMapLocation.add(blueprintDirection));
                         gc.blueprint(unit.id(), blueprintType, blueprintDirection);
                         unfinishedBlueprints.add(blueprintMapLocation);
-                        if(currentRound < 650)
+                        if (currentRound < 650)
                         {
                             removeUnitFromBuildQueue();
                         }
@@ -279,18 +279,19 @@ public class WorkerBot
             }
         }
 
-        int i = 0;
-        while (i < initialEnemyWorkers.size() &&
-                currentRound < diagonalDistanceBetween(initialWorkers.get(i).location().mapLocation(), initialEnemyWorkers.get(i)) &&
-                !moveUnitTo(unit, initialEnemyWorkers.get(i)))
+        if (currentRound < 0.6 * pathDistanceToEnemy)
         {
-            i++;
+            int i = 0;
+            while (i < initialEnemyWorkers.size() && !moveUnitTo(unit, initialEnemyWorkers.get(i)))
+            {
+                i++;
+            }
         }
-
         processBuilder(unit, unitLocation, unitMapLocation, adjacentUnits);
-
-        processMiner(unit, unitLocation, unitMapLocation);
-
+        if (currentRound < 350)
+        {
+            processMiner(unit, unitLocation, unitMapLocation);
+        }
         processBlueprinter(unit, unitLocation, unitMapLocation);
 
         // Mine karbonite if adjacent to or standing on a mine
