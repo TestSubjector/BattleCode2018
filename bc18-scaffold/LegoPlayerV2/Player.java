@@ -48,7 +48,8 @@ public class Player
             if (currentRound > 1)
             {
                 // System.out.println("Time to reach is " + rocketConstant);
-                // time += "Time taken in round " + (currentRound - 1) + " : " + (lastTime - timeLeftMs) + "\n";
+                // "Time taken in round " + (currentRound - 1) + " : " + (lastTime - timeLeftMs) + "\n";
+                // System.out.println("Get Time : " + gc.getTimeLeftMs());
             }
             if (currentRound % 50 == 0)
             {
@@ -195,12 +196,11 @@ public class Player
                         addUnitToBuildQueue(UnitType.Rocket);
                         // System.out.println("Roc");
                     }
-
                     if(currentRound  == 651 && typeSortedUnitLists.get(UnitType.Worker).size() == 0)
                     {
-                        addUnitToBuildQueue(UnitType.Worker);
-                        addUnitToBuildQueue(UnitType.Worker);
-                        addUnitToBuildQueue(UnitType.Worker);
+                        addUnitToTrainQueue(UnitType.Worker);
+                        addUnitToTrainQueue(UnitType.Worker);
+                        addUnitToTrainQueue(UnitType.Worker);
                     }
                 }
                 else

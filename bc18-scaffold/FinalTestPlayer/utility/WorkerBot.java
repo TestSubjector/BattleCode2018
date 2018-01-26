@@ -287,12 +287,23 @@ public class WorkerBot
                 i++;
             }
         }
-        processBuilder(unit, unitLocation, unitMapLocation, adjacentUnits);
-        if (currentRound < 350)
+
+        if(currentRound < 650)
         {
-            processMiner(unit, unitLocation, unitMapLocation);
+            processBuilder(unit, unitLocation, unitMapLocation, adjacentUnits);
+            if (currentRound < 350)
+            {
+                processMiner(unit, unitLocation, unitMapLocation);
+            }
+            processBlueprinter(unit, unitLocation, unitMapLocation);
         }
-        processBlueprinter(unit, unitLocation, unitMapLocation);
+        else
+        {
+            VecUnit nearbyFriendyUnits = gc.senseNearbyUnitsByTeam(unitMapLocation, 50, ourTeam);
+            moveUnitAwayFromMultipleUnits(unit, nearbyFriendyUnits);
+            processBlueprinter(unit, unitLocation, unitMapLocation);
+            processBuilder(unit, unitLocation, unitMapLocation, adjacentUnits);
+        }
 
         // Mine karbonite if adjacent to or standing on a mine
         for (int j = 0; j < directions.length; j++)
