@@ -50,17 +50,34 @@ public class DecisionTree
         {
             builderFraction = 0;
         }
-        if (karboniteLocations.size() == 0)
-        {
-            builderFraction = 1;
-        }
-        else if(currentRound > 300)
-        {
-            builderFraction = 1;
-        }
         else
         {
-            builderFraction = Math.min(1, (((double) currentRound + 200) / 300) * (1 - 0.4 * ((double) karboniteLocations.size() / initialKarboniteLocationSize)));
+            if (karboniteLocations.size() == 0)
+            {
+                builderFraction = 1;
+            }
+            else if (initialKarboniteLocationSize > 120)
+            {
+                if (currentRound > 450)
+                {
+                    builderFraction = 1;
+                }
+                else
+                {
+                    builderFraction = Math.min(1, (((double) currentRound + 200) / 400) * (1 - 0.6 * ((double) karboniteLocations.size() / initialKarboniteLocationSize)));
+                }
+            }
+            else
+            {
+                if (currentRound > 300)
+                {
+                    builderFraction = 1;
+                }
+                else
+                {
+                    builderFraction = Math.min(1, (((double) currentRound + 200) / 300) * (1 - 0.4 * ((double) karboniteLocations.size() / initialKarboniteLocationSize)));
+                }
+            }
         }
     }
 
@@ -100,9 +117,13 @@ public class DecisionTree
             }
             else
             {
-                if (karboniteLocations.size() > 200)
+                if (karboniteLocations.size() > 250)
                 {
-                    workersRequired = 18;
+                    workersRequired = 24;
+                }
+                else if (karboniteLocations.size() > 200)
+                {
+                    workersRequired = 20;
                 }
                 else if (karboniteLocations.size() > 150)
                 {

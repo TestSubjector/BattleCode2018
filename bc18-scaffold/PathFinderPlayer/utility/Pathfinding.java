@@ -99,9 +99,6 @@ public class Pathfinding
                 {
                     fromWaypointList.add(new GraphPair<MapLocation, Long>(toWaypoint, diagonalDistanceBetween(fromWaypoint, toWaypoint)));
                     edges++;
-//                    System.out.println(fromWaypoint);
-//                    System.out.println(toWaypoint);
-//                    System.out.println("===========================");
                 }
             }
         }

@@ -247,7 +247,6 @@ public class Player
             while (shouldQueueWorker())
             {
                 addUnitToTrainQueue(UnitType.Worker);
-                // System.out.println("Worker");
             }
 
             // Process units
