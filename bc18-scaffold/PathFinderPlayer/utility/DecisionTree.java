@@ -64,7 +64,7 @@ public class DecisionTree
                 }
                 else
                 {
-                    builderFraction = Math.min(1, (((double) currentRound + 200) / 400) * (1 - 0.6 * ((double) karboniteLocations.size() / initialKarboniteLocationSize)));
+                    builderFraction = Math.min(1, (((double) currentRound + 200) / 400) * (1 - 0.7 * ((double) karboniteLocations.size() / initialKarboniteLocationSize)));
                 }
             }
             else
@@ -75,7 +75,7 @@ public class DecisionTree
                 }
                 else
                 {
-                    builderFraction = Math.min(1, (((double) currentRound + 200) / 300) * (1 - 0.4 * ((double) karboniteLocations.size() / initialKarboniteLocationSize)));
+                    builderFraction = Math.min(1, (((double) currentRound + 200) / 300) * (1 - 0.5 * ((double) karboniteLocations.size() / initialKarboniteLocationSize)));
                 }
             }
         }
@@ -155,9 +155,10 @@ public class DecisionTree
 
     public static void setFactoriesRequired()
     {
-        factoriesRequired = 1 + (int) ((Math.min(1, Math.sqrt((double) currentRound / 400))) *
-                (Math.round(((double) homeMapHeight + homeMapWidth) / 20) +
+        factoriesRequired = 1 + (int) ((Math.min(1, (double) currentRound / 400)) *
+                (Math.round(((double) homeMapHeight + homeMapWidth) / 15) +
                         (double) initialTotalKarbonite / 2000));
+        System.out.println(currentRound + " " + factoriesRequired);
     }
 
     public static void setRocketsRequired()
