@@ -214,7 +214,7 @@ public class DecisionTree
     {
         if(homeMapSize <= 500)
         {
-            rangersRequired = (int) (1 + ((double) currentRound / 100) * (double) homeMapSize / 400);
+            rangersRequired = (int) (1 + ((double) currentRound / 125) * (double) homeMapSize / 400);
         }
         else if(homeMapSize <= 1000)
         {
@@ -244,7 +244,7 @@ public class DecisionTree
             }
             else
             {
-                healersRequired = (int) (Math.round((rangersRequired + 2 * knightsRequired) / 5));
+                healersRequired = (int) (Math.round((rangersRequired + 3 * knightsRequired) / 7));
             }
         }
         else if(homeMapSize <= 1000)
