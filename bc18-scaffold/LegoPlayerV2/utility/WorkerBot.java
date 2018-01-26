@@ -178,7 +178,10 @@ public class WorkerBot
                         MapLocation blueprintMapLocation = getConstantMapLocationRepresentation(unitMapLocation.add(blueprintDirection));
                         gc.blueprint(unit.id(), blueprintType, blueprintDirection);
                         unfinishedBlueprints.add(blueprintMapLocation);
-                        removeUnitFromBuildQueue();
+                        if(currentRound < 650)
+                        {
+                            removeUnitFromBuildQueue();
+                        }
                     }
                 }
             }

@@ -186,54 +186,71 @@ public class Player
             int structureCosts = 0;
             if (homePlanet == Planet.Earth)
             {
-                setFactoriesRequired();
-                while (shouldQueueFactory())
+                if (currentRound == 650)
                 {
-                    addUnitToBuildQueue(UnitType.Factory);
+                    trainQueue.clear();
+                    buildQueue.clear();
                 }
-                setRocketsRequired();
-                while (shouldQueueRocket())
+                if (currentRound >= 650)
                 {
-                    addUnitToBuildQueue(UnitType.Rocket);
+                    setRocketsRequired();
+                    while (shouldQueueRocket())
+                    {
+                        addUnitToBuildQueue(UnitType.Rocket);
+                        // System.out.println("Roc");
+                    }
                 }
-                int buildQueueSize = buildQueue.size();
-                for (int j = 0; j < buildQueueSize; j++)
+                else
                 {
-                    structureCosts += (buildQueue.peekFirst() == UnitType.Factory) ? 200 : 150;
-                    buildQueue.addLast(buildQueue.removeFirst());
-                }
-                if (structureCosts <= gc.karbonite())
-                {
-                    setWorkersRequired();
-                    while (shouldQueueWorker())
+                    setFactoriesRequired();
+                    while (shouldQueueFactory())
                     {
-                        addUnitToTrainQueue(UnitType.Worker);
+                        addUnitToBuildQueue(UnitType.Factory);
                     }
-                    setKnightsRequired();
-                    while (shouldQueueKnight())
+                    setRocketsRequired();
+                    while (shouldQueueRocket())
                     {
-                        addUnitToTrainQueue(UnitType.Knight);
+                        addUnitToBuildQueue(UnitType.Rocket);
                     }
-                    setRangersRequired();
-                    while (shouldQueueRanger())
+                    int buildQueueSize = buildQueue.size();
+                    for (int j = 0; j < buildQueueSize; j++)
                     {
-                        addUnitToTrainQueue(UnitType.Ranger);
+                        structureCosts += (buildQueue.peekFirst() == UnitType.Factory) ? 200 : 150;
+                        buildQueue.addLast(buildQueue.removeFirst());
                     }
-                    setMagesRequired();
-                    while (shouldQueueMage())
+                    if (structureCosts <= gc.karbonite())
                     {
-                        addUnitToTrainQueue(UnitType.Mage);
-                    }
-                    setHealersRequired();
-                    while (shouldQueueHealer())
-                    {
-                        addUnitToTrainQueue(UnitType.Healer);
-                    }
-                    while (typeSortedUnitLists.get(UnitType.Factory).size() * 40 + workerCost + structureCosts <= gc.karbonite() &&
-                            shouldQueueWorker())
-                    {
-                        addUnitToTrainQueueUrgently(UnitType.Worker);
-                        workerCost += 60;
+                        setWorkersRequired();
+                        while (shouldQueueWorker())
+                        {
+                            addUnitToTrainQueue(UnitType.Worker);
+                        }
+                        setKnightsRequired();
+                        while (shouldQueueKnight())
+                        {
+                            addUnitToTrainQueue(UnitType.Knight);
+                        }
+                        setRangersRequired();
+                        while (shouldQueueRanger())
+                        {
+                            addUnitToTrainQueue(UnitType.Ranger);
+                        }
+                        setMagesRequired();
+                        while (shouldQueueMage())
+                        {
+                            addUnitToTrainQueue(UnitType.Mage);
+                        }
+                        setHealersRequired();
+                        while (shouldQueueHealer())
+                        {
+                            addUnitToTrainQueue(UnitType.Healer);
+                        }
+                        while (typeSortedUnitLists.get(UnitType.Factory).size() * 40 + workerCost + structureCosts <= gc.karbonite() &&
+                                shouldQueueWorker())
+                        {
+                            addUnitToTrainQueueUrgently(UnitType.Worker);
+                            workerCost += 60;
+                        }
                     }
                 }
             }

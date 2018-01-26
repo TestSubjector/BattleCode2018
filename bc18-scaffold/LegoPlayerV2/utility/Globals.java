@@ -98,8 +98,8 @@ public class Globals
     public static int rocketsRequired;
 
     // Research queue
-    public final static UnitType[] RESEARCH_QUEUE_HARD_KNIGHT_META = {UnitType.Knight, UnitType.Knight, UnitType.Rocket,
-            UnitType.Healer, UnitType.Healer, UnitType.Knight, UnitType.Healer, UnitType.Rocket, UnitType.Rocket,
+    public final static UnitType[] RESEARCH_QUEUE_HARD_KNIGHT_META = {UnitType.Knight, UnitType.Knight, UnitType.Healer,
+            UnitType.Knight, UnitType.Healer, UnitType.Healer, UnitType.Rocket, UnitType.Rocket, UnitType.Rocket,
             UnitType.Worker, UnitType.Worker, UnitType.Worker,  UnitType.Mage, UnitType.Mage, UnitType.Mage,
             UnitType.Knight, UnitType.Ranger};
 
