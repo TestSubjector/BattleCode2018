@@ -25,19 +25,23 @@ public class Player
         // Queue researches
         if (gc.planet() == Planet.Earth)
         {
-            if(rangerMeta)
+//            if(rangerMeta)
+//            {
+//                for (int i = 0; i < RESEARCH_QUEUE_HARD_RANGER_META.length; i++)
+//                {
+//                    gc.queueResearch(RESEARCH_QUEUE_HARD_RANGER_META[i]);
+//                }
+//            }
+//            else
+//            {
+//                for (int i = 0; i < RESEARCH_QUEUE_HARD_KNIGHT_META.length; i++)
+//                {
+//                    gc.queueResearch(RESEARCH_QUEUE_HARD_KNIGHT_META[i]);
+//                }
+//            }
+            for (int i = 0; i < RESEARCH_QUEUE_HARD_KNIGHT_META.length; i++)
             {
-                for (int i = 0; i < RESEARCH_QUEUE_HARD_RANGER_META.length; i++)
-                {
-                    gc.queueResearch(RESEARCH_QUEUE_HARD_RANGER_META[i]);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < RESEARCH_QUEUE_HARD_KNIGHT_META.length; i++)
-                {
-                    gc.queueResearch(RESEARCH_QUEUE_HARD_KNIGHT_META[i]);
-                }
+                gc.queueResearch(RESEARCH_QUEUE_HARD_KNIGHT_META[i]);
             }
         }
 
@@ -92,7 +96,6 @@ public class Player
             if (homePlanet == Planet.Earth)
             {
                 removeObsoleteBlueprints();
-                removeObsoleteBuilders();
                 removeObsoleteEnemyFactories();
                 removeObsoleteEnemyHotspots();
             }
@@ -168,7 +171,6 @@ public class Player
 
             if (currentRound % 10 == 0)
             {
-                setBuilderFraction();
                 if (switchToPrimitiveMind(currentRound, timeLeftMs) && currentRound < 700)
                 {
                     botIntelligenceLevel = 0;
@@ -179,7 +181,6 @@ public class Player
                 }
             }
 
-            // TODO - add stagnation
             // Process build and train queues
             int workerCost = 30;
             int structureCosts = 0;
@@ -227,17 +228,6 @@ public class Player
                     while (shouldQueueHealer())
                     {
                         addUnitToTrainQueue(UnitType.Healer);
-                    }
-                    if (currentRound < 650 && trainQueue.isEmpty())
-                    {
-                        UnitType[] emptyQueueFillers = {UnitType.Ranger, UnitType.Healer, UnitType.Knight};
-                        int i = 0;
-                        int factories = typeSortedUnitLists.get(UnitType.Factory).size();
-                        for (int j = 0; j < factories; j++)
-                        {
-                            addUnitToTrainQueue(emptyQueueFillers[i]);
-                            i = (i + 1) % 3;
-                        }
                     }
                     while (typeSortedUnitLists.get(UnitType.Factory).size() * 40 + workerCost + structureCosts <= gc.karbonite() &&
                             shouldQueueWorker())
@@ -293,12 +283,29 @@ public class Player
                         }
                         if (unitTypes[i] == UnitType.Factory)
                         {
-                            processFactory(unit, unitLocation);
+                            if (!factoryIDsByBuildOrder.contains(unit.id()))
+                            {
+                                factoryIDsByBuildOrder.add(unit.id());
+                            }
                         }
                         if (unitTypes[i] == UnitType.Rocket)
                         {
                             processRocket(unit, unitLocation);
                         }
+                    }
+                }
+            }
+            for (int i = factoryIDsByBuildOrder.size() - 1; i >= 0 ; i--)
+            {
+                int ID = factoryIDsByBuildOrder.get(i);
+                unitList = typeSortedUnitLists.get(UnitType.Factory);
+                for (int j = 0; j < unitList.size(); j++)
+                {
+                    Unit unit = unitList.get(j);
+                    Location unitLocation = unit.location();
+                    if (unit.id() == ID)
+                    {
+                        processFactory(unit, unitLocation);
                     }
                 }
             }

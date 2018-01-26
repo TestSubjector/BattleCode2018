@@ -31,19 +31,16 @@ public class WorkerBot
             }
             if (nearestLocation != null)
             {
-                if (diagonalDistanceBetween(unitMapLocation, nearestLocation) < 2 && gc.senseNearbyUnitsByType(nearestLocation, 30, UnitType.Factory).size() > 0)
+                long diagonalDistance = diagonalDistanceBetween(unitMapLocation, nearestLocation);
+                if (diagonalDistance < 2 && gc.senseNearbyUnitsByType(nearestLocation, 30, UnitType.Factory).size() > 0)
                 {
                     primeFactoryLocations.remove(nearestLocation);
                 }
-                if (diagonalDistanceBetween(unitMapLocation, nearestLocation) > 2)
+                if (diagonalDistance >= 2 && diagonalDistance <= 5)
                 {
                     moveUnitTo(unit, nearestLocation);
                 }
             }
-        }
-        else
-        {
-            processMiner(unit, unit.location(), unitMapLocation);
         }
     }
 
@@ -51,7 +48,7 @@ public class WorkerBot
     {
         if (unit.movementHeat() < 10)
         {
-            // Move towards nearest blueprint
+            // Move towards nearest blueprint if in range
             MapLocation nearestStructure = null;
             long minDiagonalDistance = 1000L;
             for (MapLocation blueprint : unfinishedBlueprints)
@@ -69,7 +66,7 @@ public class WorkerBot
             }
             if (nearestStructure != null)
             {
-                if (minDiagonalDistance != 1)
+                if (minDiagonalDistance < 6 && minDiagonalDistance > 1)
                 {
                     moveUnitTo(unit, nearestStructure);
                 }
@@ -91,9 +88,12 @@ public class WorkerBot
         }
         unitLocation = unit.location();
         unitMapLocation = unitLocation.mapLocation();
-        moveBuilderToDesirableLocation(unit, unitMapLocation);
-        unitLocation = unit.location();
-        unitMapLocation = unitLocation.mapLocation();
+        if (!buildQueue.isEmpty())
+        {
+            moveBuilderToDesirableLocation(unit, unitMapLocation);
+            unitLocation = unit.location();
+            unitMapLocation = unitLocation.mapLocation();
+        }
         if (unit.workerHasActed() == 0)
         {
             // Blueprint structures
@@ -211,11 +211,7 @@ public class WorkerBot
                         }
                     }
                 }
-                if (nearestMineMapLocation == null || unitList.size() * builderFraction > builderSet.size())
-                {
-                    builderSet.add(unit.id());
-                }
-                else if (!moveUnitTo(unit, nearestMineMapLocation))
+                if (nearestMineMapLocation != null && !moveUnitTo(unit, nearestMineMapLocation))
                 {
                     if (!karboniteLocationBlacklists.containsKey(unit.id()))
                     {
@@ -256,6 +252,7 @@ public class WorkerBot
             }
         }
 
+        // Move away from dangerous enemies
         VecUnit nearbyEnemies = enemyVecUnits.get(unit.id());
         if (nearbyEnemies != null)
         {
@@ -274,10 +271,7 @@ public class WorkerBot
             }
         }
 
-        if (builderSet.contains(unit.id()))
-        {
-            processBuilder(unit, unitLocation, unitMapLocation, adjacentUnits);
-        }
+        processBuilder(unit, unitLocation, unitMapLocation, adjacentUnits);
 
         // Mine karbonite if adjacent to or standing on a mine
         for (int j = 0; j < directions.length; j++)
@@ -289,10 +283,7 @@ public class WorkerBot
             }
         }
 
-        if (!builderSet.contains(unit.id()))
-        {
-            processMiner(unit, unitLocation, unitMapLocation);
-        }
+        processMiner(unit, unitLocation, unitMapLocation);
 
         // Replicate worker
         if (trainQueue.peekFirst() == UnitType.Worker)
@@ -310,10 +301,6 @@ public class WorkerBot
                     {
                         Unit newWorker = gc.senseUnitAtLocation(replicateMapLocation);
                         unitList.add(newWorker);
-                        if (unitList.size() * builderFraction > builderSet.size())
-                        {
-                            builderSet.add(newWorker.id());
-                        }
                     }
                     removeUnitFromTrainQueue();
                     break;

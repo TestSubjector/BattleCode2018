@@ -45,43 +45,6 @@ public class DecisionTree
         return currentRound > 100 && typeSortedUnitLists.get(UnitType.Rocket).size() + unitsInBuildQueue[UnitType.Rocket.ordinal()] < rocketsRequired;
     }
 
-    public static void setBuilderFraction()
-    {
-        if (homePlanet == Planet.Mars)
-        {
-            builderFraction = 0;
-        }
-        else
-        {
-            if (karboniteLocations.size() == 0)
-            {
-                builderFraction = 1;
-            }
-            else if (initialKarboniteLocationSize > 120)
-            {
-                if (currentRound > 450)
-                {
-                    builderFraction = 1;
-                }
-                else
-                {
-                    builderFraction = Math.min(1, (((double) currentRound + 200) / 400) * (1 - 0.7 * ((double) karboniteLocations.size() / initialKarboniteLocationSize)));
-                }
-            }
-            else
-            {
-                if (currentRound > 300)
-                {
-                    builderFraction = 1;
-                }
-                else
-                {
-                    builderFraction = Math.min(1, (((double) currentRound + 200) / 300) * (1 - 0.5 * ((double) karboniteLocations.size() / initialKarboniteLocationSize)));
-                }
-            }
-        }
-    }
-
     public static void setWorkersRequired()
     {
         if (currentRound <= 300)
@@ -156,8 +119,12 @@ public class DecisionTree
 
     public static void setFactoriesRequired()
     {
-        factoriesRequired = 1 + (int) ((Math.min(1, Math.sqrt((double) currentRound / 400))) *
+        factoriesRequired = (int) ((Math.min(1, Math.sqrt((double) currentRound / 400))) *
                 (Math.round(((double) homeMapHeight + homeMapWidth) / 15)));
+        if (currentRound > 10)
+        {
+            factoriesRequired += 1;
+        }
     }
 
     public static void setRocketsRequired()

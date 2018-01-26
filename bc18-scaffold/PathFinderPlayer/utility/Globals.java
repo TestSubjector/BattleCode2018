@@ -44,9 +44,8 @@ public class Globals
     public static ArrayList<Unit> unitList;
     public static long totalCombatUnits;
     public static long totalUnits;
-    public static double builderFraction;
-    public static HashSet<Integer> builderSet;
     public static Set<MapLocation> unfinishedBlueprints;
+    public static ArrayList<Integer> factoryIDsByBuildOrder;
 
     // Rocket landing sites
     public static PriorityQueue<QueuePair<Long, MapLocation>> potentialLandingSites;
@@ -183,19 +182,12 @@ public class Globals
         rocketPositions = new HashSet<MapLocation>();
         sniperRoost = new HashSet<Integer>();
         enemyHotspots = new ArrayList<QueuePair<Double, MapLocation>>();
-
-        builderSet = new HashSet<Integer>();
         for (int i = 0; i < allInitialWorkers.size(); i++)
         {
             Unit worker = allInitialWorkers.get(i);
             if (worker.team() == ourTeam)
             {
                 initialWorkers.add(worker);
-                // One initial worker is a builder
-                if (builderSet.isEmpty())
-                {
-                    builderSet.add(worker.id());
-                }
             }
             else
             {
@@ -203,7 +195,7 @@ public class Globals
             }
         }
         rangerMeta = false;
-        setBuilderFraction();
+        factoryIDsByBuildOrder = new ArrayList<>();
 
         if (homePlanet == Planet.Earth)
         {
@@ -446,22 +438,6 @@ public class Globals
         for (MapLocation obsoleteBlueprint : obsoleteBlueprints)
         {
             unfinishedBlueprints.remove(obsoleteBlueprint);
-        }
-    }
-
-    public static void removeObsoleteBuilders()
-    {
-        LinkedList<Integer> obsoleteBuilders = new LinkedList<Integer>();
-        for (int builderID : builderSet)
-        {
-            if (!gc.canSenseUnit(builderID))
-            {
-                obsoleteBuilders.add(builderID);
-            }
-        }
-        for (int obsoleteBuilder : obsoleteBuilders)
-        {
-            builderSet.remove(obsoleteBuilder);
         }
     }
 
