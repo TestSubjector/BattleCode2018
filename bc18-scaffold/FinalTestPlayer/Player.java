@@ -198,9 +198,9 @@ public class Player
 
                     if(currentRound  > 650 && typeSortedUnitLists.get(UnitType.Worker).size() == 0 && trainQueue.isEmpty())
                     {
-                        addUnitToBuildQueue(UnitType.Worker);
-                        addUnitToBuildQueue(UnitType.Worker);
-                        addUnitToBuildQueue(UnitType.Worker);
+                        addUnitToTrainQueue(UnitType.Worker);
+                        addUnitToTrainQueue(UnitType.Worker);
+                        addUnitToTrainQueue(UnitType.Worker);
                     }
                 }
                 else

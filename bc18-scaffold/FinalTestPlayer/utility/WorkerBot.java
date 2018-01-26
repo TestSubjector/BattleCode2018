@@ -342,7 +342,7 @@ public class WorkerBot
         MapLocation unitMapLocation = unitLocation.mapLocation();
         VecUnit adjacentUnits = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 2, ourTeam);
 
-        // Build a structure if adjacent to one
+        // Repair a structure if adjacent to one
         for (int j = 0; j < adjacentUnits.size(); j++)
         {
             Unit adjacentUnit = adjacentUnits.get(j);
@@ -393,6 +393,7 @@ public class WorkerBot
                 }
             }
         }
+        moveUnitInRandomDirection(unit);
     }
 
     public static void processWorker(Unit unit, Location unitLocation)
@@ -467,7 +468,7 @@ public class WorkerBot
         int blockageSum = left_blockages + right_blockages + up_block + down_block;
 
         // blockage on single side only is fine
-        if (blockageSum >= 2)
+        if (blockageSum > 2)
         {
             return -1002L;
         }
