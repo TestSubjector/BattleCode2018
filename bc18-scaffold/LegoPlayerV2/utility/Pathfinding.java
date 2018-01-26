@@ -192,14 +192,11 @@ public class Pathfinding
                 MapLocation theirWaypoint = findNearestUnobstructedWaypoint(them);
                 if (ourWaypoint != null && theirWaypoint != null && constructPathBetween(ourWaypoint, theirWaypoint))
                 {
+                    rangerMeta = false;
                     long fullDistance = distances.get(ourWaypoint).get(theirWaypoint);
                     if (pathDistanceToEnemy == 0 || pathDistanceToEnemy > fullDistance)
                     {
                         pathDistanceToEnemy = fullDistance;
-                    }
-                    if (fullDistance < 2.5 * diagonalDistanceBetween(ourWaypoint, theirWaypoint))
-                    {
-                        rangerMeta = false;
                     }
                     MapLocation currentWaypoint = ourWaypoint;
                     while (distances.get(ourWaypoint).get(currentWaypoint) < 0.5 * fullDistance)

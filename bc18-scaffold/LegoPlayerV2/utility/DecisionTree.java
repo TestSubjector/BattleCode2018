@@ -263,10 +263,9 @@ public class DecisionTree
         {
             rocketsRequired = 10;
         }
-        else
+        else if (currentRound > 600)
         {
-            rocketsRequired = (int) ((Math.min(1, (double) ((currentRound - 100) * (currentRound - 100)) / (250 * 250))) *
-                    Math.round((double) totalUnits / 10));
+            rocketsRequired = (int) Math.round((double) totalUnits / 10);
         }
     }
 

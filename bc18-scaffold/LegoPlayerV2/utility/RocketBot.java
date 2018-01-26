@@ -67,35 +67,29 @@ public class RocketBot
                 }
             }
             if (((unit.health() < 200) || (unit.structureGarrison().size() == 8) || currentRound > 748) ||
-                    ((unit.structureGarrison().size() >= 2 * unit.structureMaxCapacity() / 3 ) && (currentRound >= rocketLaunchTime.get(unit.id()))))
+                    ((unit.structureGarrison().size() >= 2 * unit.structureMaxCapacity() / 3) &&
+                            (currentRound >= rocketLaunchTime.get(unit.id()))))
             {
                 QueuePair<Long, MapLocation> destPair = potentialLandingSites.poll();
-//                System.out.println("potentialLandingSites head : " + destPair.toString());
                 boolean isOutdated = true;
                 while (isOutdated)
                 {
                     isOutdated = false;
                     for (int j = 0; j < updatedAppealSites.size(); j++)
                     {
-//                        System.out.println("Testing " + destPair.toString() + " against updated " + updatedAppealSites.get(j).toString());
                         if (updatedAppealSites.get(j).getSecond().equals(destPair.getSecond())
                                 && !(updatedAppealSites.get(j).getFirst().equals(destPair.getFirst())))
                         {
                             isOutdated = true;
                             destPair = potentialLandingSites.poll();
-//                            System.out.println("destPair outdated. New pair : " + destPair.toString());
                             break;
                         }
                     }
                 }
 
                 MapLocation dest = destPair.getSecond();
-                // potentialLandingSites is supposed to have only those spots
-                // that are passable, and not already used as a destination.
-                // Hence, this check should always pass.
                 if (gc.canLaunchRocket(unit.id(), dest))
                 {
-//                    System.out.println("Final launch choice : " + destPair.toString());
                     gc.launchRocket(unit.id(), dest);
                     rocketLaunchTime.remove(unit.id());
                     rocketPositions.remove(unitLocation.mapLocation());

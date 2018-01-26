@@ -25,23 +25,19 @@ public class Player
         // Queue researches
         if (gc.planet() == Planet.Earth)
         {
-//            if(rangerMeta)
-//            {
-//                for (int i = 0; i < RESEARCH_QUEUE_HARD_RANGER_META.length; i++)
-//                {
-//                    gc.queueResearch(RESEARCH_QUEUE_HARD_RANGER_META[i]);
-//                }
-//            }
-//            else
-//            {
-//                for (int i = 0; i < RESEARCH_QUEUE_HARD_KNIGHT_META.length; i++)
-//                {
-//                    gc.queueResearch(RESEARCH_QUEUE_HARD_KNIGHT_META[i]);
-//                }
-//            }
-            for (int i = 0; i < RESEARCH_QUEUE_HARD_KNIGHT_META.length; i++)
+            if(rangerMeta)
             {
-                gc.queueResearch(RESEARCH_QUEUE_HARD_KNIGHT_META[i]);
+                for (int i = 0; i < RESEARCH_QUEUE_HARD_RANGER_META.length; i++)
+                {
+                    gc.queueResearch(RESEARCH_QUEUE_HARD_RANGER_META[i]);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < RESEARCH_QUEUE_HARD_KNIGHT_META.length; i++)
+                {
+                    gc.queueResearch(RESEARCH_QUEUE_HARD_KNIGHT_META[i]);
+                }
             }
         }
 
@@ -270,10 +266,6 @@ public class Player
                     addUnitToTrainQueue(UnitType.Worker);
                 }
             }
-//            System.out.println(currentRound);
-//            System.out.println("Build Queue : " + buildQueue.peekFirst());
-//            System.out.println("Factories required : " + factoriesRequired);
-//            System.out.println("Train Queue : " + trainQueue.peekFirst());
 
             // Process units
             for (int i = 0; i < unitTypes.length; i++)
