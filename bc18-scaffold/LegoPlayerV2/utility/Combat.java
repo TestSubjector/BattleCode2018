@@ -985,117 +985,105 @@ public class Combat
                     }
                     else
                     {
-                        if(sizeOfEnemy == 1)
+                        // Find first and second best target
+                        Unit bestTarget = null;
+                        Unit secondBestTarget = null;
+                        long minimumEnemyDistance = 999999L;
+                        long secondMinimumEnemyDistance = 1000000L;
+                        long enemyUnitHealth = 251;
+                        long secondEnemyUnitHealth = 251;
+                        for (int j = 0; j < nearbyEnemyUnits.size(); j++)
                         {
-                            Unit loneEnemyUnit = nearbyEnemyUnits.get(0);
-                            MapLocation loneEnemyUnitMapLocation = loneEnemyUnit.location().mapLocation();
-                            if(gc.canAttack(unit.id(), loneEnemyUnit.id()))
+                            Unit enemyUnit = nearbyEnemyUnits.get(j);
+                            long enemyDistance = unitMapLocation.distanceSquaredTo(enemyUnit.location().mapLocation());
+                            if (enemyDistance < minimumEnemyDistance)
                             {
-                                if(canWin1v1(unit, loneEnemyUnit))
-                                {
-
-                                    gc.attack(unit.id(), loneEnemyUnit.id());
-                                    return;
-                                }
-                                else
-                                {
-                                    boolean haveSupport = false;
-                                    if(numberOfOtherAlliesInAttackRange(unit,loneEnemyUnitMapLocation ) > 0)
-                                    {
-                                        haveSupport = true;
-                                    }
-                                    // Have ally help
-                                    if(haveSupport)
-                                    {
-                                        gc.attack(unit.id(), loneEnemyUnit.id());
-                                        return;
-                                    }
-                                    else
-                                    {
-                                        // TODO - Retreat Function as we don't have backup
-                                        // Enemy can't fire. Shoot and retreat
-                                        if(loneEnemyUnit.attackCooldown() >= 20)
-                                        {
-
-                                            gc.attack(unit.id(), loneEnemyUnit.id());
-                                            return;
-                                        }
-                                        else
-                                        {
-                                            // If we can move, then try retreat
-                                            if(unit.movementHeat() <10)
-                                            {
-                                                // TODO - Retreat function here
-                                                if(moveUnitAwayFrom(unit, loneEnemyUnitMapLocation))
-                                                {
-                                                    return;
-                                                }
-                                                else
-                                                {
-                                                    // Desperate attack
-                                                    gc.attack(unit.id(), loneEnemyUnit.id());
-                                                    return;
-                                                }
-                                            }
-                                            else
-                                            {
-                                                gc.attack(unit.id(), loneEnemyUnit.id());
-                                                return;
-                                            }
-                                        }
-                                    }
-                                }
+                                enemyUnitHealth = enemyUnit.health();
+                                minimumEnemyDistance = enemyDistance;
+                                bestTarget = enemyUnit;
                             }
-                            else
+                            else if (enemyDistance == minimumEnemyDistance && enemyUnit.health() < enemyUnitHealth)
                             {
-                                // Can't attack enemy unit
-                                if(unit.location().mapLocation().distanceSquaredTo(loneEnemyUnitMapLocation) > 10)
-                                {
-                                    moveUnitTo(unit, loneEnemyUnit.location().mapLocation());
-                                }
-                                else
-                                {
-                                    moveUnitAwayFrom(unit, loneEnemyUnitMapLocation);
-                                }
+                                secondEnemyUnitHealth = enemyUnitHealth;
+                                secondMinimumEnemyDistance = minimumEnemyDistance;
+                                secondBestTarget = bestTarget;
+                                enemyUnitHealth = enemyUnit.health();
+                                minimumEnemyDistance = enemyDistance;
+                                bestTarget = enemyUnit;
+                            }
+                            else if(enemyDistance < secondMinimumEnemyDistance)
+                            {
+                                secondEnemyUnitHealth = enemyUnit.health();
+                                secondMinimumEnemyDistance = enemyDistance;
+                                secondBestTarget = enemyUnit;
+                            }
+                            else if (enemyDistance == secondMinimumEnemyDistance && enemyUnit.health() < secondEnemyUnitHealth)
+                            {
+                                secondEnemyUnitHealth = enemyUnit.health();
+                                secondMinimumEnemyDistance = enemyDistance;
+                                secondBestTarget = enemyUnit;
                             }
                         }
-                        // Multiple Units
-                        else
+                        if (bestTarget != null)
                         {
-                            Unit bestTarget = null;
-                            double bestTargetingMetric = 0;
-                            double maxAllyUnitsAttackingAnEnemy = 0;
-                            for (int j = 0; j < nearbyEnemyUnits.size(); j++)
+                            if (gc.canAttack(unit.id(), bestTarget.id()))
                             {
-                                Unit nearbyEnemyUnit = nearbyEnemyUnits.get(j);
-                                UnitType enemyUnitType = nearbyEnemyUnit.unitType();
-                                int attackNumber = numberOfOtherAlliesInAttackRange(unit, nearbyEnemyUnit.location().mapLocation());
-                                if(attackNumber > maxAllyUnitsAttackingAnEnemy)
+                                gc.attack(unit.id(), bestTarget.id());
+                                if(enemyUnitHealth > 60 || (bestTarget.unitType() == UnitType.Knight && enemyUnitHealth > 45))
                                 {
-                                    maxAllyUnitsAttackingAnEnemy = attackNumber;
-                                    double targetingMetric = getEnemyUnitPriority(enemyUnitType) * attackNumber/ nearbyEnemyUnit.health();
-                                    if(targetingMetric > bestTargetingMetric)
+                                    if(gc.isJavelinReady(unit.id()) && unit.abilityHeat() < 10)
                                     {
-                                        bestTargetingMetric = targetingMetric;
-                                        bestTarget = nearbyEnemyUnit;
+                                        if(gc.canJavelin(unit.id(), bestTarget.id()))
+                                        {
+                                            gc.javelin(unit.id(), bestTarget.id());
+                                        }
+                                    }
+                                }
+                                else if(secondBestTarget != null)
+                                {
+                                    if(gc.isJavelinReady(unit.id()) && unit.abilityHeat() < 10)
+                                    {
+                                        if(gc.canJavelin(unit.id(), secondBestTarget.id()))
+                                        {
+                                            gc.javelin(unit.id(), secondBestTarget.id());
+                                        }
                                     }
                                 }
                             }
-                            if(bestTarget != null)
+                            else if (unit.attackRange() < minimumEnemyDistance)
                             {
-                                if(gc.canAttack(unit.id(), bestTarget.id()))
+                                if (moveUnitTo(unit, bestTarget.location().mapLocation()))
                                 {
-                                    gc.attack(unit.id(), bestTarget.id());
-                                    return;
-                                }
-                                else if(unit.attackRange() < unitMapLocation.distanceSquaredTo(bestTarget.location().mapLocation()))
-                                {
-                                    // TODO - Retreat function here
-                                    if(moveUnitTo(unit, bestTarget.location().mapLocation()) && gc.canAttack(unit.id(), bestTarget.id()))
+                                    if(gc.canAttack(unit.id(), bestTarget.id()))
                                     {
-                                        // Desperate attack
                                         gc.attack(unit.id(), bestTarget.id());
-                                        return;
+                                        if(enemyUnitHealth > 60 || (bestTarget.unitType() == UnitType.Knight && enemyUnitHealth > 45))
+                                        {
+                                            if(gc.isJavelinReady(unit.id()) && unit.abilityHeat() < 10)
+                                            {
+                                                if(gc.canJavelin(unit.id(), bestTarget.id()))
+                                                {
+                                                    gc.javelin(unit.id(), bestTarget.id());
+                                                }
+                                            }
+                                        }
+                                        else if(secondBestTarget != null)
+                                        {
+                                            if(gc.isJavelinReady(unit.id()) && unit.abilityHeat() < 10)
+                                            {
+                                                if(gc.canJavelin(unit.id(), secondBestTarget.id()))
+                                                {
+                                                    gc.javelin(unit.id(), secondBestTarget.id());
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else if(gc.isJavelinReady(unit.id()) && unit.abilityHeat() < 10)
+                                    {
+                                        if(gc.canJavelin(unit.id(), bestTarget.id()))
+                                        {
+                                            gc.javelin(unit.id(), bestTarget.id());
+                                        }
                                     }
                                 }
                             }
