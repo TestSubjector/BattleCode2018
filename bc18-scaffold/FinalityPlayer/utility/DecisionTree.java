@@ -172,7 +172,7 @@ public class DecisionTree
         if(homeMapSize <= 500)
         {
             factoriesRequired = 1 + (int) ((Math.min(1, Math.sqrt((double) currentRound / 450))) *
-                    (Math.ceil(((double) homeMapHeight + homeMapWidth) / 15)) + initialTotalKarbonite/400);
+                    (Math.ceil(((double) homeMapHeight + homeMapWidth) / 15) + initialTotalKarbonite/400));
         }
         else if(homeMapSize <= 1000)
         {
