@@ -39,9 +39,7 @@ public class FactoryBot
         if (unit.isFactoryProducing() == 0)
         {
             if (!trainQueue.isEmpty() &&
-                    (trainQueue.peekFirst() != UnitType.Worker || typeSortedUnitLists.get(UnitType.Worker).size() < 4) &&
-                    trainQueue.peekFirst() != UnitType.Factory &&
-                    trainQueue.peekFirst() != UnitType.Rocket)
+                    (trainQueue.peekFirst() != UnitType.Worker || typeSortedUnitLists.get(UnitType.Worker).size() < 4))
             {
                 if (gc.canProduceRobot(unit.id(), trainQueue.peekFirst()))
                 {

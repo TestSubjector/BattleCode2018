@@ -169,7 +169,7 @@ public class DecisionTree
         else
         {
             rocketsRequired = (int) ((Math.min(1, (double) ((currentRound - 100) * (currentRound - 100)) / (500 * 500))) *
-                    Math.round((double) totalUnits / 20));
+                    Math.round((double) totalUnits / 15));
         }
     }
 
