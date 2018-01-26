@@ -105,21 +105,29 @@ public class DecisionTree
                     workersRequired = 5;
                 }
             }
+
             workersRequired = 2 + (int) (Math.min(1, Math.sqrt((double) (currentRound + 125) / 400)) * workersRequired);
         }
         else if(homeMapSize <= 1000)
         {
-            if (karboniteLocations.size() > 180)
+            if(currentRound > 300)
             {
-                workersRequired = 15;
-            }
-            else if (karboniteLocations.size() > 130)
-            {
-                workersRequired = 12;
+                workersRequired = 7;
             }
             else
             {
-                workersRequired = 10;
+                if (karboniteLocations.size() > 180)
+                {
+                    workersRequired = 20;
+                }
+                else if (karboniteLocations.size() > 130)
+                {
+                    workersRequired = 15;
+                }
+                else
+                {
+                    workersRequired = 10;
+                }
             }
         }
         else if(homeMapSize <= 1600)
@@ -145,7 +153,8 @@ public class DecisionTree
         }
         else if(homeMapSize <= 1000)
         {
-
+            factoriesRequired = 1 + (int) ((Math.min(1, Math.sqrt((double) currentRound / 400))) *
+                    (Math.ceil(((double) homeMapHeight + homeMapWidth) / 20) + initialTotalKarbonite/600));
         }
         else if(homeMapSize <= 1600)
         {
@@ -169,31 +178,8 @@ public class DecisionTree
         }
         else
         {
-            if(homeMapSize <= 500)
-            {
-                rocketsRequired = (int) ((Math.min(1, (double) ((currentRound - 100) * (currentRound - 100)) / (250 * 250))) *
+            rocketsRequired = (int) ((Math.min(1, (double) ((currentRound - 100) * (currentRound - 100)) / (250 * 250))) *
                         Math.round((double) totalUnits / 10));
-                if(rocketsRequired < 0)
-                {
-                    rocketsRequired = 0;
-                }
-            }
-            else if(homeMapSize <= 1000)
-            {
-
-            }
-            else if(homeMapSize <= 1600)
-            {
-
-            }
-            else if(homeMapSize <= 2100)
-            {
-
-            }
-            else
-            {
-
-            }
         }
     }
 
@@ -228,7 +214,7 @@ public class DecisionTree
     {
         if(homeMapSize <= 500)
         {
-            rangersRequired = (int) (2 + ((double) currentRound / 100) * (double) homeMapSize / 400);
+            rangersRequired = (int) (1 + ((double) currentRound / 100) * (double) homeMapSize / 400);
         }
         else if(homeMapSize <= 1000)
         {
