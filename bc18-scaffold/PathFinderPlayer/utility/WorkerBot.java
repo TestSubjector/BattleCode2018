@@ -124,6 +124,10 @@ public class WorkerBot
                     }
                 }
             }
+            else
+            {
+                processMiner(unit, unitLocation, unitMapLocation);
+            }
         }
     }
 

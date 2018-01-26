@@ -131,6 +131,7 @@ public class Pathfinding
         // TODO - Make Dijkstra on demand to save computation
         // TODO - Probably even switch out in favour of distributed A*
         // Run Dijkstra's Algorithm for each waypoint to generate shortest path trees
+        HashMap<MapLocation, HashMap<MapLocation, Long>> distances = new HashMap<MapLocation, HashMap<MapLocation, Long>>();
         for (MapLocation sourceWaypoint : waypoints)
         {
             shortestPathTrees.put(sourceWaypoint, new HashMap<MapLocation, MapLocation>());
@@ -150,14 +151,11 @@ public class Pathfinding
                 }
             }
             HashSet<MapLocation> done = new HashSet<MapLocation>();
-            int repeats = 0;
-            long connectedWaypoints = connectedComponentSize.get(sourceWaypoint);
             while (!edgeQueue.isEmpty())
             {
                 GraphPair<MapLocation, Long> topEdge = edgeQueue.remove();
                 if (done.contains(topEdge.getFirst()))
                 {
-                    repeats++;
                     continue;
                 }
                 done.add(topEdge.getFirst());
@@ -172,6 +170,38 @@ public class Pathfinding
                             shortestPathTree.put(edge.getFirst(), topEdge.getFirst());
                             edgeQueue.add(new GraphPair<MapLocation, Long>(edge.getFirst(), newDistance));
                         }
+                    }
+                }
+            }
+            distances.put(sourceWaypoint, distanceTo);
+        }
+        computeStartingPaths(distances);
+    }
+
+    private static void computeStartingPaths(HashMap<MapLocation, HashMap<MapLocation, Long>> distances)
+    {
+        primeFactoryLocations = new HashSet<MapLocation>();
+        for (int i = 0; i < initialWorkers.size(); i++)
+        {
+            MapLocation us = initialWorkers.get(i).location().mapLocation();
+            MapLocation ourWaypoint = findNearestUnobstructedWaypoint(us);
+            for (int j = 0; j < initialEnemyWorkers.size(); j++)
+            {
+                MapLocation them = initialEnemyWorkers.get(j);
+                MapLocation theirWaypoint = findNearestUnobstructedWaypoint(them);
+                if (!constructPathBetween(ourWaypoint, theirWaypoint))
+                {
+                    workersInDifferentComponents = true;
+                }
+                else
+                {
+                    long fullDistance = distances.get(ourWaypoint).get(theirWaypoint);
+                    MapLocation currentWaypoint = ourWaypoint;
+                    while (distances.get(currentWaypoint).get(theirWaypoint) < 0.4 * fullDistance)
+                    {
+                        primeFactoryLocations.add(currentWaypoint);
+                        System.out.println(currentWaypoint);
+                        currentWaypoint = nextBestWaypoint.get(new Pair<MapLocation, MapLocation>(currentWaypoint, theirWaypoint));
                     }
                 }
             }
@@ -204,7 +234,7 @@ public class Pathfinding
         return nearest;
     }
 
-    public static void constructPathBetween(MapLocation startWaypoint, MapLocation endWaypoint)
+    public static boolean constructPathBetween(MapLocation startWaypoint, MapLocation endWaypoint)
     {
         Pair<MapLocation, MapLocation> key = new Pair<>(startWaypoint, endWaypoint);
         if (!nextBestWaypoint.containsKey(key))
@@ -218,6 +248,11 @@ public class Pathfinding
                 nextBestWaypoint.put(new Pair<MapLocation, MapLocation>(parent, endWaypoint), son);
                 son = parent;
             }
+            if (son == null)
+            {
+                return false;
+            }
         }
+        return true;
     }
 }

@@ -482,7 +482,6 @@ public class Combat
         for(Iterator<MapLocation> fp = enemyFactories.iterator(); fp.hasNext();)
         {
             MapLocation enemyMapLocation = fp.next();
-            System.out.println("Sniping at area" + enemyMapLocation);
             while(sniperID.hasNext())
             {
                 int theSniperID = sniperID.next();

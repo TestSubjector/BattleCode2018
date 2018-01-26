@@ -156,7 +156,7 @@ public class DecisionTree
     public static void setFactoriesRequired()
     {
         factoriesRequired = 1 + (int) ((Math.min(1, Math.sqrt((double) currentRound / 400))) *
-                (Math.round(2 + ((double) homeMapHeight + homeMapWidth) / 10) +
+                (Math.round(((double) homeMapHeight + homeMapWidth) / 20) +
                         (double) initialTotalKarbonite / 2000));
     }
 

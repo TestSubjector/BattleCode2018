@@ -30,6 +30,7 @@ public class Globals
     public static long currentRound;
     public static MapLocation[][] mapLocationAt;
     public static ArrayList<Unit> initialWorkers;
+    public static boolean workersInDifferentComponents;
     public static long passableTerrain;
     public static long initialTotalKarbonite;
     public static Set<MapLocation> karboniteLocations;
@@ -67,6 +68,7 @@ public class Globals
     public static HashMap<Integer, MapLocation> lastVisited;
     public static HashMap<Integer, Long> rocketLaunchTime;
     public static int numberOfConnectedComponents;
+    public static HashSet<MapLocation> primeFactoryLocations; // hehehe
 
     // Enemy locations
     public static ArrayList<MapLocation> initialEnemyWorkers;
@@ -200,6 +202,7 @@ public class Globals
                 // System.out.println("Enemy Worker Here" + worker.location().mapLocation());
             }
         }
+        workersInDifferentComponents = false;
         setBuilderFraction();
 
         if (homePlanet == Planet.Earth)

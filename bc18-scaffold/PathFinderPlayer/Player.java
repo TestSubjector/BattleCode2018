@@ -199,11 +199,16 @@ public class Player
                 int buildQueueSize = buildQueue.size();
                 for (int j = 0; j < buildQueueSize; j++)
                 {
-                    structureCosts += (buildQueue.peekFirst() == UnitType.Factory) ? 100 : 75;
+                    structureCosts += (buildQueue.peekFirst() == UnitType.Factory) ? 200 : 150;
                     buildQueue.addLast(buildQueue.removeFirst());
                 }
                 if (structureCosts <= gc.karbonite())
                 {
+                    setWorkersRequired();
+                    while (shouldQueueWorker())
+                    {
+                        addUnitToTrainQueue(UnitType.Worker);
+                    }
                     setKnightsRequired();
                     while (shouldQueueKnight())
                     {
@@ -235,18 +240,21 @@ public class Player
                             i = (i + 1) % 3;
                         }
                     }
+                    while (typeSortedUnitLists.get(UnitType.Factory).size() * 40 + workerCost + structureCosts <= gc.karbonite() &&
+                            shouldQueueWorker())
+                    {
+                        addUnitToTrainQueueUrgently(UnitType.Worker);
+                        workerCost += 60;
+                    }
                 }
             }
-            setWorkersRequired();
-            while (typeSortedUnitLists.get(UnitType.Factory).size() * 20 + workerCost + structureCosts <= gc.karbonite() &&
-                    shouldQueueWorker())
+            else
             {
-                addUnitToTrainQueueUrgently(UnitType.Worker);
-                workerCost += 30;
-            }
-            while (shouldQueueWorker())
-            {
-                addUnitToTrainQueue(UnitType.Worker);
+                setWorkersRequired();
+                while (shouldQueueWorker())
+                {
+                    addUnitToTrainQueue(UnitType.Worker);
+                }
             }
 
             // Process units
