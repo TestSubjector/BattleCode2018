@@ -164,9 +164,12 @@ public class WorkerBot
                             }
                         }
                     }
-                    moveUnitTo(unit, blueprintMapLocation);
-                    unitLocation = unit.location();
-                    unitMapLocation = unitLocation.mapLocation();
+                    if (blueprintMapLocation != null)
+                    {
+                        moveUnitTo(unit, blueprintMapLocation);
+                        unitLocation = unit.location();
+                        unitMapLocation = unitLocation.mapLocation();
+                    }
                 }
                 else
                 {
