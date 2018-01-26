@@ -56,7 +56,6 @@ public class Globals
     // Terrain appeal constants
     public final static long WEIGHT_IMPASSABLE = -1;
     public final static long WEIGHT_ROCKET_ON_MARS = -3;
-    public final static long WEIGHT_STRUCTURE = -1;
     public final static long WEIGHT_NONE = 0;
 
     // Pathfinding data structures
@@ -187,19 +186,21 @@ public class Globals
         enemyHotspots = new ArrayList<QueuePair<Double, MapLocation>>();
 
         builderSet = new HashSet<Integer>();
-        // All initial workers are builders
         for (int i = 0; i < allInitialWorkers.size(); i++)
         {
             Unit worker = allInitialWorkers.get(i);
             if (worker.team() == ourTeam)
             {
                 initialWorkers.add(worker);
-                builderSet.add(worker.id());
+                // One initial worker is a builder
+                if (builderSet.isEmpty())
+                {
+                    builderSet.add(worker.id());
+                }
             }
             else
             {
                 initialEnemyWorkers.add(worker.location().mapLocation());
-                // System.out.println("Enemy Worker Here" + worker.location().mapLocation());
             }
         }
         workersInDifferentComponents = false;

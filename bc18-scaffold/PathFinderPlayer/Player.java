@@ -288,7 +288,7 @@ public class Player
                         {
                             processHealer(unit, unitLocation);
                         }
-                        if (unitTypes[i] == UnitType.Factory)
+                        if (unitTypes[i] == UnitType.Factory && unit.unitType() == UnitType.Factory)
                         {
                             processFactory(unit, unitLocation);
                         }

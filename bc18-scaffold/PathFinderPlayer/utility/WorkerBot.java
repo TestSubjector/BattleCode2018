@@ -10,79 +10,42 @@ import static utility.Movement.*;
 
 public class WorkerBot
 {
-    private static void processBuilder(Unit unit, Location unitLocation, MapLocation unitMapLocation, VecUnit adjacentUnits)
+    private static void moveBuilderToDesirableLocation(Unit unit, MapLocation unitMapLocation)
     {
-        // Blueprint structures
-        if (unit.workerHasActed() == 0)
+        if (!primeFactoryLocations.isEmpty())
         {
-            UnitType blueprintType = null;
-            if (currentRound > 650)
+            MapLocation nearestLocation = null;
+            long minDiagonalDistance = 1000L;
+            for (MapLocation mapLocation : primeFactoryLocations)
             {
-                if (gc.karbonite() >= 75)
+                long diagonalDistanceToLocation = diagonalDistanceBetween(mapLocation, unitMapLocation);
+                if (diagonalDistanceToLocation < minDiagonalDistance)
                 {
-                    blueprintType = UnitType.Rocket;
-                }
-            }
-            else
-            {
-                if (buildQueue.peekFirst() == UnitType.Factory && gc.karbonite() >= 100)
-                {
-                    // Blueprint a factory
-                    blueprintType = UnitType.Factory;
-                }
-                if (buildQueue.peekFirst() == UnitType.Rocket && gc.karbonite() >= 75)
-                {
-                    // Blueprint a rocket
-                    blueprintType = UnitType.Rocket;
-                }
-            }
-
-            if (blueprintType != null)
-            {
-                Direction blueprintDirection = directions[0];
-                boolean isMovementNeeded = true; // to check if all points are choked
-                long maxAppeal = -1000L; // tracking the candidateAppeal
-                for (int j = 0; j < directions.length - 1; j++)
-                {
-                    Direction candidateDirection = directions[j];
-                    MapLocation candidateMapLocation = unitMapLocation.add(candidateDirection);
-                    if (homeMap.onMap(candidateMapLocation) && homeMap.isPassableTerrainAt(candidateMapLocation) != 0)
+                    nearestLocation = mapLocation;
+                    minDiagonalDistance = diagonalDistanceToLocation;
+                    if (minDiagonalDistance == 1)
                     {
-                        long locAppeal = getLocationAppeal(candidateMapLocation);
-                        if (locAppeal != -1002L)
-                        {
-                            isMovementNeeded = false; // found a viable point
-                            if (locAppeal > maxAppeal)
-                            {
-                                blueprintDirection = candidateDirection;
-                                maxAppeal = locAppeal;
-                            }
-                        }
+                        break;
                     }
                 }
-
-                if (isMovementNeeded)
+            }
+            if (nearestLocation != null)
+            {
+                if (diagonalDistanceBetween(unitMapLocation, nearestLocation) < 4 && gc.senseNearbyUnitsByType(nearestLocation, 5, UnitType.Factory).size() > 0)
                 {
-                    moveUnitInRandomDirection(unit);
+                    primeFactoryLocations.remove(nearestLocation);
+                    System.out.println("Removed " + nearestLocation);
                 }
-                else
+                if (diagonalDistanceBetween(unitMapLocation, nearestLocation) > 2)
                 {
-                    if (gc.canBlueprint(unit.id(), blueprintType, blueprintDirection))
-                    {
-                        MapLocation blueprintMapLocation = unitMapLocation.add(blueprintDirection);
-                        gc.blueprint(unit.id(), blueprintType, blueprintDirection);
-                        Unit newBlueprint = gc.senseUnitAtLocation(blueprintMapLocation);
-                        unfinishedBlueprints.add(newBlueprint);
-                        typeSortedUnitLists.get(blueprintType).add(newBlueprint);
-                        if (currentRound < 650)
-                        {
-                            removeUnitFromBuildQueue();
-                        }
-                    }
+                    moveUnitTo(unit, nearestLocation);
                 }
             }
         }
+    }
 
+    private static void processBuilder(Unit unit, Location unitLocation, MapLocation unitMapLocation, VecUnit adjacentUnits)
+    {
         if (unit.movementHeat() < 10)
         {
             // Move towards nearest blueprint
@@ -107,7 +70,6 @@ public class WorkerBot
                 if (minDiagonalDistance != 1)
                 {
                     moveUnitTo(unit, nearestStructureMapLocation);
-                    processMiner(unit, unitLocation, unitMapLocation);
                 }
                 else
                 {
@@ -124,9 +86,95 @@ public class WorkerBot
                     }
                 }
             }
+        }
+        moveBuilderToDesirableLocation(unit, unitMapLocation);
+        if (unit.workerHasActed() == 0)
+        {
+            // Blueprint structures
+            UnitType blueprintType = null;
+            if (currentRound > 650)
+            {
+                if (gc.karbonite() >= 75)
+                {
+                    blueprintType = UnitType.Rocket;
+                }
+            }
             else
             {
-                processMiner(unit, unitLocation, unitMapLocation);
+                if (buildQueue.peekFirst() == UnitType.Factory && gc.karbonite() >= 100)
+                {
+                    // Blueprint a factory
+                    blueprintType = UnitType.Factory;
+                }
+                if (buildQueue.peekFirst() == UnitType.Rocket && gc.karbonite() >= 75)
+                {
+                    // Blueprint a rocket
+                    blueprintType = UnitType.Rocket;
+                }
+            }
+            if (blueprintType != null)
+            {
+                Direction blueprintDirection = directions[0];
+                boolean isMovementNeeded = true; // to check if all points are choked
+                long maxAppeal = -1000L; // tracking the candidateAppeal
+                for (int j = 0; j < directions.length - 1; j++)
+                {
+                    Direction candidateDirection = directions[j];
+                    MapLocation candidateMapLocation = unitMapLocation.addMultiple(candidateDirection, 1);
+                    if (homeMap.onMap(candidateMapLocation) && homeMap.isPassableTerrainAt(candidateMapLocation) == 1)
+                    {
+                        long locAppeal = getLocationAppeal(candidateMapLocation);
+                        if (locAppeal != -1002L)
+                        {
+                            isMovementNeeded = false; // found a viable point
+                            if (locAppeal > maxAppeal)
+                            {
+                                blueprintDirection = candidateDirection;
+                                maxAppeal = locAppeal;
+                            }
+                        }
+                    }
+                }
+                if (isMovementNeeded)
+                {
+                    MapLocation blueprintMapLocation = null;
+                    for (int i = 2; i <= 3; i++)
+                    {
+                        for (int j = 0; j < directions.length - 1; j++)
+                        {
+                            Direction candidateDirection = directions[j];
+                            MapLocation candidateMapLocation = unitMapLocation.addMultiple(candidateDirection, i);
+                            if (homeMap.onMap(candidateMapLocation) && homeMap.isPassableTerrainAt(candidateMapLocation) == 1)
+                            {
+                                long locAppeal = getLocationAppeal(candidateMapLocation);
+                                if (locAppeal != -1002L)
+                                {
+                                    if (locAppeal > maxAppeal)
+                                    {
+                                        blueprintMapLocation = candidateMapLocation;
+                                        maxAppeal = locAppeal;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    moveUnitTo(unit, blueprintMapLocation);
+                }
+                else
+                {
+                    if (gc.canBlueprint(unit.id(), blueprintType, blueprintDirection))
+                    {
+                        MapLocation blueprintMapLocation = unitMapLocation.add(blueprintDirection);
+                        gc.blueprint(unit.id(), blueprintType, blueprintDirection);
+                        if (gc.hasUnitAtLocation(blueprintMapLocation))
+                        {
+                            Unit newBlueprint = gc.senseUnitAtLocation(blueprintMapLocation);
+                            unfinishedBlueprints.add(newBlueprint);
+                            typeSortedUnitLists.get(blueprintType).add(newBlueprint);
+                        }
+                        removeUnitFromBuildQueue();
+                    }
+                }
             }
         }
     }
@@ -198,6 +246,11 @@ public class WorkerBot
             }
         }
 
+        if (builderSet.contains(unit.id()))
+        {
+            processBuilder(unit, unitLocation, unitMapLocation, adjacentUnits);
+        }
+
         // Mine karbonite if adjacent to or standing on a mine
         for (int j = 0; j < directions.length; j++)
         {
@@ -208,11 +261,7 @@ public class WorkerBot
             }
         }
 
-        if (builderSet.contains(unit.id()))
-        {
-            processBuilder(unit, unitLocation, unitMapLocation, adjacentUnits);
-        }
-        else
+        if (!builderSet.contains(unit.id()))
         {
             processMiner(unit, unitLocation, unitMapLocation);
         }
@@ -327,91 +376,55 @@ public class WorkerBot
         for (int i = 0; i < directions.length - 1; i++)
         {
             MapLocation adjacentMapLocation = mapLocation.add(directions[i]);
-            if (!homeMap.onMap(adjacentMapLocation) || (homeMap.isPassableTerrainAt(adjacentMapLocation) == 0))
+            UnitType type = null;
+            if (gc.hasUnitAtLocation(adjacentMapLocation))
+            {
+                type = gc.senseUnitAtLocation(adjacentMapLocation).unitType();
+            }
+            if (!homeMap.onMap(adjacentMapLocation) || (homeMap.isPassableTerrainAt(adjacentMapLocation) == 0) ||
+                    (gc.hasUnitAtLocation(adjacentMapLocation) && (type == UnitType.Factory || type == UnitType.Rocket)))
             {
                 switch (i)
                 {
                     case 0:
                         up_block++;
                         break;
-
                     case 1:
-                    case 2:
-                    case 3:
+                        up_block++;
                         right_blockages++;
                         break;
-
+                    case 2:
+                        right_blockages++;
+                        break;
+                    case 3:
+                        down_block++;
+                        right_blockages++;
+                        break;
                     case 4:
                         down_block++;
                         break;
-
                     case 5:
+                        down_block++;
+                        left_blockages++;
+                        break;
                     case 6:
+                        left_blockages++;
+                        break;
                     case 7:
+                        up_block++;
                         left_blockages++;
                         break;
                     default:
                         break; //center; will never have a blockage
                 }
-
                 appeal += WEIGHT_IMPASSABLE;
             }
-            // not checking canSense because it should always be in vision range (max sq dist 8)
-            if (gc.hasUnitAtLocation(adjacentMapLocation))
-            {
-                UnitType type = gc.senseUnitAtLocation(adjacentMapLocation).unitType();
-                if (type == UnitType.Factory || type == UnitType.Rocket)
-                {
-                    switch (i)
-                    {
-                        case 0:
-                            up_block++;
-                            break;
-
-                        case 1:
-                        case 2:
-                        case 3:
-                            right_blockages++;
-                            break;
-
-                        case 4:
-                            down_block++;
-                            break;
-
-                        case 5:
-                        case 6:
-                        case 7:
-                            left_blockages++;
-                            break;
-                        default:
-                            break; //center; will never have a blockage
-                    }
-
-                    appeal += WEIGHT_STRUCTURE;
-                }
-            }
         }
 
-        int blocksum = 0;
-        if (left_blockages != 0)
-        {
-            blocksum++;
-        }
-        if (right_blockages != 0)
-        {
-            blocksum++;
-        }
-        if (up_block != 0)
-        {
-            blocksum++;
-        }
-        if (down_block != 0)
-        {
-            blocksum++;
-        }
+        int blockageSum = left_blockages + right_blockages + up_block + down_block;
 
         // blockage on single side only is fine
-        if (blocksum > 1)
+        if (blockageSum > 2)
         {
             return -1002L;
         }

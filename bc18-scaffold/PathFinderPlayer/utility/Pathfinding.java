@@ -189,7 +189,7 @@ public class Pathfinding
             {
                 MapLocation them = initialEnemyWorkers.get(j);
                 MapLocation theirWaypoint = findNearestUnobstructedWaypoint(them);
-                if (!constructPathBetween(ourWaypoint, theirWaypoint))
+                if (ourWaypoint == null || theirWaypoint == null || !constructPathBetween(ourWaypoint, theirWaypoint))
                 {
                     workersInDifferentComponents = true;
                 }
@@ -197,10 +197,9 @@ public class Pathfinding
                 {
                     long fullDistance = distances.get(ourWaypoint).get(theirWaypoint);
                     MapLocation currentWaypoint = ourWaypoint;
-                    while (distances.get(currentWaypoint).get(theirWaypoint) < 0.4 * fullDistance)
+                    while (distances.get(ourWaypoint).get(currentWaypoint) < 0.5 * fullDistance)
                     {
                         primeFactoryLocations.add(currentWaypoint);
-                        System.out.println(currentWaypoint);
                         currentWaypoint = nextBestWaypoint.get(new Pair<MapLocation, MapLocation>(currentWaypoint, theirWaypoint));
                     }
                 }
