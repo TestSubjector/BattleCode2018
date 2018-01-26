@@ -68,6 +68,13 @@ public class Combat
         }
     }
 
+    private static boolean unitShouldGoToEnemyBase(Unit unit)
+    {
+        VecUnit friendlies = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), unit.visionRange(), ourTeam);
+        long maxDimension = Math.max(homeMapHeight, homeMapWidth);
+        return (maxDimension > 25 && friendlies.size() >= maxDimension / 10);
+    }
+
     public static boolean canWin1v1(Unit unit , Unit enemyUnit)
     {
         UnitType enemyUnitType = enemyUnit.unitType();
@@ -677,7 +684,7 @@ public class Combat
                 }
                 else
                 {
-                    moveUnitInRandomDirection(unit);
+                    // moveUnitInRandomDirection(unit);
                 }
             }
         }
@@ -727,7 +734,7 @@ public class Combat
                     moveUnitTo(unit, indexLocation);
                 }
             }
-            else
+            else if (unitShouldGoToEnemyBase(unit))
             {
                 moveToEnemyBases(unit, unitMapLocation);
             }
@@ -735,7 +742,7 @@ public class Combat
         // Lazying about
         if(unit.attackHeat() < 10 && unit.abilityHeat() < 10)
         {
-            moveUnitInRandomDirection(unit);
+            // moveUnitInRandomDirection(unit);
         }
     }
 
@@ -949,12 +956,12 @@ public class Combat
                     moveUnitTo(unit, indexLocation);
                 }
             }
-            else
+            else if (unitShouldGoToEnemyBase(unit))
             {
                 moveToEnemyBases(unit, unitMapLocation);
             }
         }
-        moveUnitInRandomDirection(unit);
+        // moveUnitInRandomDirection(unit);
     }
 
     public static void doMicroKnight(Unit unit, MapLocation unitMapLocation, VecUnit nearbyEnemyUnits)
@@ -1153,12 +1160,12 @@ public class Combat
                     moveUnitTo(unit, indexLocation);
                 }
             }
-            else
+            else if (unitShouldGoToEnemyBase(unit))
             {
                 moveToEnemyBases(unit, unitMapLocation);
             }
         }
-        moveUnitInRandomDirection(unit);
+        // moveUnitInRandomDirection(unit);
     }
     
     // Decides the incentive to attack an unit by Rangers
@@ -1317,7 +1324,7 @@ public class Combat
         }
         if(count == 0)
         {
-            moveUnitInRandomDirection(unit);
+            // moveUnitInRandomDirection(unit);
         }
     }
 */

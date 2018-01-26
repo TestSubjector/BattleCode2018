@@ -46,6 +46,7 @@ public class WorkerBot
 
     private static void processBuilder(Unit unit, Location unitLocation, MapLocation unitMapLocation, VecUnit adjacentUnits)
     {
+
         if (unit.movementHeat() < 10)
         {
             // Move towards nearest blueprint if in range
@@ -66,7 +67,7 @@ public class WorkerBot
             }
             if (nearestStructure != null)
             {
-                if (minDiagonalDistance < 6 && minDiagonalDistance > 1)
+                if (minDiagonalDistance < 4 && minDiagonalDistance > 1)
                 {
                     moveUnitTo(unit, nearestStructure);
                 }
@@ -88,6 +89,10 @@ public class WorkerBot
         }
         unitLocation = unit.location();
         unitMapLocation = unitLocation.mapLocation();
+    }
+
+    private static void processBlueprinter(Unit unit, Location unitLocation, MapLocation unitMapLocation)
+    {
         if (!buildQueue.isEmpty())
         {
             moveBuilderToDesirableLocation(unit, unitMapLocation);
@@ -100,19 +105,19 @@ public class WorkerBot
             UnitType blueprintType = null;
             if (currentRound > 650)
             {
-                if (gc.karbonite() >= 75)
+                if (gc.karbonite() >= 150)
                 {
                     blueprintType = UnitType.Rocket;
                 }
             }
             else
             {
-                if (buildQueue.peekFirst() == UnitType.Factory && gc.karbonite() >= 100)
+                if (buildQueue.peekFirst() == UnitType.Factory && gc.karbonite() >= 200)
                 {
                     // Blueprint a factory
                     blueprintType = UnitType.Factory;
                 }
-                if (buildQueue.peekFirst() == UnitType.Rocket && gc.karbonite() >= 75)
+                if (buildQueue.peekFirst() == UnitType.Rocket && gc.karbonite() >= 150)
                 {
                     // Blueprint a rocket
                     blueprintType = UnitType.Rocket;
@@ -121,8 +126,8 @@ public class WorkerBot
             if (blueprintType != null)
             {
                 Direction blueprintDirection = directions[0];
-                boolean isMovementNeeded = true; // to check if all points are choked
-                long maxAppeal = -1000L; // tracking the candidateAppeal
+                boolean isMovementNeeded = true;
+                long maxAppeal = -1000L;
                 for (int j = 0; j < directions.length - 1; j++)
                 {
                     Direction candidateDirection = directions[j];
@@ -274,7 +279,19 @@ public class WorkerBot
             }
         }
 
+        int i = 0;
+        while (i < initialEnemyWorkers.size() &&
+                currentRound < diagonalDistanceBetween(initialWorkers.get(i).location().mapLocation(), initialEnemyWorkers.get(i)) &&
+                !moveUnitTo(unit, initialEnemyWorkers.get(i)))
+        {
+            i++;
+        }
+
         processBuilder(unit, unitLocation, unitMapLocation, adjacentUnits);
+
+        processMiner(unit, unitLocation, unitMapLocation);
+
+        processBlueprinter(unit, unitLocation, unitMapLocation);
 
         // Mine karbonite if adjacent to or standing on a mine
         for (int j = 0; j < directions.length; j++)
@@ -285,8 +302,6 @@ public class WorkerBot
                 break;
             }
         }
-
-        processMiner(unit, unitLocation, unitMapLocation);
 
         // Replicate worker
         if (trainQueue.peekFirst() == UnitType.Worker)
