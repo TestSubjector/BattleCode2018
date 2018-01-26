@@ -4,6 +4,7 @@ import bc.*;
 
 import utility.QueuePair;
 
+import static utility.DecisionTree.*;
 import static utility.Globals.*;
 import static utility.Combat.*;
 import static utility.WorkerBot.*;
@@ -13,7 +14,6 @@ import static utility.MageBot.*;
 import static utility.HealerBot.*;
 import static utility.FactoryBot.*;
 import static utility.RocketBot.*;
-import static utility.DecisionTree.*;
 
 
 public class Player
@@ -199,9 +199,17 @@ public class Player
                         addUnitToBuildQueue(UnitType.Rocket);
                         // System.out.println("Roc");
                     }
+
+                    if(currentRound  == 651 && typeSortedUnitLists.get(UnitType.Worker).size() == 0)
+                    {
+                        addUnitToBuildQueue(UnitType.Worker);
+                        addUnitToBuildQueue(UnitType.Worker);
+                        addUnitToBuildQueue(UnitType.Worker);
+                    }
                 }
                 else
                 {
+                    maintainArmyRatio();
                     setFactoriesRequired();
                     while (shouldQueueFactory())
                     {

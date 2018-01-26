@@ -49,50 +49,80 @@ public class DecisionTree
     {
         if(rangerMeta)
         {
+            // 2:1
             long numberOfHealers = typeSortedUnitLists.get(UnitType.Healer).size();
             long numberOfRangers = typeSortedUnitLists.get(UnitType.Ranger).size();
-            if( numberOfRangers < 2* numberOfHealers)
+            if( numberOfRangers < 2 * numberOfHealers)
             {
-                addUnitToBuildQueueUrgently(UnitType.Ranger);
+                addUnitToTrainQueueUrgently(UnitType.Ranger);
             }
-            else
+            else if(numberOfHealers < 0.5 * numberOfRangers)
             {
-                addUnitToBuildQueueUrgently(UnitType.Healer);
+                addUnitToTrainQueueUrgently(UnitType.Healer);
             }
         }
         else
         {
             if(homeMapSize <= 500)
             {
+                // 2.5 : 1
                 long numberOfKnights = typeSortedUnitLists.get(UnitType.Knight).size();
                 long numberOfHealers = typeSortedUnitLists.get(UnitType.Healer).size();
                 if( numberOfKnights < 2.5 * numberOfHealers)
                 {
-                    addUnitToBuildQueueUrgently(UnitType.Knight);
+                    addUnitToTrainQueueUrgently(UnitType.Knight);
                 }
-                else
+                else if(numberOfHealers < 2/5 * numberOfKnights)
                 {
-                    addUnitToBuildQueueUrgently(UnitType.Healer);
+                    addUnitToTrainQueueUrgently(UnitType.Healer);
                 }
             }
             else if(homeMapSize <= 1000)
             {
+                // 2: 1: 1
                 long numberOfKnights = typeSortedUnitLists.get(UnitType.Knight).size();
                 long numberOfHealers = typeSortedUnitLists.get(UnitType.Healer).size();
                 long numberOfRangers = typeSortedUnitLists.get(UnitType.Ranger).size();
-                
+                if(numberOfKnights < numberOfHealers + numberOfRangers )
+                {
+                    addUnitToTrainQueueUrgently(UnitType.Knight);
+                }
+                else if(numberOfHealers < numberOfRangers)
+                {
+                    addUnitToTrainQueueUrgently(UnitType.Healer);
+                }
+                else if(numberOfRangers < numberOfHealers)
+                {
+                    addUnitToTrainQueueUrgently(UnitType.Ranger);
+                }
             }
             else if(homeMapSize <= 1600)
             {
+                // 2 : 1
                 long numberOfKnights = typeSortedUnitLists.get(UnitType.Knight).size();
                 long numberOfHealers = typeSortedUnitLists.get(UnitType.Healer).size();
-                long numberOfRangers = typeSortedUnitLists.get(UnitType.Ranger).size();
+                if(numberOfKnights < 2 * numberOfHealers)
+                {
+                    addUnitToTrainQueueUrgently(UnitType.Knight);
+                }
+                else if(numberOfHealers < 0.5 * numberOfKnights)
+                {
+                    addUnitToTrainQueueUrgently(UnitType.Healer);
+                }
             }
             else
             {
+                // 3 : 2
                 long numberOfKnights = typeSortedUnitLists.get(UnitType.Knight).size();
                 long numberOfHealers = typeSortedUnitLists.get(UnitType.Healer).size();
-                long numberOfRangers = typeSortedUnitLists.get(UnitType.Ranger).size();
+                if(numberOfKnights < 3/2 * numberOfHealers)
+                {
+                    addUnitToTrainQueueUrgently(UnitType.Knight);
+                }
+                else if(numberOfHealers < 2/3 * numberOfKnights)
+                {
+                    addUnitToTrainQueueUrgently(UnitType.Healer);
+                }
             }
         }
     }
@@ -286,6 +316,12 @@ public class DecisionTree
                 knightsRequired = 2 * (int) (((double) currentRound * (600 + homeMapSize) * passableTerrain) / (12000 * homeMapSize));
             }
         }
+
+        if(rangerMeta)
+        {
+            knightsRequired = 0;
+        }
+
     }
 
     public static void setRangersRequired()
@@ -300,7 +336,6 @@ public class DecisionTree
             {
                 rangersRequired = (int) (6 + ((double) currentRound / 75) * (double) homeMapSize / 100);
             }
-            rangersRequired = 0;
         }
         else if(homeMapSize <= 1000)
         {
