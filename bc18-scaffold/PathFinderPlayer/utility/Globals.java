@@ -30,7 +30,7 @@ public class Globals
     public static long currentRound;
     public static MapLocation[][] mapLocationAt;
     public static ArrayList<Unit> initialWorkers;
-    public static boolean workersInDifferentComponents;
+    public static boolean rangerMeta;
     public static long passableTerrain;
     public static long initialTotalKarbonite;
     public static Set<MapLocation> karboniteLocations;
@@ -99,13 +99,12 @@ public class Globals
     public static int rocketsRequired;
 
     // Research queue
-    // 25+25+100+100+100+25+75+100+25+75+100+25+75+100+25+75
-    public final static UnitType[] RESEARCH_QUEUE_HARD_LARGE_MAPS = {UnitType.Knight, UnitType.Knight, UnitType.Rocket,
+    public final static UnitType[] RESEARCH_QUEUE_HARD_KNIGHT_META = {UnitType.Knight, UnitType.Knight, UnitType.Rocket,
             UnitType.Healer, UnitType.Healer, UnitType.Knight, UnitType.Healer, UnitType.Rocket, UnitType.Rocket,
             UnitType.Worker, UnitType.Worker, UnitType.Worker,  UnitType.Mage, UnitType.Mage, UnitType.Mage,
             UnitType.Knight, UnitType.Ranger};
 
-    public final static UnitType[] RESEARCH_QUEUE_HARD_SMALL_MAPS = {UnitType.Ranger, UnitType.Healer, UnitType.Rocket,
+    public final static UnitType[] RESEARCH_QUEUE_HARD_RANGER_META = {UnitType.Ranger, UnitType.Healer, UnitType.Rocket,
             UnitType.Ranger, UnitType.Healer, UnitType.Healer, UnitType.Ranger, UnitType.Rocket, UnitType.Rocket,
             UnitType.Worker, UnitType.Worker, UnitType.Worker,  UnitType.Mage, UnitType.Mage, UnitType.Mage,
             UnitType.Knight};
@@ -203,7 +202,7 @@ public class Globals
                 initialEnemyWorkers.add(worker.location().mapLocation());
             }
         }
-        workersInDifferentComponents = false;
+        rangerMeta = false;
         setBuilderFraction();
 
         if (homePlanet == Planet.Earth)

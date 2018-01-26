@@ -23,20 +23,20 @@ public class Player
         initializeGlobals();
 
         // Queue researches
-        if (gc.planet() == Planet.Mars)
+        if (gc.planet() == Planet.Earth)
         {
-            if(homeMapSize <= 625)
+            if(rangerMeta)
             {
-                for (int i = 0; i < RESEARCH_QUEUE_HARD_SMALL_MAPS.length; i++)
+                for (int i = 0; i < RESEARCH_QUEUE_HARD_RANGER_META.length; i++)
                 {
-                    gc.queueResearch(RESEARCH_QUEUE_HARD_SMALL_MAPS[i]);
+                    gc.queueResearch(RESEARCH_QUEUE_HARD_RANGER_META[i]);
                 }
             }
             else
             {
-                for (int i = 0; i < RESEARCH_QUEUE_HARD_LARGE_MAPS.length; i++)
+                for (int i = 0; i < RESEARCH_QUEUE_HARD_KNIGHT_META.length; i++)
                 {
-                    gc.queueResearch(RESEARCH_QUEUE_HARD_LARGE_MAPS[i]);
+                    gc.queueResearch(RESEARCH_QUEUE_HARD_KNIGHT_META[i]);
                 }
             }
         }
@@ -255,7 +255,7 @@ public class Player
                     addUnitToTrainQueue(UnitType.Worker);
                 }
             }
-            System.out.println(currentRound);
+//            System.out.println(currentRound);
 //            System.out.println("Build Queue : " + buildQueue.peekFirst());
 //            System.out.println("Factories required : " + factoriesRequired);
 //            System.out.println("Train Queue : " + trainQueue.peekFirst());
