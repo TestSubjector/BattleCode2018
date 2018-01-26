@@ -729,7 +729,7 @@ public class Combat
                     }
                 }
                 if(currentRound < 750 && (distanceFromUnit < 40 || (currentRound > 650 && distanceFromUnit < 170) ||
-                        (currentRound > 710  && distanceFromUnit < 677)))
+                        (currentRound > 690  && distanceFromUnit < 677)))
                 {
                     moveUnitTo(unit, indexLocation);
                 }
@@ -951,7 +951,7 @@ public class Combat
                     }
                 }
                 if(currentRound < 750 && (distanceFromUnit < 40 || (currentRound > 650 && distanceFromUnit < 170) ||
-                        (currentRound > 710  && distanceFromUnit < 677)))
+                        (currentRound > 690  && distanceFromUnit < 677)))
                 {
                     moveUnitTo(unit, indexLocation);
                 }
@@ -1155,7 +1155,7 @@ public class Combat
                     }
                 }
                 if(currentRound < 750 && (distanceFromUnit < 40 || (currentRound > 650 && distanceFromUnit < 170) ||
-                        (currentRound > 710  && distanceFromUnit < 677)))
+                        (currentRound > 690  && distanceFromUnit < 677)))
                 {
                     moveUnitTo(unit, indexLocation);
                 }
