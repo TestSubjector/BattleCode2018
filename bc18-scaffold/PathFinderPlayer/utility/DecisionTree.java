@@ -9,6 +9,7 @@ import static utility.Combat.*;
 
 public class DecisionTree
 {
+
     public static boolean shouldQueueWorker()
     {
         return typeSortedUnitLists.get(UnitType.Worker).size() + unitsInTrainQueue[UnitType.Worker.ordinal()] < workersRequired;
