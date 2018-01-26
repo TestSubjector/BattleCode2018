@@ -196,7 +196,7 @@ public class Player
                         // System.out.println("Roc");
                     }
 
-                    if(currentRound  == 651 && typeSortedUnitLists.get(UnitType.Worker).size() == 0)
+                    if(currentRound  > 650 && typeSortedUnitLists.get(UnitType.Worker).size() == 0 && trainQueue.isEmpty())
                     {
                         addUnitToBuildQueue(UnitType.Worker);
                         addUnitToBuildQueue(UnitType.Worker);

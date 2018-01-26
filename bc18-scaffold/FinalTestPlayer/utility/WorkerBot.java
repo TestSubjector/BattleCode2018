@@ -299,8 +299,6 @@ public class WorkerBot
         }
         else
         {
-            VecUnit nearbyFriendyUnits = gc.senseNearbyUnitsByTeam(unitMapLocation, 50, ourTeam);
-            moveUnitAwayFromMultipleUnits(unit, nearbyFriendyUnits);
             processBlueprinter(unit, unitLocation, unitMapLocation);
             processBuilder(unit, unitLocation, unitMapLocation, adjacentUnits);
         }
@@ -469,7 +467,7 @@ public class WorkerBot
         int blockageSum = left_blockages + right_blockages + up_block + down_block;
 
         // blockage on single side only is fine
-        if (blockageSum > 2)
+        if (blockageSum >= 2)
         {
             return -1002L;
         }

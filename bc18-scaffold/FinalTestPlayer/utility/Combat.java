@@ -328,7 +328,8 @@ public class Combat
             nearbyFriendlyUnit  = nearbyFriendlyUnits.get(j);
             friendlyUnitType = nearbyFriendlyUnit.unitType();
             distanceToLocation = nearbyFriendlyUnit.location().mapLocation().distanceSquaredTo(targetLocation);
-            if(friendlyUnitType != UnitType.Ranger && friendlyUnitType != UnitType.Knight && friendlyUnitType != UnitType.Mage)
+            if(friendlyUnitType != UnitType.Ranger && friendlyUnitType != UnitType.Knight && friendlyUnitType != UnitType.Mage &&
+                    friendlyUnitType != UnitType.Healer)
             {
                 continue;
             }
@@ -548,9 +549,7 @@ public class Combat
                         {
                             if(canWin1v1(unit, loneEnemyUnit))
                             {
-
                                 gc.attack(unit.id(), loneEnemyUnit.id());
-                                return;
                             }
                             else
                             {
@@ -563,7 +562,6 @@ public class Combat
                                 if(haveSupport)
                                 {
                                     gc.attack(unit.id(), loneEnemyUnit.id());
-                                    return;
                                 }
                                 else
                                 {
@@ -571,9 +569,7 @@ public class Combat
                                     // Enemy can't fire. Shoot and retreat
                                     if(loneEnemyUnit.attackCooldown() >= 20)
                                     {
-
                                         gc.attack(unit.id(), loneEnemyUnit.id());
-                                        return;
                                     }
                                     else
                                     {
@@ -583,19 +579,16 @@ public class Combat
                                             // TODO - Retreat function here
                                             if(moveUnitAwayFrom(unit, loneEnemyUnitMapLocation))
                                             {
-                                                return;
                                             }
                                             else
                                             {
                                                 // Desperate attack
                                                 gc.attack(unit.id(), loneEnemyUnit.id());
-                                                return;
                                             }
                                         }
                                         else
                                         {
                                             gc.attack(unit.id(), loneEnemyUnit.id());
-                                            return;
                                         }
                                     }
                                 }
@@ -641,7 +634,6 @@ public class Combat
                             if(gc.canAttack(unit.id(), bestTarget.id()))
                             {
                                 gc.attack(unit.id(), bestTarget.id());
-                                return;
                             }
                             else if(unit.attackRange() < unitMapLocation.distanceSquaredTo(bestTarget.location().mapLocation()))
                             {
@@ -650,7 +642,6 @@ public class Combat
                                 {
                                     // Desperate attack
                                     gc.attack(unit.id(), bestTarget.id());
-                                    return;
                                 }
                             }
                         }
@@ -740,9 +731,9 @@ public class Combat
             }
         }
         // Lazying about
-        if(unit.attackHeat() < 10 && unit.abilityHeat() < 10)
+        if(unit.attackHeat() < 10 && unit.abilityHeat() < 10 && homeMapSize > 1000)
         {
-            // moveUnitInRandomDirection(unit);
+            moveUnitInRandomDirection(unit);
         }
     }
 
@@ -985,6 +976,7 @@ public class Combat
                     }
                     else
                     {
+
                         // Find first and second best target
                         Unit bestTarget = null;
                         Unit secondBestTarget = null;
