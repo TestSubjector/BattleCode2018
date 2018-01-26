@@ -46,7 +46,7 @@ public class Globals
     public static long totalUnits;
     public static double builderFraction;
     public static HashSet<Integer> builderSet;
-    public static Set<Unit> unfinishedBlueprints;
+    public static Set<MapLocation> unfinishedBlueprints;
 
     // Rocket landing sites
     public static PriorityQueue<QueuePair<Long, MapLocation>> potentialLandingSites;
@@ -208,7 +208,7 @@ public class Globals
 
         if (homePlanet == Planet.Earth)
         {
-            unfinishedBlueprints = new HashSet<Unit>();
+            unfinishedBlueprints = new HashSet<MapLocation>();
             potentialLandingSites = new PriorityQueue<QueuePair<Long, MapLocation>>();
             marsMapAppeals = new long[(int) awayMapWidth][(int) awayMapHeight];
             findMarsLocationAppeals();
@@ -423,10 +423,10 @@ public class Globals
 
     public static void removeObsoleteBlueprints()
     {
-        LinkedList<Unit> obsoleteBlueprints = new LinkedList<Unit>();
-        for (Unit blueprint : unfinishedBlueprints)
+        LinkedList<MapLocation> obsoleteBlueprints = new LinkedList<MapLocation>();
+        for (MapLocation blueprint : unfinishedBlueprints)
         {
-            MapLocation blueprintMapLocation = blueprint.location().mapLocation();
+            MapLocation blueprintMapLocation = blueprint;
             if (gc.canSenseLocation(blueprintMapLocation))
             {
                 if (!gc.hasUnitAtLocation(blueprintMapLocation))
@@ -444,7 +444,7 @@ public class Globals
                 }
             }
         }
-        for (Unit obsoleteBlueprint : obsoleteBlueprints)
+        for (MapLocation obsoleteBlueprint : obsoleteBlueprints)
         {
             unfinishedBlueprints.remove(obsoleteBlueprint);
         }

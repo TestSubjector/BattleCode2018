@@ -35,6 +35,15 @@ public class FactoryBot
 
     public static void processFactory(Unit unit, Location unitLocation)
     {
+        if (unit.structureIsBuilt() == 0)
+        {
+            MapLocation blueprintMapLocation = getConstantMapLocationRepresentation(unit.location().mapLocation());
+            if (!unfinishedBlueprints.contains(blueprintMapLocation))
+            {
+                unfinishedBlueprints.add(blueprintMapLocation);
+            }
+            return;
+        }
         tryToUnloadRobot(unit);
         if (unit.isFactoryProducing() == 0)
         {

@@ -171,7 +171,6 @@ public class Player
                 setBuilderFraction();
                 if (switchToPrimitiveMind(currentRound, timeLeftMs) && currentRound < 700)
                 {
-                    System.out.println("Switching to primitive mind");
                     botIntelligenceLevel = 0;
                 }
                 else
@@ -256,6 +255,10 @@ public class Player
                     addUnitToTrainQueue(UnitType.Worker);
                 }
             }
+            System.out.println(currentRound);
+//            System.out.println("Build Queue : " + buildQueue.peekFirst());
+//            System.out.println("Factories required : " + factoriesRequired);
+//            System.out.println("Train Queue : " + trainQueue.peekFirst());
 
             // Process units
             for (int i = 0; i < unitTypes.length; i++)
@@ -288,7 +291,7 @@ public class Player
                         {
                             processHealer(unit, unitLocation);
                         }
-                        if (unitTypes[i] == UnitType.Factory && unit.unitType() == UnitType.Factory)
+                        if (unitTypes[i] == UnitType.Factory)
                         {
                             processFactory(unit, unitLocation);
                         }
