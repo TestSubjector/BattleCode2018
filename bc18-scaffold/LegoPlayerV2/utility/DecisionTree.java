@@ -134,17 +134,17 @@ public class DecisionTree
     {
         if(homeMapSize <= 500)
         {
-            factoriesRequired = 1 + (int) ((Math.min(1, Math.sqrt((double) currentRound / 450))) *
+            factoriesRequired = (int) ((Math.min(1, Math.sqrt((double) currentRound / 450))) *
                     (Math.ceil(((double) homeMapHeight + homeMapWidth) / 15) + initialTotalKarbonite/400));
         }
         else if(homeMapSize <= 1000)
         {
-            factoriesRequired = 1 + (int) ((Math.min(1, Math.sqrt((double) currentRound / 400))) *
+            factoriesRequired = (int) ((Math.min(1, Math.sqrt((double) currentRound / 400))) *
                     (Math.round(((double) homeMapHeight + homeMapWidth) / 30)));
         }
         else if(homeMapSize <= 1600)
         {
-            factoriesRequired = 1 + (int) ((Math.min(1, Math.sqrt((double) currentRound / 400))) *
+            factoriesRequired = (int) ((Math.min(1, Math.sqrt((double) currentRound / 400))) *
                     (Math.round(((double) homeMapHeight + homeMapWidth))) / 15 + initialTotalKarbonite/4000);
         }
         else if(homeMapSize <= 2100)
@@ -154,6 +154,10 @@ public class DecisionTree
         else
         {
 
+        }
+        if (currentRound > 10)
+        {
+            factoriesRequired += 1;
         }
     }
 
@@ -268,18 +272,6 @@ public class DecisionTree
     public static void setMagesRequired()
     {
         magesRequired = 0;
-//        if (typeSortedUnitLists.get(UnitType.Factory).size() < 1 || shouldQueueWorker() || shouldQueueFactory())
-//        {
-//            return;
-//        }
-//        if (currentRound <= 75)
-//        {
-//            magesRequired = (int) (2 + ((double) currentRound / 75) * (double) homeMapSize / 300);
-//        }
-//        else
-//        {
-//            magesRequired = (int) (((double) currentRound * (600 + homeMapSize) * passableTerrain) / (12000 * homeMapSize));
-//        }
     }
 
     public static boolean switchToPrimitiveMind(long currentRound, int timeLeft)
