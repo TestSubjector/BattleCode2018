@@ -104,7 +104,7 @@ public class Globals
             UnitType.Knight, UnitType.Ranger};
 
     public final static UnitType[] RESEARCH_QUEUE_HARD_RANGER_META = {UnitType.Ranger, UnitType.Healer, UnitType.Rocket,
-            UnitType.Ranger, UnitType.Healer, UnitType.Healer, UnitType.Ranger, UnitType.Rocket, UnitType.Rocket,
+            UnitType.Ranger, UnitType.Ranger, UnitType.Healer, UnitType.Healer,  UnitType.Rocket, UnitType.Rocket,
             UnitType.Worker, UnitType.Worker, UnitType.Worker,  UnitType.Mage, UnitType.Mage, UnitType.Mage,
             UnitType.Knight};
 

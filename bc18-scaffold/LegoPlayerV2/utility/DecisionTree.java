@@ -45,6 +45,58 @@ public class DecisionTree
         return currentRound > 100 && typeSortedUnitLists.get(UnitType.Rocket).size() + unitsInBuildQueue[UnitType.Rocket.ordinal()] < rocketsRequired;
     }
 
+    public static void maintainArmyRatio()
+    {
+        if(rangerMeta)
+        {
+            long numberOfHealers = typeSortedUnitLists.get(UnitType.Healer).size();
+            long numberOfRangers = typeSortedUnitLists.get(UnitType.Ranger).size();
+            if( numberOfRangers < 2* numberOfHealers)
+            {
+                addUnitToBuildQueueUrgently(UnitType.Ranger);
+            }
+            else
+            {
+                addUnitToBuildQueueUrgently(UnitType.Healer);
+            }
+        }
+        else
+        {
+            if(homeMapSize <= 500)
+            {
+                long numberOfKnights = typeSortedUnitLists.get(UnitType.Knight).size();
+                long numberOfHealers = typeSortedUnitLists.get(UnitType.Healer).size();
+                if( numberOfKnights < 2.5 * numberOfHealers)
+                {
+                    addUnitToBuildQueueUrgently(UnitType.Knight);
+                }
+                else
+                {
+                    addUnitToBuildQueueUrgently(UnitType.Healer);
+                }
+            }
+            else if(homeMapSize <= 1000)
+            {
+                long numberOfKnights = typeSortedUnitLists.get(UnitType.Knight).size();
+                long numberOfHealers = typeSortedUnitLists.get(UnitType.Healer).size();
+                long numberOfRangers = typeSortedUnitLists.get(UnitType.Ranger).size();
+                
+            }
+            else if(homeMapSize <= 1600)
+            {
+                long numberOfKnights = typeSortedUnitLists.get(UnitType.Knight).size();
+                long numberOfHealers = typeSortedUnitLists.get(UnitType.Healer).size();
+                long numberOfRangers = typeSortedUnitLists.get(UnitType.Ranger).size();
+            }
+            else
+            {
+                long numberOfKnights = typeSortedUnitLists.get(UnitType.Knight).size();
+                long numberOfHealers = typeSortedUnitLists.get(UnitType.Healer).size();
+                long numberOfRangers = typeSortedUnitLists.get(UnitType.Ranger).size();
+            }
+        }
+    }
+
     public static void setWorkersRequired()
     {
         if(homeMapSize <= 500)
@@ -248,6 +300,7 @@ public class DecisionTree
             {
                 rangersRequired = (int) (6 + ((double) currentRound / 75) * (double) homeMapSize / 100);
             }
+            rangersRequired = 0;
         }
         else if(homeMapSize <= 1000)
         {
