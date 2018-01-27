@@ -128,6 +128,7 @@ public class WorkerBot
                 Direction blueprintDirection = directions[0];
                 boolean isMovementNeeded = true;
                 long maxAppeal = -1000L;
+                Direction lastDitch = null;
                 for (int j = 0; j < directions.length - 1; j++)
                 {
                     Direction candidateDirection = directions[j];
@@ -143,6 +144,10 @@ public class WorkerBot
                                 blueprintDirection = candidateDirection;
                                 maxAppeal = locAppeal;
                             }
+                        }
+                        else
+                        {
+                            lastDitch = candidateDirection;
                         }
                     }
                 }
@@ -174,6 +179,19 @@ public class WorkerBot
                         moveUnitTo(unit, blueprintMapLocation);
                         unitLocation = unit.location();
                         unitMapLocation = unitLocation.mapLocation();
+                    }
+                    else if(currentRound > 650 && lastDitch != null)
+                    {
+                        if (gc.canBlueprint(unit.id(), blueprintType, lastDitch))
+                        {
+                            MapLocation ditchBlueprintMapLocation = getConstantMapLocationRepresentation(unitMapLocation.add(lastDitch));
+                            gc.blueprint(unit.id(), blueprintType, lastDitch);
+                            unfinishedBlueprints.add(ditchBlueprintMapLocation);
+                            if (currentRound < 650)
+                            {
+                                removeUnitFromBuildQueue();
+                            }
+                        }
                     }
                 }
                 else

@@ -239,7 +239,7 @@ public class DecisionTree
         else if (homeMapSize <= 1000)
         {
             factoriesRequired = (int) ((Math.min(1, Math.sqrt((double) currentRound / 400))) *
-                    (Math.round(((double) homeMapHeight + homeMapWidth) / 30)));
+                    (Math.round(((double) homeMapHeight + homeMapWidth) / 15)));
         }
         else if (homeMapSize <= 1600)
         {
